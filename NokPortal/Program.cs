@@ -1,0 +1,93 @@
+using System.Data;
+using System.Data.SqlClient;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using NokPortal.Domains.Middlewares;
+using NokPortal.Domains.Models;
+using NokPortal.Domains.Repositories;
+using NokPortal.Domains.Services;
+using NokPortal.Domians.Models;
+using NokPortal.Domians.Repositorys;
+using NokPortal.Domians.Services;
+using NokPortal.Domians.Validation;
+using NokPortal.Shared.DB;
+
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
+
+        builder.Services.AddScoped<IDbConnection>(sp =>
+            new SqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+        // DB
+        builder.Services.AddScoped<DbConnectionFactory>();
+        builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
+
+        // Repository
+        builder.Services.AddScoped<IUsersRepository, UsersRepository>();
+        builder.Services.AddScoped<IAppRepository, AppRepository>();
+        builder.Services.AddScoped<IUsersAppsRepository, UsersAppsRepository>();
+        builder.Services.AddScoped<IAppsEnvRepository, AppsEnvRepository>();
+
+        // Service
+        builder.Services.AddScoped<IUsersService, UsersService>();
+        builder.Services.AddScoped<IAppService, AppService>();
+        builder.Services.AddScoped<IAuthService, AuthService>();
+        builder.Services.AddScoped<IJsonHelperService, JsonHelperService>();
+        builder.Services.AddScoped<IJwtService, JwtService>();
+        builder.Services.AddScoped<IAppsEnvService, AppsEnvService>();
+        builder.Services.AddScoped<IUsersService, UsersService>();
+        builder.Services.AddScoped<IUsersAppsService, UsersAppsService>();
+
+        builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+
+        // Add HttpClient
+        builder.Services.AddHttpClient();
+
+        // Add CORS policy
+        var corsOrigins = builder.Configuration.GetSection("CorsAllowedOrigins").Get<string[]>() ?? throw new ArgumentNullException("Cors:AllowedOrigins configuration is missing");
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy(
+                "AllowSpecificOrigin",
+                policyBuilder => policyBuilder.WithOrigins(corsOrigins)
+                                              .AllowAnyHeader()
+                                              .AllowAnyMethod());
+        });
+
+        builder.Services.AddFluentValidationAutoValidation();
+        builder.Services.AddFluentValidationClientsideAdapters();
+        builder.Services.AddValidatorsFromAssemblyContaining<TokenRedirectValidation>();
+        builder.Services.AddValidatorsFromAssemblyContaining<RequestToken>();
+        builder.Services.AddValidatorsFromAssemblyContaining<RequestCreateApp>();
+        builder.Services.AddValidatorsFromAssemblyContaining<RequestAppInfo>();
+        builder.Services.AddValidatorsFromAssemblyContaining<UserApp>();
+        builder.Services.AddControllers();
+
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+        builder.Configuration.SetBasePath(AppDomain.CurrentDomain.BaseDirectory).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+
+        var app = builder.Build();
+
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
+
+        app.UseHttpsRedirection();
+
+        app.UseCors("AllowSpecificOrigin");
+
+        app.UseMiddleware<AuthMiddleware>();
+
+        // app.UseAuthentication();
+        // app.UseAuthorization();
+        app.MapControllers();
+
+        app.Run();
+    }
+}

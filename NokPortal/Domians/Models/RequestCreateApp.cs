@@ -1,0 +1,24 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace NokPortal.Domians.Models
+{
+    public class RequestCreateApp
+    {
+        [Required]
+        [MaxLength(255)]
+        required public string Name { get; set; }
+
+        [Required]
+        [MaxLength(255)]
+        required public string Header { get; set; }
+
+        [MaxLength(255)]
+        required public string Subheader { get; set; }
+
+        [MaxLength(255)]
+        required public string Detail { get; set; }
+
+        [MaxLength(255)]
+        required public string Image { get; set; }
+    }
+}
