@@ -192,8 +192,7 @@ namespace NokPortal.Domains.Services
 
                 var jwtSetting = new JWTsetting
                 {
-                    UserId = user.UserID,
-                    ApplicationId = null
+                    UserId = user.UserID
                 };
 
                 return _jwtService.GenerateToken(jwtSetting);

@@ -6,8 +6,5 @@ namespace NokPortal.Domians.Models
     {
         [JsonPropertyName("userId")]
         public int UserId { get; set; }
-
-        [JsonPropertyName("applicationId")]
-        public int? ApplicationId { get; set; }
     }
 }

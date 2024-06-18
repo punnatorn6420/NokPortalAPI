@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34916.146
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NokPortal", "NokPortal\NokPortal.csproj", "{BFB5DA65-BC86-4D1F-9341-E9CAA8B8087E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NokPortalAPI", "NokPortalAPI\NokPortalAPI.csproj", "{BFB5DA65-BC86-4D1F-9341-E9CAA8B8087E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NokCore", "..\NokCore\NokCore.csproj", "{E5591121-5B29-4F79-BA04-BE93C57AEA4E}"
 EndProject

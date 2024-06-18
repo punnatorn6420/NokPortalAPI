@@ -8,34 +8,35 @@ namespace NokPortal.Domians.Services
 {
     public class JwtService : IJwtService
     {
-        private readonly IConfiguration _configuration;
-        private readonly string secretKey = "secret123456789abcdefghigklmnopqrst";
-        private readonly string _issuer = "NokPortalAPI"; //nokdev
-        private readonly string _audience = "WebPortal"; //nokdev
+        // private readonly IConfiguration _configuration;
+        private readonly string _secretKey;
+        private readonly int _hourExpire;
 
-        public JwtService(IConfiguration configuration)
+        private readonly string _issuer = "nokdev";
+        private readonly string _audience = "nokdev";
+
+        public JwtService(string secretKey, int hourExpire)
         {
-            _configuration = configuration;
+            _secretKey = secretKey;
+            _hourExpire = hourExpire;
         }
 
-        public ResponseJwt GenerateToken(JWTsetting jwtSetting)
+        public dynamic GenerateToken(dynamic jwtSetting)
         {
             JsonHelperService jsonHelper = new JsonHelperService();
 
-            var claims = new List<Claim>
+            var claims = new List<Claim>();
+            foreach (var property in jwtSetting.GetType().GetProperties())
             {
-                new Claim(jsonHelper.GetJsonPropertyName<JWTsetting>(nameof(JWTsetting.UserId)), jwtSetting.UserId.ToString())
-            };
-
-            if (jwtSetting.ApplicationId != null)
-            {
-                claims.Add(new Claim(jsonHelper.GetJsonPropertyName<JWTsetting>(nameof(JWTsetting.ApplicationId)), jwtSetting.ApplicationId.ToString() ?? throw new ArgumentNullException("ApplicationId is missing")));
+                var propertyName = property.Name;
+                var propertyValue = property.GetValue(jwtSetting)?.ToString() ?? string.Empty;
+                claims.Add(new Claim(propertyName, propertyValue));
             }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            DateTime expiresTime = DateTime.Now.AddHours(24);
+            DateTime expiresTime = DateTime.Now.AddHours(_hourExpire);
 
             var token = new JwtSecurityToken(
                 issuer: _issuer,
@@ -54,7 +55,7 @@ namespace NokPortal.Domians.Services
         public ClaimsPrincipal? DecodeToken(string token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(secretKey);
+            var key = Encoding.UTF8.GetBytes(_secretKey);
             var validationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,

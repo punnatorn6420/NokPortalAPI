@@ -5,7 +5,7 @@ namespace NokPortal.Domians.Services
 {
     public interface IJwtService
     {
-        ResponseJwt GenerateToken(JWTsetting jwtSetting);
+        dynamic GenerateToken(dynamic jwtSetting);
 
         ClaimsPrincipal? DecodeToken(string token);
     }

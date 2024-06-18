@@ -36,12 +36,15 @@ public class Program
         builder.Services.AddScoped<IAppService, AppService>();
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IJsonHelperService, JsonHelperService>();
-        builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddScoped<IAppsEnvService, AppsEnvService>();
         builder.Services.AddScoped<IUsersService, UsersService>();
         builder.Services.AddScoped<IUsersAppsService, UsersAppsService>();
 
         builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+
+        string secretKey = "secret123456789abcdefghigklmnopqrst";
+        int hourExpire = 24;
+        builder.Services.AddSingleton<IJwtService>(new JwtService(secretKey, hourExpire));
 
         // Add HttpClient
         builder.Services.AddHttpClient();
