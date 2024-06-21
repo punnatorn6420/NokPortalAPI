@@ -25,7 +25,7 @@ namespace NokPortal.Domains.Repositories
 
         public async Task<App> GetAppByIdAsync(IDbConnection conn, IDbTransaction tran, int id)
         {
-            var sql = "SELECT * FROM Apps WHERE AppID = @AppID";
+            var sql = "SELECT * FROM Apps WHERE AppId = @AppId";
             App? app = await conn.QueryFirstOrDefaultAsync<App>(sql, new { AppID = id }, transaction: tran);
             if (app == null)
             {
@@ -36,14 +36,14 @@ namespace NokPortal.Domains.Repositories
 
         public async Task<bool> UpdateAppAsync(IDbConnection conn, IDbTransaction tran, int id, string name)
         {
-            var sql = "UPDATE Apps SET Name = @Name WHERE AppID = @AppID";
+            var sql = "UPDATE Apps SET Name = @Name WHERE AppId = @AppId";
             var rowsAffected = await conn.ExecuteAsync(sql, new { AppID = id, Name = name }, transaction: tran);
             return rowsAffected > 0;
         }
 
         public async Task<bool> DeleteAppAsync(IDbConnection conn, IDbTransaction tran, int id)
         {
-            var sql = "DELETE FROM Apps WHERE AppID = @AppID";
+            var sql = "DELETE FROM Apps WHERE AppId = @AppId";
             var rowsAffected = await conn.ExecuteAsync(sql, new { AppID = id }, transaction: tran);
             return rowsAffected > 0;
         }

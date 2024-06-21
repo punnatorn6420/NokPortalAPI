@@ -4,12 +4,12 @@ using NokPortal.Domians.Models;
 
 namespace NokPortal.Domians.Repositorys
 {
-    public class AppsEnvRepository : IAppsEnvRepository
+    public class AppEnvRepository : IAppEnvRepository
     {
-        public async Task Create(IDbConnection conn, IDbTransaction tran, AppsEnvModel model) // CreateAppsEnvAsync
+        public async Task Create(IDbConnection conn, IDbTransaction tran, RequestCreateAppEnv model) // CreateAppsEnvAsync
         {
-            const string sql = "INSERT INTO Apps_Env (AppID, Environment, BaseURL, Additional, SecretKey, JwtHourLimit) " +
-                   "VALUES (@AppID, @Environment, @BaseURL, @Additional, @SecretKey, @JwtHourLimit); " +
+            const string sql = "INSERT INTO Apps_Env (AppId, Environment, BaseURL, Additional, SecretKey, JwtHourLimit) " +
+                   "VALUES (@AppId, @Environment, @BaseURL, @Additional, @SecretKey, @JwtHourLimit); " +
                    "SELECT @@ROWCOUNT;";
             int rowCount = await conn.ExecuteScalarAsync<int>(sql, model, tran);
 
@@ -19,11 +19,11 @@ namespace NokPortal.Domians.Repositorys
             }
         }
 
-        public async Task<AppsEnvModel> GetById(IDbConnection conn, IDbTransaction tran, int appId, int userId)
+        public async Task<RequestCreateAppEnv> GetById(IDbConnection conn, IDbTransaction tran, int appId, int userId)
         {
             // Check if the userId exists in Users_Apps
             var userExists = await conn.ExecuteScalarAsync<int>(
-                "SELECT COUNT(*) FROM Users_Apps WHERE UserID = @UserID AND AppID = @AppID;",
+                "SELECT COUNT(*) FROM Users_Apps WHERE UserId = @UserId AND AppId = @AppId;",
                 new { UserID = userId, AppID = appId },
                 transaction: tran);
 
@@ -32,8 +32,8 @@ namespace NokPortal.Domians.Repositorys
                 throw new UnauthorizedAccessException("This user does not have access, or user/application cannot be found in system.");
             }
 
-            const string sql = "SELECT * FROM Apps_Env WHERE AppID = @AppID";
-            AppsEnvModel? appsEnvModel = await conn.QueryFirstOrDefaultAsync<AppsEnvModel>(sql, new { AppID = appId }, tran);
+            const string sql = "SELECT * FROM Apps_Env WHERE AppId = @AppId";
+            RequestCreateAppEnv? appsEnvModel = await conn.QueryFirstOrDefaultAsync<RequestCreateAppEnv>(sql, new { AppID = appId }, tran);
             if (appsEnvModel == null)
             {
                 throw new Exception("Not found apps environment");
@@ -41,23 +41,23 @@ namespace NokPortal.Domians.Repositorys
             return appsEnvModel;
         }
 
-        public async Task<IEnumerable<AppsEnvModel>> GetAll(IDbConnection conn, IDbTransaction tran)
+        public async Task<IEnumerable<RequestCreateAppEnv>> GetAll(IDbConnection conn, IDbTransaction tran)
         {
             const string sql = "SELECT * FROM Apps_Env";
-            return await conn.QueryAsync<AppsEnvModel>(sql, transaction: tran);
+            return await conn.QueryAsync<RequestCreateAppEnv>(sql, transaction: tran);
         }
 
-        public async Task Update(IDbConnection conn, IDbTransaction tran, AppsEnvModel model)
+        public async Task Update(IDbConnection conn, IDbTransaction tran, RequestCreateAppEnv model)
         {
             const string sql = "UPDATE Apps_Env SET Environment = @Environment, BaseURL = @BaseURL, " +
                                "Additional = @Additional, SecretKey = @SecretKey, JwtHourLimit = @JwtHourLimit " +
-                               "WHERE AppID = @AppID";
+                               "WHERE AppId = @AppId";
             await conn.ExecuteAsync(sql, model, tran);
         }
 
         public async Task Delete(IDbConnection conn, IDbTransaction tran, int appId)
         {
-            const string sql = "DELETE FROM Apps_Env WHERE AppID = @AppID";
+            const string sql = "DELETE FROM Apps_Env WHERE AppId = @AppId";
             await conn.ExecuteAsync(sql, new { AppID = appId }, tran);
         }
     }

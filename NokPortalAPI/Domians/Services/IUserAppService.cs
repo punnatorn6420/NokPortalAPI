@@ -2,8 +2,10 @@
 
 namespace NokPortal.Domians.Services
 {
-    public interface IUsersAppsService
+    public interface IUserAppsService
     {
         Task<int> AddUserAppAsync(UserApp userApp);
+
+        Task<UserApp> GetUserAppAsync(int appId, int userId);
     }
 }

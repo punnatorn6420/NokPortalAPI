@@ -2,10 +2,10 @@
 
 namespace NokPortal.Domians.Models
 {
-    public class AppsEnvModel
+    public class ResponseAppsEnv
     {
-        [JsonPropertyName("appID")]
-        public int AppID { get; set; }
+        [JsonPropertyName("appId")]
+        public int AppId { get; set; }
 
         [JsonPropertyName("environment")]
         public string Environment { get; set; } = string.Empty;
@@ -15,11 +15,5 @@ namespace NokPortal.Domians.Models
 
         [JsonPropertyName("additional")]
         public string Additional { get; set; } = string.Empty;
-
-        [JsonPropertyName("secretKey")]
-        public string SecretKey { get; set; } = string.Empty;
-
-        [JsonPropertyName("jwtHourLimit")]
-        public int JwtHourLimit { get; set; }
     }
 }

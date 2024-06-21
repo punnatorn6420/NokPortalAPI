@@ -1,14 +1,15 @@
-﻿using NokPortal.Domians.Models;
+﻿using NokCore.Identity.Models;
+using NokPortal.Domians.Models;
 
 namespace NokPortal.Domains.Services
 {
-    public interface IUsersService
+    public interface IUserService
     {
-        Task<IEnumerable<Users>> GetAllUsersAsync();
+        Task<IEnumerable<User>> GetAllUsersAsync();
 
-        Task<int> CreateUserAsync(Users user);
+        Task<int> CreateUserAsync(User user);
 
-        Task<bool> UpdateUserAsync(Users user);
+        Task<bool> UpdateUserAsync(User user);
 
         Task<bool> DeleteUserAsync(int id);
 

@@ -11,9 +11,9 @@ namespace NokPortal.Domians.Controllers
     [Route("ad")]
     public class UsersController : NokController<ControllerBase>
     {
-        private readonly IUsersService _appUserService;
+        private readonly IUserService _appUserService;
 
-        public UsersController(IUsersService authService)
+        public UsersController(IUserService authService)
         {
             _appUserService = authService;
         }

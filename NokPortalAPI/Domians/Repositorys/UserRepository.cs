@@ -1,21 +1,22 @@
 ﻿using System.Data;
 using Dapper;
+using NokCore.Identity.Models;
 using NokPortal.Domians.Models;
 
 namespace NokPortal.Domains.Repositories
 {
-    public class UsersRepository : IUsersRepository
+    public class UserRepository : IUserRepository
     {
-        public async Task<IEnumerable<Users>> GetAllUsersAsync(IDbConnection conn, IDbTransaction tran)
+        public async Task<IEnumerable<User>> GetAllUsersAsync(IDbConnection conn, IDbTransaction tran)
         {
             string query = "SELECT * FROM Users";
-            return await conn.QueryAsync<Users>(query, tran);
+            return await conn.QueryAsync<User>(query, tran);
         }
 
-        public async Task<Users> GetUserByIdAsync(IDbConnection conn, IDbTransaction tran, int id)
+        public async Task<User> GetUserByIdAsync(IDbConnection conn, IDbTransaction tran, int id)
         {
-            string query = "SELECT * FROM Users WHERE UserID = @Id";
-            Users? appUser = await conn.QuerySingleOrDefaultAsync<Users>(query, new { Id = id }, tran);
+            string query = "SELECT * FROM Users WHERE UserId = @Id";
+            User? appUser = await conn.QuerySingleOrDefaultAsync<User>(query, new { Id = id }, tran);
             if (appUser == null)
             {
                 throw new Exception("Not found user");
@@ -24,38 +25,38 @@ namespace NokPortal.Domains.Repositories
             return appUser;
         }
 
-        public async Task<int> CreateUserAsync(IDbConnection conn, IDbTransaction tran, Users user)
+        public async Task<int> CreateUserAsync(IDbConnection conn, IDbTransaction tran, User user)
         {
             string query = @"
-                INSERT INTO Users (Email, FirstName, LastName, JobTitle, Department, CreatedAt, ModifiedAt, Active)
-                VALUES (@Email, @FirstName, @LastName, @JobTitle, @Department, @CreatedAt, @ModifiedAt, @Active);
+                INSERT INTO Users (Email, FirstName, LastName, JobTitle, Department, ObjectId, CreatedAt, ModifiedAt, Active)
+                VALUES (@Email, @FirstName, @LastName, @JobTitle, @Department, @ObjectId, @CreatedAt, @ModifiedAt, @Active);
                 SELECT CAST(SCOPE_IDENTITY() as int);";
             return await conn.QuerySingleAsync<int>(query, user, tran);
         }
 
-        public async Task<bool> UpdateUserAsync(IDbConnection conn, IDbTransaction tran, Users user)
+        public async Task<bool> UpdateUserAsync(IDbConnection conn, IDbTransaction tran, User user)
         {
             string query = @"
                 UPDATE Users
                 SET Email = @Email, FirstName = @FirstName, LastName = @LastName, JobTitle = @JobTitle,
                     Department = @Department, ModifiedAt = @ModifiedAt, Active = @Active
-                WHERE UserID = @UserID;";
+                WHERE UserId = @UserId;";
             int rowsAffected = await conn.ExecuteAsync(query, user, tran);
             return rowsAffected > 0;
         }
 
         public async Task<bool> DeleteUserAsync(IDbConnection conn, IDbTransaction tran, int id)
         {
-            string query = "DELETE FROM Users WHERE UserID = @Id";
+            string query = "DELETE FROM Users WHERE UserId = @Id";
             int rowsAffected = await conn.ExecuteAsync(query, id, tran);
             return rowsAffected > 0;
         }
 
-        public async Task<Users> GetUserByEmailAsync(IDbConnection conn, IDbTransaction tran, string email)
+        public async Task<User> GetUserByEmailAsync(IDbConnection conn, IDbTransaction tran, string email)
         {
             string query = "SELECT * FROM Users WHERE Email = @Email";
             var queryByEmail = new { Email = email };
-            Users? appUser = await conn.QuerySingleOrDefaultAsync<Users>(query, queryByEmail, tran);
+            User? appUser = await conn.QuerySingleOrDefaultAsync<User>(query, queryByEmail, tran);
             if (appUser == null)
             {
                 throw new Exception("Not found user");

@@ -1,7 +1,9 @@
 ﻿namespace NokPortal.Domians.Services
 {
-    public interface IJsonHelperService
+    public interface IManagePayloadService
     {
         public string GetJsonPropertyName<T>(string propertyName);
+
+        int GetUserIdFromJwtDecode(HttpContext payload);
     }
 }

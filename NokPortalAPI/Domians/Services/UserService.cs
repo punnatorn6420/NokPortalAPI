@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Text.Json;
+using NokCore.Identity.Models;
 using NokPortal.Domains.Repositories;
 using NokPortal.Domians.Models;
 using NokPortal.Domians.Services;
@@ -7,15 +8,15 @@ using NokPortal.Shared.DB;
 
 namespace NokPortal.Domains.Services
 {
-    public class UsersService : IUsersService
+    public class UserService : IUserService
     {
         private readonly IConfiguration _configuration;
-        private readonly IUsersRepository _appUserRepository;
+        private readonly IUserRepository _appUserRepository;
         private readonly IDbConnection _connectionFactory;
         private readonly HttpClient _httpClient;
         private readonly IJwtService _jwtService;
 
-        public UsersService(IConfiguration configuration, IDbConnectionFactory connectionFactory, IUsersRepository appUserRepository, HttpClient httpClient, IJwtService jwtService)
+        public UserService(IConfiguration configuration, IDbConnectionFactory connectionFactory, IUserRepository appUserRepository, HttpClient httpClient, IJwtService jwtService)
         {
             _appUserRepository = appUserRepository;
             _configuration = configuration;
@@ -24,25 +25,25 @@ namespace NokPortal.Domains.Services
             _jwtService = jwtService;
         }
 
-        public async Task<IEnumerable<Users>> GetAllUsersAsync()
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
             _connectionFactory.Open();
             using var tran = _connectionFactory.BeginTransaction();
-            IEnumerable<Users> listUser = await _appUserRepository.GetAllUsersAsync(_connectionFactory, tran);
+            IEnumerable<User> listUser = await _appUserRepository.GetAllUsersAsync(_connectionFactory, tran);
             tran.Commit();
             return listUser;
         }
 
-        public async Task<Users> GetUserByIdAsync(int id)
+        public async Task<User> GetUserByIdAsync(int id)
         {
             _connectionFactory.Open();
             using var tran = _connectionFactory.BeginTransaction();
-            Users user = await _appUserRepository.GetUserByIdAsync(_connectionFactory, tran, id);
+            User user = await _appUserRepository.GetUserByIdAsync(_connectionFactory, tran, id);
             tran.Commit();
             return user;
         }
 
-        public async Task<int> CreateUserAsync(Users user)
+        public async Task<int> CreateUserAsync(User user)
         {
             _connectionFactory.Open();
             using var tran = _connectionFactory.BeginTransaction();
@@ -54,7 +55,7 @@ namespace NokPortal.Domains.Services
             return rowsAffected;
         }
 
-        public async Task<bool> UpdateUserAsync(Users user)
+        public async Task<bool> UpdateUserAsync(User user)
         {
             _connectionFactory.Open();
             using var tran = _connectionFactory.BeginTransaction();
@@ -105,17 +106,18 @@ namespace NokPortal.Domains.Services
 
         public async Task SignupMicrosoftGraphGetMeAsync(string token)
         {
+            // Request to microsoft get AD info
             var request = new HttpRequestMessage(HttpMethod.Get, "https://graph.microsoft.com/v1.0/me");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             var response = await _httpClient.SendAsync(request);
-            UserADresponse userAD;
+            ResponseUserAd userAD;
             try
             {
                 response.EnsureSuccessStatusCode();
                 var responseContent = await response.Content.ReadAsStringAsync();
 
-                userAD = JsonSerializer.Deserialize<UserADresponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) !;
+                userAD = JsonSerializer.Deserialize<ResponseUserAd>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) !;
 
                 if (userAD == null)
                 {
@@ -127,12 +129,14 @@ namespace NokPortal.Domains.Services
                 throw;
             }
 
-            Users user = new Users
+            // Insert database create user
+            User user = new User
             {
                 FirstName = userAD.GivenName,
                 LastName = userAD.Surname,
                 Email = userAD.UserPrincipalName,
                 JobTitle = userAD.JobTitle,
+                ObjectId = userAD.Id,
                 Department = userAD.OfficeLocation,
                 CreatedAt = DateTime.Now,
                 ModifiedAt = DateTime.Now,
@@ -151,6 +155,7 @@ namespace NokPortal.Domains.Services
                 }
                 else
                 {
+                    tran.Rollback();
                     throw new Exception("No recode create.");
                 }
             }
@@ -168,13 +173,13 @@ namespace NokPortal.Domains.Services
                 request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
                 var response = await _httpClient.SendAsync(request);
-                UserADresponse userAD;
+                ResponseUserAd userAD;
                 try
                 {
                     response.EnsureSuccessStatusCode();
                     var responseContent = await response.Content.ReadAsStringAsync();
 
-                    userAD = JsonSerializer.Deserialize<UserADresponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) !;
+                    userAD = JsonSerializer.Deserialize<ResponseUserAd>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) !;
                     if (userAD == null)
                     {
                         throw new InvalidOperationException("Deserialization returned null.");
@@ -187,15 +192,15 @@ namespace NokPortal.Domains.Services
 
                 _connectionFactory.Open();
                 using var tran = _connectionFactory.BeginTransaction();
-                Users user = await _appUserRepository.GetUserByEmailAsync(_connectionFactory, tran, userAD.UserPrincipalName);
+                User user = await _appUserRepository.GetUserByEmailAsync(_connectionFactory, tran, userAD.UserPrincipalName);
                 tran.Commit();
 
-                var jwtSetting = new JWTsetting
+                var jwtData = new JwtData
                 {
-                    UserId = user.UserID
+                    UserId = user.UserId
                 };
 
-                return _jwtService.GenerateToken(jwtSetting);
+                return _jwtService.GenerateToken(jwtData);
             }
             catch (Exception)
             {

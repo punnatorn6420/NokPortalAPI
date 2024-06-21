@@ -2,7 +2,7 @@
 
 namespace NokPortal.Domians.Models
 {
-    public class UserADresponse
+    public class ResponseUserAd
     {
         [JsonPropertyName("@odata.context")]
         required public string ODataContext { get; set; }

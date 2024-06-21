@@ -34,6 +34,7 @@ namespace NokPortal.Domains.Services
                 }
                 else
                 {
+                    tran.Rollback();
                     throw new Exception("No recode create.");
                 }
             }

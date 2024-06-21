@@ -26,19 +26,19 @@ public class Program
         builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
 
         // Repository
-        builder.Services.AddScoped<IUsersRepository, UsersRepository>();
+        builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<IAppRepository, AppRepository>();
-        builder.Services.AddScoped<IUsersAppsRepository, UsersAppsRepository>();
-        builder.Services.AddScoped<IAppsEnvRepository, AppsEnvRepository>();
+        builder.Services.AddScoped<IUserAppRepository, UserAppRepository>();
+        builder.Services.AddScoped<IAppEnvRepository, AppEnvRepository>();
 
         // Service
-        builder.Services.AddScoped<IUsersService, UsersService>();
+        builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IAppService, AppService>();
         builder.Services.AddScoped<IAuthService, AuthService>();
-        builder.Services.AddScoped<IJsonHelperService, JsonHelperService>();
-        builder.Services.AddScoped<IAppsEnvService, AppsEnvService>();
-        builder.Services.AddScoped<IUsersService, UsersService>();
-        builder.Services.AddScoped<IUsersAppsService, UsersAppsService>();
+        builder.Services.AddScoped<IManagePayloadService, ManagePayloadService>();
+        builder.Services.AddScoped<IAppEnvService, AppEnvService>();
+        builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<IUserAppsService, UserAppsService>();
 
         builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 

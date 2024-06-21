@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using NokPortalAPI.Domians.Models;
 
 namespace NokPortal.Domains.Models
 {
@@ -6,9 +7,12 @@ namespace NokPortal.Domains.Models
     {
 
         [JsonPropertyName("appId")]
-        public int AppID { get; set; }
+        public int AppId { get; set; }
 
         [JsonPropertyName("userId")]
-        public int UserID { get; set; }
+        public int UserId { get; set; }
+
+        [JsonPropertyName("roleId")]
+        public UserRole RoleId { get; set; }
     }
 }

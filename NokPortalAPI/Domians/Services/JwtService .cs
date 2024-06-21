@@ -23,7 +23,7 @@ namespace NokPortal.Domians.Services
 
         public dynamic GenerateToken(dynamic jwtSetting)
         {
-            JsonHelperService jsonHelper = new JsonHelperService();
+            ManagePayloadService jsonHelper = new ManagePayloadService();
 
             var claims = new List<Claim>();
             foreach (var property in jwtSetting.GetType().GetProperties())

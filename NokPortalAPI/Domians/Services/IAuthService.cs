@@ -1,9 +1,10 @@
-﻿using NokPortal.Domians.Models;
+﻿using NokCore.Identity.Models;
+using NokPortal.Domians.Models;
 
 namespace NokPortal.Domains.Services
 {
     public interface IAuthService
     {
-        Task<Users> GetUsersByIdAsync(int userID);
+        Task<User> GetUsersByIdAsync(int userID);
     }
 }

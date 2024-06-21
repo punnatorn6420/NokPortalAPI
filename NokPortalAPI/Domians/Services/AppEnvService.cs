@@ -5,20 +5,20 @@ using NokPortal.Shared.DB;
 
 namespace NokPortal.Domians.Services
 {
-    public class AppsEnvService : IAppsEnvService
+    public class AppEnvService : IAppEnvService
     {
         private readonly IDbConnectionFactory _connectionFactory;
-        private readonly IAppsEnvRepository _appsEnvRepository;
+        private readonly IAppEnvRepository _appsEnvRepository;
         private readonly IAppRepository _appRepository;
 
-        public AppsEnvService(IDbConnectionFactory connectionFactory, IAppsEnvRepository appsEnvRepository, IAppRepository appRepository)
+        public AppEnvService(IDbConnectionFactory connectionFactory, IAppEnvRepository appsEnvRepository, IAppRepository appRepository)
         {
             _connectionFactory = connectionFactory;
             _appsEnvRepository = appsEnvRepository;
             _appRepository = appRepository;
         }
 
-        public async Task<bool> CreateAppsEnv(AppsEnvModel model)
+        public async Task<bool> CreateAppsEnv(RequestCreateAppEnv reqCreateAppEnv, int appId)
         {
             using var connection = _connectionFactory.CreateConnection();
             connection.Open();
@@ -26,17 +26,17 @@ namespace NokPortal.Domians.Services
 
             try
             {
-                App app = await _appRepository.GetAppByIdAsync(connection, tran, model.AppID);
+                App app = await _appRepository.GetAppByIdAsync(connection, tran, appId);
                 if (app != null)
                 {
-                    var appsEnvModel = new AppsEnvModel()
+                    var appsEnvModel = new RequestCreateAppEnv()
                     {
-                        AppID = app.AppID,
-                        Environment = model.Environment,
-                        BaseURL = model.BaseURL,
-                        Additional = model.Additional,
-                        SecretKey = model.SecretKey,
-                        JwtHourLimit = model.JwtHourLimit,
+                        AppId = appId,
+                        Environment = reqCreateAppEnv.Environment,
+                        BaseURL = reqCreateAppEnv.BaseURL,
+                        Additional = reqCreateAppEnv.Additional,
+                        SecretKey = reqCreateAppEnv.SecretKey,
+                        JwtHourLimit = reqCreateAppEnv.JwtHourLimit,
                     };
                     await _appsEnvRepository.Create(connection, tran, appsEnvModel);
                     tran.Commit();
@@ -51,7 +51,7 @@ namespace NokPortal.Domians.Services
             }
         }
 
-        public async Task<AppsEnvModel> GetById(RequestAppInfo appId, int userId)
+        public async Task<RequestCreateAppEnv> GetById(int appId, int userId)
         {
             using var connection = _connectionFactory.CreateConnection();
             connection.Open();
@@ -59,7 +59,7 @@ namespace NokPortal.Domians.Services
 
             try
             {
-                AppsEnvModel appEnv = await _appsEnvRepository.GetById(connection, tran, appId.AppId, userId);
+                RequestCreateAppEnv appEnv = await _appsEnvRepository.GetById(connection, tran, appId, userId);
                 if (appEnv != null)
                 {
                     tran.Commit();
