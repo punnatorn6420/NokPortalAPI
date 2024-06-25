@@ -8,5 +8,9 @@ namespace NokPortal.Domians.Services
         dynamic GenerateToken(dynamic jwtSetting);
 
         ClaimsPrincipal? DecodeToken(string token);
+
+        dynamic GenerateToken(dynamic jwtSetting, string secretKey, int hourExpire);
+
+        ClaimsPrincipal? DecodeToken(string token, string secretKey);
     }
 }

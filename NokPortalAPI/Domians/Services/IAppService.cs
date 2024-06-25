@@ -9,5 +9,7 @@ namespace NokPortal.Domians.Services
         Task<IEnumerable<App>> GetAllAppAsync();
 
         Task<App> GetAppByIdAsync(int appId);
+
+        Task<string> GenerateJwtTargetApp(int appId);
     }
 }

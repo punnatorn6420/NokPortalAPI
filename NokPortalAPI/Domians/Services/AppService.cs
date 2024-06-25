@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using NokCore.Identity.Models;
 using NokPortal.Domains.Repositories;
 using NokPortal.Domians.Models;
 using NokPortal.Domians.Repositorys;
@@ -12,12 +13,14 @@ namespace NokPortal.Domains.Services
         private readonly IDbConnectionFactory _connectionFactory;
         private readonly IConfiguration _configuration;
         private readonly IAppRepository _appRepository;
+        private readonly IJwtService _jwtService;
 
-        public AppService(IDbConnectionFactory connectionFactory, IConfiguration configuration, IAppRepository appRepository)
+        public AppService(IDbConnectionFactory connectionFactory, IConfiguration configuration, IAppRepository appRepository, IJwtService jwtService)
         {
             _connectionFactory = connectionFactory;
             _appRepository = appRepository;
             _configuration = configuration;
+            _jwtService = jwtService;
         }
 
         public async Task CreateAppAsync(RequestCreateApp reqCreate)
@@ -77,6 +80,19 @@ namespace NokPortal.Domains.Services
             catch (Exception)
             {
                 tran.Rollback();
+                throw;
+            }
+        }
+
+        public async Task<string> GenerateJwtTargetApp(int appId)
+        {
+            try
+            {
+                string jwtToken = _jwtService.GenerateToken(new JwtData { UserId = 1 }, "secret123456789abc22fghigklmnopqrst", 1);
+                return jwtToken;
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }

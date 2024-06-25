@@ -85,7 +85,7 @@ public class Program
 
         app.UseCors("AllowSpecificOrigin");
 
-        app.UseMiddleware<AuthMiddleware>();
+        app.UseMiddleware<JWTmiddleware>();
 
         // app.UseAuthentication();
         // app.UseAuthorization();

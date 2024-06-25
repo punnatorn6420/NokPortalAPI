@@ -30,6 +30,10 @@ namespace NokPortal.Domians.Services
                 {
                     tran.Commit();
                 }
+                else
+                {
+                    tran.Rollback();
+                }
                 return rowEffect;
             }
             catch (Exception)
