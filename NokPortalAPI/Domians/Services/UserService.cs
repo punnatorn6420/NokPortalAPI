@@ -1,24 +1,26 @@
-﻿using System.Data;
-using System.Text.Json;
-using NokCore.Identity.Models;
-using NokPortal.Domains.Repositories;
-using NokPortal.Domians.Models;
-using NokPortal.Domians.Services;
-using NokPortal.Shared.DB;
-
-namespace NokPortal.Domains.Services
+﻿namespace NokPortal.Domains.Services
 {
+    using System.Data;
+    using System.Text.Json;
+    using NokCore.Api.JwtToken.Models;
+    using NokCore.Api.JwtToken.Services;
+    using NokCore.Identity.Models;
+    using NokPortal.Domains.Repositories;
+    using NokPortal.Domians.Models;
+    using NokPortal.Shared.DB;
+    using NokPortalAPI.Domians.Models;
+
     public class UserService : IUserService
     {
         private readonly IConfiguration _configuration;
-        private readonly IUserRepository _appUserRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IDbConnection _connectionFactory;
         private readonly HttpClient _httpClient;
         private readonly IJwtService _jwtService;
 
-        public UserService(IConfiguration configuration, IDbConnectionFactory connectionFactory, IUserRepository appUserRepository, HttpClient httpClient, IJwtService jwtService)
+        public UserService(IConfiguration configuration, IDbConnectionFactory connectionFactory, IUserRepository userRepository, HttpClient httpClient, IJwtService jwtService)
         {
-            _appUserRepository = appUserRepository;
+            _userRepository = userRepository;
             _configuration = configuration;
             _connectionFactory = connectionFactory.CreateConnection();
             _httpClient = httpClient;
@@ -29,16 +31,39 @@ namespace NokPortal.Domains.Services
         {
             _connectionFactory.Open();
             using var tran = _connectionFactory.BeginTransaction();
-            IEnumerable<User> listUser = await _appUserRepository.GetAllUsersAsync(_connectionFactory, tran);
-            tran.Commit();
-            return listUser;
+            try
+            {
+                IEnumerable<User> listUser = await _userRepository.GetAllUsersAsync(_connectionFactory, tran);
+                tran.Commit();
+                return listUser;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<UserApps>> GetUserAppsAsync(int userId)
+        {
+            _connectionFactory.Open();
+            using var tran = _connectionFactory.BeginTransaction();
+            try
+            {
+                IEnumerable<UserApps> userApps = await _userRepository.GetUserAppsAsync(_connectionFactory, tran, userId);
+                tran.Commit();
+                return userApps;
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public async Task<User> GetUserByIdAsync(int id)
         {
             _connectionFactory.Open();
             using var tran = _connectionFactory.BeginTransaction();
-            User user = await _appUserRepository.GetUserByIdAsync(_connectionFactory, tran, id);
+            User user = await _userRepository.GetUserByIdAsync(_connectionFactory, tran, id);
             tran.Commit();
             return user;
         }
@@ -50,7 +75,7 @@ namespace NokPortal.Domains.Services
 
             user.CreatedAt = DateTime.UtcNow;
             user.ModifiedAt = DateTime.UtcNow;
-            int rowsAffected = await _appUserRepository.CreateUserAsync(_connectionFactory, tran, user);
+            int rowsAffected = await _userRepository.CreateUserAsync(_connectionFactory, tran, user);
             tran.Commit();
             return rowsAffected;
         }
@@ -61,7 +86,7 @@ namespace NokPortal.Domains.Services
             using var tran = _connectionFactory.BeginTransaction();
 
             user.ModifiedAt = DateTime.UtcNow;
-            bool success = await _appUserRepository.UpdateUserAsync(_connectionFactory, tran, user);
+            bool success = await _userRepository.UpdateUserAsync(_connectionFactory, tran, user);
             tran.Commit();
             return success;
         }
@@ -71,7 +96,7 @@ namespace NokPortal.Domains.Services
             _connectionFactory.Open();
             using var tran = _connectionFactory.BeginTransaction();
 
-            bool success = await _appUserRepository.DeleteUserAsync(_connectionFactory, tran, id);
+            bool success = await _userRepository.DeleteUserAsync(_connectionFactory, tran, id);
             tran.Commit();
             return success;
         }
@@ -111,13 +136,13 @@ namespace NokPortal.Domains.Services
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             var response = await _httpClient.SendAsync(request);
-            ResponseUserAd userAD;
+            ResponseMicrosoftUserInfo userAD;
             try
             {
                 response.EnsureSuccessStatusCode();
                 var responseContent = await response.Content.ReadAsStringAsync();
 
-                userAD = JsonSerializer.Deserialize<ResponseUserAd>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) !;
+                userAD = JsonSerializer.Deserialize<ResponseMicrosoftUserInfo>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) !;
 
                 if (userAD == null)
                 {
@@ -143,25 +168,17 @@ namespace NokPortal.Domains.Services
                 Active = true,
             };
 
-            try
-            {
-                _connectionFactory.Open();
-                using var tran = _connectionFactory.BeginTransaction();
+            _connectionFactory.Open();
+            using var tran = _connectionFactory.BeginTransaction();
 
-                int rowsAffected = await _appUserRepository.CreateUserAsync(_connectionFactory, tran, user);
-                if (rowsAffected > 0)
-                {
-                    tran.Commit();
-                }
-                else
-                {
-                    tran.Rollback();
-                    throw new Exception("No recode create.");
-                }
-            }
-            catch (Exception)
+            int rowsAffected = await _userRepository.CreateUserAsync(_connectionFactory, tran, user);
+            if (rowsAffected > 0)
             {
-                throw;
+                tran.Commit();
+            }
+            else
+            {
+                throw new Exception("No recode create.");
             }
         }
 
@@ -173,13 +190,13 @@ namespace NokPortal.Domains.Services
                 request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
                 var response = await _httpClient.SendAsync(request);
-                ResponseUserAd userAD;
+                ResponseMicrosoftUserInfo userAD;
                 try
                 {
                     response.EnsureSuccessStatusCode();
                     var responseContent = await response.Content.ReadAsStringAsync();
 
-                    userAD = JsonSerializer.Deserialize<ResponseUserAd>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) !;
+                    userAD = JsonSerializer.Deserialize<ResponseMicrosoftUserInfo>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) !;
                     if (userAD == null)
                     {
                         throw new InvalidOperationException("Deserialization returned null.");
@@ -192,7 +209,7 @@ namespace NokPortal.Domains.Services
 
                 _connectionFactory.Open();
                 using var tran = _connectionFactory.BeginTransaction();
-                User user = await _appUserRepository.GetUserByEmailAsync(_connectionFactory, tran, userAD.UserPrincipalName);
+                User user = await _userRepository.GetUserByEmailAsync(_connectionFactory, tran, userAD.UserPrincipalName);
                 tran.Commit();
 
                 var jwtData = new JwtData

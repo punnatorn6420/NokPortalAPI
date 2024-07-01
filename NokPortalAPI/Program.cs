@@ -1,7 +1,9 @@
 using System.Data;
 using System.Data.SqlClient;
+using System.Text.Json.Serialization;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using NokCore.Api.JwtToken.Services;
 using NokPortal.Domains.Middlewares;
 using NokPortal.Domains.Models;
 using NokPortal.Domains.Repositories;
@@ -62,13 +64,19 @@ public class Program
 
         builder.Services.AddFluentValidationAutoValidation();
         builder.Services.AddFluentValidationClientsideAdapters();
-        builder.Services.AddValidatorsFromAssemblyContaining<TokenRedirectValidation>();
-        builder.Services.AddValidatorsFromAssemblyContaining<RequestToken>();
+        builder.Services.AddValidatorsFromAssemblyContaining<RequestTokenValidation>();
+        // builder.Services.AddValidatorsFromAssemblyContaining<RequestToken>();
         builder.Services.AddValidatorsFromAssemblyContaining<RequestCreateApp>();
         builder.Services.AddValidatorsFromAssemblyContaining<RequestAppInfo>();
-        builder.Services.AddValidatorsFromAssemblyContaining<UserApp>();
-        builder.Services.AddControllers();
+       // builder.Services.AddValidatorsFromAssemblyContaining<RequestCreateAppEnvValidator>();
+        builder.Services.AddValidatorsFromAssemblyContaining<ModelUserApp>();
+        builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
 
+        builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Configuration.SetBasePath(AppDomain.CurrentDomain.BaseDirectory).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);

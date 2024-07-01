@@ -1,14 +1,15 @@
 ﻿using System.Text.Json.Serialization;
+using NokPortalAPI.Domians.Models;
 
 namespace NokPortal.Domians.Models
 {
-    public class RequestCreateAppEnv
+    public class AppEnv
     {
         [JsonPropertyName("appId")]
         public int? AppId { get; set; }
 
         [JsonPropertyName("environment")]
-        public string Environment { get; set; } = string.Empty;
+        public EnumEnvironmentType Environment { get; set; }
 
         [JsonPropertyName("baseURL")]
         public string BaseURL { get; set; } = string.Empty;

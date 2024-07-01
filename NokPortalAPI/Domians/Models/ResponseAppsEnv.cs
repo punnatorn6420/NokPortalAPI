@@ -1,4 +1,7 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using NokCore.Api.JwtToken.Models;
+using NokPortalAPI.Domians.Models;
 
 namespace NokPortal.Domians.Models
 {
@@ -15,5 +18,8 @@ namespace NokPortal.Domians.Models
 
         [JsonPropertyName("additional")]
         public string Additional { get; set; } = string.Empty;
+
+        [JsonPropertyName("jwtTargetApp")]
+        required public ResponseJwt JwtTargetApp { get; set; }
     }
 }

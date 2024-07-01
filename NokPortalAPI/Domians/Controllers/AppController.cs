@@ -1,6 +1,8 @@
-﻿using System.Data.SqlClient;
+﻿using System.Data;
+using System.Data.SqlClient;
 using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers;
+using NokCore.Api.JwtToken.Services;
 using NokCore.Identity.Models;
 using NokPortal.Domains.Models;
 using NokPortal.Domians.Models;
@@ -40,24 +42,31 @@ namespace NokPortal.Domians.Controllers
 
             int userId = _managePayload.GetUserIdFromJwtDecode(HttpContext);
 
-
             try
             {
-                await _appService.CreateAppAsync(reqApp);
-                return Ok(FormatSuccessResponse(null));
+                bool chkSuccess = await _appService.CreateAppAsync(reqApp);
+                if (chkSuccess)
+                {
+                    return Ok(FormatSuccessResponse("Success"));
+                }
+                throw new Exception("Create failed.");
+            }
+            catch (DuplicateNameException ex)
+            {
+                return Ok(FormatInternalErrorReponse(ex.Message, null));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, FormatInternalErrorReponse(ex.Message, null));
+                return Ok(FormatInternalErrorReponse(ex.Message, null));
             }
         }
 
-        [HttpGet("get-all")]
+        [HttpGet("all")]
         public async Task<ActionResult> GetAllApp()
         {
             try
             {
-                IEnumerable<App> app = await _appService.GetAllAppAsync();
+                IEnumerable<ModelApp> app = await _appService.GetAllAppAsync();
                 return Ok(FormatSuccessResponse(app));
             }
             catch (Exception ex)
@@ -67,9 +76,7 @@ namespace NokPortal.Domians.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse<object, string>>> CreateAppEnvironment(
-            int id,
-            RequestCreateAppEnv reqAppEnv)
+        public async Task<ActionResult<ApiResponse<object, string>>> CreateAppEnvironment(int id, AppEnv reqAppEnv)
         {
             if (!ModelState.IsValid)
             {
@@ -79,7 +86,7 @@ namespace NokPortal.Domians.Controllers
             try
             {
                 await _appsEnvService.CreateAppsEnv(reqAppEnv, id);
-                return Ok(FormatSuccessResponse(null));
+                return Ok(FormatSuccessResponse("Success"));
             }
             catch (SqlException sqlEx)
             {
@@ -99,7 +106,7 @@ namespace NokPortal.Domians.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<object, string>>> GetAppEnv(int id)
+        public async Task<ActionResult<ApiResponse<object, string>>> GetAppInfo(int id)
         {
             if (!ModelState.IsValid)
             {
@@ -108,41 +115,8 @@ namespace NokPortal.Domians.Controllers
 
             try
             {
-                int userId = _managePayload.GetUserIdFromJwtDecode(HttpContext);
-
-                RequestCreateAppEnv appEnv = await _appsEnvService.GetById(id, userId);
-
-                ResponseAppsEnv appEnvNoneSecretKey = new ResponseAppsEnv
-                {
-                    AppId = id,
-                    Environment = appEnv.Environment,
-                    BaseURL = appEnv.BaseURL,
-                    Additional = appEnv.Additional,
-                };
-                return Ok(FormatSuccessResponse(appEnvNoneSecretKey));
-            }
-            catch (SqlException sqlEx)
-            {
-                if (sqlEx.Number == 2627)
-                {
-                    return Ok(FormatInternalErrorReponse("This app environment already exists in the system", null));
-                }
-                else
-                {
-                    return StatusCode(500, FormatInternalErrorReponse(sqlEx.Message, null));
-                }
-            }
-            catch (ArgumentNullException ex)
-            {
-                return Ok(FormatDataErrorResponse(ex.Message, "ArgumentNullError"));
-            }
-            catch (ArgumentException ex)
-            {
-                return Ok(FormatDataErrorResponse(ex.Message, "AuthenticationError"));
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Ok(FormatDataErrorResponse(ex.Message, "AuthenticationError"));
+                ModelApp app = await _appService.GetAppByIdAsync(id);
+                return Ok(FormatSuccessResponse(app));
             }
             catch (Exception ex)
             {
@@ -150,7 +124,7 @@ namespace NokPortal.Domians.Controllers
             }
         }
 
-        [HttpPut("{id}/add-user")] // Link app, user, (role)
+        [HttpPost("{id}/assign-user")] // Link app, user, (role)
         public async Task<ActionResult<ApiResponse<object, string>>> CreateUserApp(int id, RequestAddUserApp reqUserId)
         {
             if (!ModelState.IsValid)
@@ -158,24 +132,18 @@ namespace NokPortal.Domians.Controllers
                 return BadRequest(FormatInvalidFieldResponse(GetFieldErrors()));
             }
 
-            string jwtTokenTargetApp = await _appService.GenerateJwtTargetApp(1);
             int userId = _managePayload.GetUserIdFromJwtDecode(HttpContext);
-            UserApp chkRoleUser = await _usersAppService.GetUserAppAsync(id, userId);
 
-            if (chkRoleUser.RoleId != UserRole.Root && chkRoleUser.RoleId != UserRole.Admin) // (int)UserRole.User
-            {
-                return Unauthorized(FormatInternalErrorReponse("User is not authorized to add a user to this app.", null));
-            }
-
+            // ResponseJwt jwtTokenTargetApp = await _appService.AssignUserTargetAppAsync(id, userId); // mock up
             try
             {
-                await _usersAppService.AddUserAppAsync(new UserApp
+                await _usersAppService.AddUserAppAsync(new ModelUserApp
                 {
                     AppId = id,
-                    RoleId = UserRole.User,
+                    RoleId = EnumUserRole.User,
                     UserId = reqUserId.UserId,
                 });
-                return Ok(FormatSuccessResponse(null));
+                return Ok(FormatSuccessResponse("Success"));
             }
             catch (ArgumentNullException ex)
             {
@@ -199,12 +167,56 @@ namespace NokPortal.Domians.Controllers
         }
 
         [HttpGet("{id}/get-roles")]
-        public async Task<ActionResult<ApiResponse<object, string>>> GetRoles(int appId)
+        public async Task<ActionResult<ApiResponse<object, string>>> GetRoles(int id)
         {
             try
             {
-                IEnumerable<App> app = await _appService.GetAllAppAsync();
+                IEnumerable<Role> app = await _appService.GetAppTargetAllRole(id);
                 return Ok(FormatSuccessResponse(app));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, FormatInternalErrorReponse(ex.Message, null));
+            }
+        }
+
+        [HttpGet("{id}/retireve_token")]
+        public async Task<ActionResult<ApiResponse<object, string>>> RetireveToken(int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(FormatInvalidFieldResponse(GetFieldErrors()));
+            }
+
+            int userId = _managePayload.GetUserIdFromJwtDecode(HttpContext);
+
+            try
+            {
+                IEnumerable<AppEnv> appEnv = await _appsEnvService.GetById(id, userId);
+                return Ok(FormatSuccessResponse(appEnv));
+            }
+            catch (SqlException sqlEx)
+            {
+                if (sqlEx.Number == 2627)
+                {
+                    return Ok(FormatInternalErrorReponse("This app environment already exists in the system", null));
+                }
+                else
+                {
+                    return StatusCode(500, FormatInternalErrorReponse(sqlEx.Message, null));
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return Ok(FormatDataErrorResponse(ex.Message, "ArgumentNullError"));
+            }
+            catch (ArgumentException ex)
+            {
+                return Ok(FormatDataErrorResponse(ex.Message, "AuthenticationError"));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Ok(FormatDataErrorResponse(ex.Message, "AuthenticationError"));
             }
             catch (Exception ex)
             {

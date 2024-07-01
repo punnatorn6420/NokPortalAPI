@@ -1,15 +1,19 @@
-﻿using NokPortal.Domians.Models;
+﻿using NokCore.Api.JwtToken.Models;
+using NokCore.Identity.Models;
+using NokPortal.Domians.Models;
 
 namespace NokPortal.Domians.Services
 {
     public interface IAppService
     {
-        Task CreateAppAsync(RequestCreateApp reqCreate);
+        Task<bool> CreateAppAsync(RequestCreateApp reqCreate);
 
-        Task<IEnumerable<App>> GetAllAppAsync();
+        Task<IEnumerable<ModelApp>> GetAllAppAsync();
 
-        Task<App> GetAppByIdAsync(int appId);
+        Task<ModelApp> GetAppByIdAsync(int appId);
 
-        Task<string> GenerateJwtTargetApp(int appId);
+        Task<ResponseJwt> AssignUserTargetAppAsync(int appId, int userId);
+
+        Task<IEnumerable<Role>> GetAppTargetAllRole(int appId);
     }
 }

@@ -1,5 +1,6 @@
-﻿using NokCore.Identity.Models;
-using NokPortal.Domians.Models;
+﻿using NokCore.Api.JwtToken.Models;
+using NokCore.Identity.Models;
+using NokPortalAPI.Domians.Models;
 
 namespace NokPortal.Domains.Services
 {
@@ -7,11 +8,13 @@ namespace NokPortal.Domains.Services
     {
         Task<IEnumerable<User>> GetAllUsersAsync();
 
+        Task<IEnumerable<UserApps>> GetUserAppsAsync(int userId);
+
         Task<int> CreateUserAsync(User user);
 
         Task<bool> UpdateUserAsync(User user);
 
-        Task<bool> DeleteUserAsync(int id);
+        Task<bool> DeleteUserAsync(int userId);
 
         string GenerateAuthorizationUrlSignup();
 

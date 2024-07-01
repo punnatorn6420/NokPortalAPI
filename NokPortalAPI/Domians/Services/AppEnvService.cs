@@ -18,7 +18,7 @@ namespace NokPortal.Domians.Services
             _appRepository = appRepository;
         }
 
-        public async Task<bool> CreateAppsEnv(RequestCreateAppEnv reqCreateAppEnv, int appId)
+        public async Task<bool> CreateAppsEnv(AppEnv reqCreateAppEnv, int appId)
         {
             using var connection = _connectionFactory.CreateConnection();
             connection.Open();
@@ -26,10 +26,10 @@ namespace NokPortal.Domians.Services
 
             try
             {
-                App app = await _appRepository.GetAppByIdAsync(connection, tran, appId);
+                ModelApp app = await _appRepository.GetAppByIdAsync(connection, tran, appId);
                 if (app != null)
                 {
-                    var appsEnvModel = new RequestCreateAppEnv()
+                    var appsEnvModel = new AppEnv()
                     {
                         AppId = appId,
                         Environment = reqCreateAppEnv.Environment,
@@ -51,7 +51,7 @@ namespace NokPortal.Domians.Services
             }
         }
 
-        public async Task<RequestCreateAppEnv> GetById(int appId, int userId)
+        public async Task<IEnumerable<AppEnv>> GetById(int appId, int userId)
         {
             using var connection = _connectionFactory.CreateConnection();
             connection.Open();
@@ -59,7 +59,7 @@ namespace NokPortal.Domians.Services
 
             try
             {
-                RequestCreateAppEnv appEnv = await _appsEnvRepository.GetById(connection, tran, appId, userId);
+                IEnumerable<AppEnv> appEnv = await _appsEnvRepository.GetByIdAsync(connection, tran, appId, userId);
                 if (appEnv != null)
                 {
                     tran.Commit();

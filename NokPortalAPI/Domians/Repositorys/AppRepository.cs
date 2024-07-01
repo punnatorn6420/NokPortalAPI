@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Data.SqlClient;
 using Dapper;
 using NokPortal.Domians.Models;
 using NokPortal.Domians.Repositorys;
@@ -7,26 +8,44 @@ namespace NokPortal.Domains.Repositories
 {
     public class AppRepository : IAppRepository
     {
-        public async Task<int> CreateAppAsync(IDbConnection conn, IDbTransaction tran, RequestCreateApp reqCreate)
+        public async Task<bool> CreateAppAsync(IDbConnection conn, IDbTransaction tran, RequestCreateApp reqCreate)
         {
-            var sql = @"
-                INSERT INTO Apps (Name, Header, Subheader, Detail, Image)
-                VALUES (@Name, @Header, @Subheader, @Detail, @Image);
-                SELECT CAST(SCOPE_IDENTITY() as int);";
+            try
+            {
+                // Check if the name already exists
+                var checkSql = "SELECT COUNT(1) FROM Apps WHERE Name = @Name";
+                var nameExists = await conn.ExecuteScalarAsync<bool>(checkSql, new { reqCreate.Name }, transaction: tran);
 
-            return await conn.ExecuteScalarAsync<int>(sql, reqCreate, transaction: tran);
+                if (nameExists)
+                {
+                    throw new DuplicateNameException("An app with this name already exists.");
+                }
+
+                // Insert new record
+                var insertSql = @"
+                    INSERT INTO Apps (Name, Header, Subheader, Detail, Image)
+                    VALUES (@Name, @Header, @Subheader, @Detail, @Image);
+                    SELECT CAST(SCOPE_IDENTITY() as int);";
+
+                await conn.ExecuteScalarAsync<int>(insertSql, reqCreate, transaction: tran);
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-        public async Task<IEnumerable<App>> GetAllAppAsync(IDbConnection conn, IDbTransaction tran)
+        public async Task<IEnumerable<ModelApp>> GetAllAppAsync(IDbConnection conn, IDbTransaction tran)
         {
             var sql = "SELECT * FROM Apps";
-            return await conn.QueryAsync<App>(sql, transaction: tran);
+            return await conn.QueryAsync<ModelApp>(sql, transaction: tran);
         }
 
-        public async Task<App> GetAppByIdAsync(IDbConnection conn, IDbTransaction tran, int id)
+        public async Task<ModelApp> GetAppByIdAsync(IDbConnection conn, IDbTransaction tran, int id)
         {
             var sql = "SELECT * FROM Apps WHERE AppId = @AppId";
-            App? app = await conn.QueryFirstOrDefaultAsync<App>(sql, new { AppID = id }, transaction: tran);
+            ModelApp? app = await conn.QueryFirstOrDefaultAsync<ModelApp>(sql, new { AppID = id }, transaction: tran);
             if (app == null)
             {
                 throw new Exception("Not found app");

@@ -2,6 +2,7 @@
 using Dapper;
 using NokCore.Identity.Models;
 using NokPortal.Domains.Models;
+using NokPortal.Domians.Models;
 
 namespace NokPortal.Domains.Repositories
 {
@@ -38,10 +39,10 @@ namespace NokPortal.Domains.Repositories
             return await conn.ExecuteAsync(sql, new { AppID = appId, UserID = userId }, transaction: tran);
         }
 
-        public async Task<UserApp> GetUserAppAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId)
+        public async Task<ModelUserApp> GetUserAppAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId)
         {
             var sql = "SELECT * FROM Users_Apps WHERE AppId = @AppId AND UserId = @UserId;";
-            UserApp? userApp = await conn.QueryFirstOrDefaultAsync<UserApp>(sql, new { AppId = appId, UserId = userId }, transaction: tran);
+            ModelUserApp? userApp = await conn.QueryFirstOrDefaultAsync<ModelUserApp>(sql, new { AppId = appId, UserId = userId }, transaction: tran);
             if (userApp == null)
             {
                 throw new Exception("Not found userApp");
@@ -49,10 +50,28 @@ namespace NokPortal.Domains.Repositories
             return userApp;
         }
 
-        public async Task<IEnumerable<UserApp>> GetAllUserAppsAsync(IDbConnection conn, IDbTransaction tran)
+        public async Task<IEnumerable<ModelUserApp>> GetAllUserAppsAsync(IDbConnection conn, IDbTransaction tran)
         {
             var sql = "SELECT * FROM Users_Apps;";
-            return await conn.QueryAsync<UserApp>(sql);
+            return await conn.QueryAsync<ModelUserApp>(sql);
+        }
+
+        public async Task<IEnumerable<ModelApp>> GetUserAllAppAsync(IDbConnection conn, IDbTransaction tran, int userId)
+        {
+            const string sql = @"
+                SELECT a.*
+                FROM Apps a
+                INNER JOIN Users_Apps ua ON a.AppId = ua.AppId
+                WHERE ua.UserId = @UserId";
+
+            var userApps = await conn.QueryAsync<ModelApp>(sql, new { UserId = userId }, tran);
+
+            if (!userApps.Any())
+            {
+                throw new Exception("No applications found for this user.");
+            }
+
+            return userApps;
         }
     }
 }

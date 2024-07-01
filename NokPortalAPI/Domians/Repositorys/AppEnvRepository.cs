@@ -6,20 +6,30 @@ namespace NokPortal.Domians.Repositorys
 {
     public class AppEnvRepository : IAppEnvRepository
     {
-        public async Task Create(IDbConnection conn, IDbTransaction tran, RequestCreateAppEnv model) // CreateAppsEnvAsync
+        public async Task Create(IDbConnection conn, IDbTransaction tran, AppEnv model)
         {
-            const string sql = "INSERT INTO Apps_Env (AppId, Environment, BaseURL, Additional, SecretKey, JwtHourLimit) " +
-                   "VALUES (@AppId, @Environment, @BaseURL, @Additional, @SecretKey, @JwtHourLimit); " +
-                   "SELECT @@ROWCOUNT;";
-            int rowCount = await conn.ExecuteScalarAsync<int>(sql, model, tran);
+            const string checkSql = @"
+                SELECT COUNT(*)
+                FROM Apps_Env
+                WHERE AppId = @AppId AND Environment = @Environment;";
 
-            if (rowCount == 0)
+            const string insertSql = @"
+                INSERT INTO Apps_Env (AppId, Environment, BaseURL, Additional, SecretKey, JwtHourLimit)
+                VALUES (@AppId, @Environment, @BaseURL, @Additional, @SecretKey, @JwtHourLimit);";
+
+            // Check if a record already exists
+            int count = await conn.ExecuteScalarAsync<int>(checkSql, model, tran);
+
+            if (count > 0)
             {
-                throw new Exception("Insert operation failed.");
+                throw new Exception("Duplicate record found.");
             }
+
+            // Insert the record
+            await conn.ExecuteAsync(insertSql, model, tran);
         }
 
-        public async Task<RequestCreateAppEnv> GetById(IDbConnection conn, IDbTransaction tran, int appId, int userId)
+        public async Task<IEnumerable<AppEnv>> GetByIdAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId)
         {
             // Check if the userId exists in Users_Apps
             var userExists = await conn.ExecuteScalarAsync<int>(
@@ -33,21 +43,23 @@ namespace NokPortal.Domians.Repositorys
             }
 
             const string sql = "SELECT * FROM Apps_Env WHERE AppId = @AppId";
-            RequestCreateAppEnv? appsEnvModel = await conn.QueryFirstOrDefaultAsync<RequestCreateAppEnv>(sql, new { AppID = appId }, tran);
-            if (appsEnvModel == null)
+            IEnumerable<AppEnv> appsEnvModels = await conn.QueryAsync<AppEnv>(sql, new { AppID = appId }, tran);
+
+            if (!appsEnvModels.Any())
             {
-                throw new Exception("Not found apps environment");
+                throw new Exception("No apps environment found.");
             }
-            return appsEnvModel;
+
+            return appsEnvModels;
         }
 
-        public async Task<IEnumerable<RequestCreateAppEnv>> GetAll(IDbConnection conn, IDbTransaction tran)
+        public async Task<IEnumerable<AppEnv>> GetAll(IDbConnection conn, IDbTransaction tran)
         {
             const string sql = "SELECT * FROM Apps_Env";
-            return await conn.QueryAsync<RequestCreateAppEnv>(sql, transaction: tran);
+            return await conn.QueryAsync<AppEnv>(sql, transaction: tran);
         }
 
-        public async Task Update(IDbConnection conn, IDbTransaction tran, RequestCreateAppEnv model)
+        public async Task Update(IDbConnection conn, IDbTransaction tran, AppEnv model)
         {
             const string sql = "UPDATE Apps_Env SET Environment = @Environment, BaseURL = @BaseURL, " +
                                "Additional = @Additional, SecretKey = @SecretKey, JwtHourLimit = @JwtHourLimit " +

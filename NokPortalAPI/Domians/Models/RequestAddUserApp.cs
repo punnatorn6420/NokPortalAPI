@@ -8,5 +8,9 @@ namespace NokPortalAPI.Domians.Models
         [JsonPropertyName("userId")]
         [Required]
         required public int UserId { get; set; }
+
+        [JsonPropertyName("roleId")]
+        [Required]
+        required public int RoleId { get; set; }
     }
 }

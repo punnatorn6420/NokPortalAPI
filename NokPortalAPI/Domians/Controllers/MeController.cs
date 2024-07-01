@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers;
+using NokCore.Api.JwtToken.Services;
 using NokCore.Identity.Models;
 using NokPortal.Domains.Services;
 using NokPortal.Domians.Models;
 using NokPortal.Domians.Services;
+using NokPortalAPI.Domians.Models;
 
 namespace NokPortal.Domians.Controllers
 {
@@ -13,11 +15,15 @@ namespace NokPortal.Domians.Controllers
     {
         private readonly IAuthService _authService;
         private readonly IManagePayloadService _managePayload;
+        private readonly IUserAppsService _userAppsService;
+        private readonly IUserService _userService;
 
-        public MeController(IAuthService authService, IManagePayloadService managePayload)
+        public MeController(IAuthService authService, IManagePayloadService managePayload, IUserAppsService userAppsService, IUserService userService)
         {
             _authService = authService;
             _managePayload = managePayload;
+            _userAppsService = userAppsService;
+            _userService = userService;
         }
 
         [HttpGet("")]
@@ -52,6 +58,35 @@ namespace NokPortal.Domians.Controllers
                 }
 
                 return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+            }
+        }
+
+        [HttpGet("info")]
+        public async Task<ActionResult<ApiResponse<object, string>>> MeApp()
+        {
+            if (!this.ModelState.IsValid)
+            {
+                return this.BadRequest(this.FormatInvalidFieldResponse(this.GetFieldErrors()));
+            }
+
+            try
+            {
+                int userId = _managePayload.GetUserIdFromJwtDecode(HttpContext);
+
+                IEnumerable<UserApps> user = await _userService.GetUserAppsAsync(userId);
+
+                return this.Ok(this.FormatSuccessResponse(user));
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message == "Response status code does not indicate success: 401 (Unauthorized).")
+                {
+                    return this.Unauthorized(this.FormatInternalErrorReponse("Token is either not in correct format or has expired", null));
+                }
+                else
+                {
+                    return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+                }
             }
         }
     }

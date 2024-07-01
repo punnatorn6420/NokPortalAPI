@@ -1,12 +1,15 @@
 ﻿using System.Data;
 using NokCore.Identity.Models;
 using NokPortal.Domians.Models;
+using NokPortalAPI.Domians.Models;
 
 namespace NokPortal.Domains.Repositories
 {
     public interface IUserRepository
     {
         Task<IEnumerable<User>> GetAllUsersAsync(IDbConnection conn, IDbTransaction tran);
+
+        Task<IEnumerable<UserApps>> GetUserAppsAsync(IDbConnection conn, IDbTransaction tran, int userId);
 
         Task<User> GetUserByIdAsync(IDbConnection conn, IDbTransaction tran, int id);
 
