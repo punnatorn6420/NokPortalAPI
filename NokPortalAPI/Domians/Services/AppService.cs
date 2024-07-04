@@ -123,8 +123,10 @@ namespace NokPortal.Domains.Services
         }
         */
 
+
         public async Task<IEnumerable<Role>> GetAppTargetAllRole(int appId, EnumEnvironmentType env)
         {
+            /*
             try
             {
                 using var connection = connectionFactory.CreateConnection();
@@ -152,12 +154,74 @@ namespace NokPortal.Domains.Services
                         string errorContent = await response.Content.ReadAsStringAsync();
                         Console.WriteLine($"Error: {errorContent}");
                     }
-                    return null;
                 }
                 catch (Exception)
                 {
                     throw;
                 }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            */
+
+            try
+            {
+                string json = @"
+                [
+                    {
+                        ""RoleId"": 1,
+                        ""RoleName"": ""Admin"",
+                        ""Permissions"": [
+                            {
+                                ""PermissionId"": 101,
+                                ""PermissionName"": ""CreateCreditNote""
+                            },
+                            {
+                                ""PermissionId"": 102,
+                                ""PermissionName"": ""CancelEtaxInvoice""
+                            }
+                        ],
+                        ""Active"": true,
+                        ""CreatedAt"": ""2024-06-26T12:00:00Z"",
+                        ""ModifiedAt"": ""2024-06-26T12:00:00Z""
+                    },
+                    {
+                        ""RoleId"": 2,
+                        ""RoleName"": ""User"",
+                        ""Permissions"": [
+                            {
+                                ""PermissionId"": 103,
+                                ""PermissionName"": ""ViewDashboard""
+                            },
+                            {
+                                ""PermissionId"": 104,
+                                ""PermissionName"": ""EditProfile""
+                            }
+                        ],
+                        ""Active"": true,
+                        ""CreatedAt"": ""2024-06-25T11:00:00Z"",
+                        ""ModifiedAt"": ""2024-06-25T11:00:00Z""
+                    },
+                    {
+                        ""RoleId"": 3,
+                        ""RoleName"": ""Guest"",
+                        ""Permissions"": [
+                            {
+                                ""PermissionId"": 105,
+                                ""PermissionName"": ""ViewPublicContent""
+                            }
+                        ],
+                        ""Active"": false,
+                        ""CreatedAt"": ""2024-06-24T10:00:00Z"",
+                        ""ModifiedAt"": ""2024-06-24T10:00:00Z""
+                    }
+                ]";
+
+                IEnumerable<Role> roles = JsonConvert.DeserializeObject<IEnumerable<Role>>(json);
+
+                return roles;
             }
             catch (Exception)
             {
