@@ -66,7 +66,7 @@ public class Program
         builder.Services.AddFluentValidationClientsideAdapters();
         builder.Services.AddValidatorsFromAssemblyContaining<RequestTokenValidation>();
         // builder.Services.AddValidatorsFromAssemblyContaining<RequestToken>();
-        builder.Services.AddValidatorsFromAssemblyContaining<RequestCreateApp>();
+        builder.Services.AddValidatorsFromAssemblyContaining<RequestApp>();
         builder.Services.AddValidatorsFromAssemblyContaining<RequestAppInfo>();
        // builder.Services.AddValidatorsFromAssemblyContaining<RequestCreateAppEnvValidator>();
         builder.Services.AddValidatorsFromAssemblyContaining<ModelUserApp>();

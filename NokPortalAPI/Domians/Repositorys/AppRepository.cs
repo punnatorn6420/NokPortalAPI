@@ -8,7 +8,7 @@ namespace NokPortal.Domains.Repositories
 {
     public class AppRepository : IAppRepository
     {
-        public async Task<bool> CreateAppAsync(IDbConnection conn, IDbTransaction tran, RequestCreateApp reqCreate)
+        public async Task<bool> CreateAppAsync(IDbConnection conn, IDbTransaction tran, RequestApp reqCreate)
         {
             try
             {
@@ -34,6 +34,26 @@ namespace NokPortal.Domains.Repositories
             {
                 throw;
             }
+        }
+
+        public async Task<bool> UpdateAppAsync(IDbConnection conn, IDbTransaction tran, RequestApp reqUpdate)
+        {
+            var checkSql = "SELECT COUNT(1) FROM Apps WHERE Name = @Name";
+            var appExists = await conn.ExecuteScalarAsync<int>(checkSql, new { reqUpdate.Name }, transaction: tran) > 0;
+
+            if (!appExists)
+            {
+                throw new KeyNotFoundException("App not found.");
+            }
+
+            var updateSql = @"
+                    UPDATE Apps
+                    SET Header = @Header, Subheader = @Subheader, Detail = @Detail, Image = @Image
+                    WHERE Name = @Name;";
+
+            await conn.ExecuteAsync(updateSql, reqUpdate, transaction: tran);
+
+            return true;
         }
 
         public async Task<IEnumerable<ModelApp>> GetAllAppAsync(IDbConnection conn, IDbTransaction tran)

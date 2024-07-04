@@ -13,17 +13,17 @@ namespace NokPortal.Domians.Controllers
     [Route("me")]
     public class MeController : NokController<ControllerBase>
     {
-        private readonly IAuthService _authService;
-        private readonly IManagePayloadService _managePayload;
-        private readonly IUserAppsService _userAppsService;
-        private readonly IUserService _userService;
+        private readonly IAuthService authService;
+        private readonly IManagePayloadService managePayload;
+        private readonly IUserAppsService userAppsService;
+        private readonly IUserService userService;
 
         public MeController(IAuthService authService, IManagePayloadService managePayload, IUserAppsService userAppsService, IUserService userService)
         {
-            _authService = authService;
-            _managePayload = managePayload;
-            _userAppsService = userAppsService;
-            _userService = userService;
+            this.authService = authService;
+            this.managePayload = managePayload;
+            this.userAppsService = userAppsService;
+            this.userService = userService;
         }
 
         [HttpGet("")]
@@ -36,11 +36,11 @@ namespace NokPortal.Domians.Controllers
 
             try
             {
-                int userId = _managePayload.GetUserIdFromJwtDecode(this.HttpContext);
+                int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
 
-                User appUser = await _authService.GetUsersByIdAsync(userId);
+                User appUser = await this.authService.GetUsersByIdAsync(userId);
 
-                return Ok(this.FormatSuccessResponse(appUser));
+                return this.Ok(this.FormatSuccessResponse(appUser));
             }
             catch (ArgumentNullException ex)
             {
@@ -71,9 +71,9 @@ namespace NokPortal.Domians.Controllers
 
             try
             {
-                int userId = _managePayload.GetUserIdFromJwtDecode(HttpContext);
+                int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
 
-                IEnumerable<UserApps> user = await _userService.GetUserAppsAsync(userId);
+                IEnumerable<UserApps> user = await this.userService.GetUserAppsAsync(userId);
 
                 return this.Ok(this.FormatSuccessResponse(user));
             }

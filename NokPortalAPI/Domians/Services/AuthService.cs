@@ -9,24 +9,24 @@ namespace NokPortal.Domians.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly IDbConnectionFactory _connectionFactory;
-        private readonly IConfiguration _configuration;
-        private readonly IUserRepository _userRepository;
+        private readonly IDbConnectionFactory connectionFactory;
+        private readonly IConfiguration configuration;
+        private readonly IUserRepository userRepository;
 
         public AuthService(IDbConnectionFactory connectionFactory, IConfiguration configuration, IUserRepository userRepository)
         {
-            _connectionFactory = connectionFactory;
-            _configuration = configuration;
-            _userRepository = userRepository;
+            this.connectionFactory = connectionFactory;
+            this.configuration = configuration;
+            this.userRepository = userRepository;
         }
 
         public async Task<User> GetUsersByIdAsync(int userID)
         {
-            using var connection = _connectionFactory.CreateConnection();
+            using var connection = connectionFactory.CreateConnection();
             connection.Open();
             using var tran = connection.BeginTransaction();
 
-            User user = await _userRepository.GetUserByIdAsync(connection, tran, userID);
+            User user = await userRepository.GetUserByIdAsync(connection, tran, userID);
             tran.Commit();
             return user;
         }

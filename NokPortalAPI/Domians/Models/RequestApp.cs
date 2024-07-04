@@ -2,7 +2,7 @@
 
 namespace NokPortal.Domians.Models
 {
-    public class RequestCreateApp
+    public class RequestApp
     {
         [Required]
         [MaxLength(255)]

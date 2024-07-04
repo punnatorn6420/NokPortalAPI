@@ -5,7 +5,9 @@ namespace NokPortal.Domians.Repositorys
 {
     public interface IAppRepository
     {
-        Task<bool> CreateAppAsync(IDbConnection conn, IDbTransaction tran, RequestCreateApp reqCreate);
+        Task<bool> CreateAppAsync(IDbConnection conn, IDbTransaction tran, RequestApp reqCreate);
+
+        Task<bool> UpdateAppAsync(IDbConnection conn, IDbTransaction tran, RequestApp reqUpdate);
 
         Task<IEnumerable<ModelApp>> GetAllAppAsync(IDbConnection conn, IDbTransaction tran);
 

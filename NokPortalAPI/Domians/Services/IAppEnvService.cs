@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using NokPortal.Domians.Models;
+using NokPortalAPI.Domians.Models;
 
 namespace NokPortal.Domians.Services
 {
@@ -7,6 +8,8 @@ namespace NokPortal.Domians.Services
     {
         Task<bool> CreateAppsEnv(AppEnv reqCreateAppEnv, int appId);
 
-        Task<IEnumerable<AppEnv>> GetById(int appId, int userId);
+        Task<bool> UpdateAppsEnv(AppEnv reqCreateAppEnv, int appId);
+
+        Task<AppEnv> GetById(int appId, int userId, EnumEnvironmentType env);
     }
 }
