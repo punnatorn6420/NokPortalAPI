@@ -1,8 +1,8 @@
 ﻿using NokCore.Api.JwtToken.Models;
 using NokCore.Identity.Models;
-using NokPortalAPI.Domians.Models;
+using NokPortalAPI.Domains.Models;
 
-namespace NokPortal.Domains.Services
+namespace NokPortalAPI.Domains.Services
 {
     public interface IUserService
     {

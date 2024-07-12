@@ -1,17 +1,15 @@
-﻿using NokPortal.Domains.Models;
-using NokPortal.Domians.Models;
-using NokPortalAPI.Domians.Models;
+﻿using NokPortalAPI.Domains.Models;
 
-namespace NokPortal.Domians.Services
+namespace NokPortalAPI.Domains.Services
 {
     public interface IUserAppsService
     {
-        Task<int> AddUserAppAsync(ModelUserApp userApp);
+        Task AddUserAppAsync(int appId, RequestAddUserApp addUser);
 
         Task<ModelUserApp> GetUserAppAsync(int appId, int userId);
 
         Task<bool> CheckRoleLevelAsync(EnumUserRole roleLevel, int appId, int userId);
 
-        Task<IEnumerable<ModelApp>> GetUserAllAppAsync(int userId);
+        Task<IEnumerable<App>> GetUserAllAppAsync(int userId);
     }
 }

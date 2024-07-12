@@ -1,11 +1,9 @@
 ﻿using System.Data;
 using Dapper;
 using NokCore.Identity.Models;
-using NokPortal.Domains.Models;
-using NokPortal.Domians.Models;
-using NokPortalAPI.Domians.Models;
+using NokPortalAPI.Domains.Models;
 
-namespace NokPortal.Domains.Repositories
+namespace NokPortalAPI.Domains.Repositorys
 {
     public class UserRepository : IUserRepository
     {
@@ -17,7 +15,7 @@ namespace NokPortal.Domains.Repositories
 
         public async Task<User> GetUserByIdAsync(IDbConnection conn, IDbTransaction tran, int id)
         {
-            string query = "SELECT * FROM Users WHERE UserId = @Id";
+            string query = "SELECT * FROM Users WHERE UserID = @Id";
             User? appUser = await conn.QuerySingleOrDefaultAsync<User>(query, new { Id = id }, tran);
             if (appUser == null)
             {
@@ -27,23 +25,23 @@ namespace NokPortal.Domains.Repositories
             return appUser;
         }
 
-        public async Task<IEnumerable<UserApps>> GetUserAppsAsync(IDbConnection conn, IDbTransaction tran, int userId)
+        public async Task<IEnumerable<UserApps>> GetUserAppsAsync(IDbConnection conn, IDbTransaction tran, int userID)
         {
             // Join query to retrieve user and their apps
             string query = @"
                 SELECT 
-                    u.UserId, u.Email, u.FirstName, u.LastName, u.JobTitle, u.Department, 
+                    u.UserID, u.Email, u.FirstName, u.LastName, u.JobTitle, u.Department, 
                     u.ObjectId, u.CreatedAt, u.ModifiedAt, u.Active,
                     a.AppId, a.Name, a.Header, a.Subheader, a.Detail, a.Image
                 FROM Users u
-                INNER JOIN Users_Apps ua ON u.UserId = ua.UserId
+                INNER JOIN Assigned_Users ua ON u.UserID = ua.UserID
                 INNER JOIN Apps a ON ua.AppId = a.AppId
-                WHERE u.UserId = @UserId";
+                WHERE u.UserID = @UserID";
 
             // Dictionary to hold the results and group by user
             var userAppDictionary = new Dictionary<int, UserApps>();
 
-            var result = await conn.QueryAsync<User, ModelApp, UserApps>(
+            var result = await conn.QueryAsync<User, App, UserApps>(
                 query,
                 (user, app) =>
                 {
@@ -52,15 +50,15 @@ namespace NokPortal.Domains.Repositories
                         userApps = new UserApps
                         {
                             User = user,
-                            App = new List<ModelApp>() // Initialize as List<ModelApp>
+                            App = new List<App>() // Initialize as List<ModelApp>
                         };
                         userAppDictionary.Add(user.UserId, userApps);
                     }
 
-                    ((List<ModelApp>)userApps.App).Add(app); // Cast to List<ModelApp> to use Add method
+                    ((List<App>)userApps.App).Add(app); // Cast to List<ModelApp> to use Add method
                     return userApps;
                 },
-                new { UserId = userId },
+                new { UserID = userID },
                 splitOn: "AppId",
                 transaction: tran
             );
@@ -108,14 +106,14 @@ namespace NokPortal.Domains.Repositories
                 UPDATE Users
                 SET Email = @Email, FirstName = @FirstName, LastName = @LastName, JobTitle = @JobTitle,
                     Department = @Department, ModifiedAt = @ModifiedAt, Active = @Active
-                WHERE UserId = @UserId;";
+                WHERE UserID = @UserID;";
             int rowsAffected = await conn.ExecuteAsync(query, user, tran);
             return rowsAffected > 0;
         }
 
         public async Task<bool> DeleteUserAsync(IDbConnection conn, IDbTransaction tran, int id)
         {
-            string query = "DELETE FROM Users WHERE UserId = @Id";
+            string query = "DELETE FROM Users WHERE UserID = @Id";
             int rowsAffected = await conn.ExecuteAsync(query, id, tran);
             return rowsAffected > 0;
         }

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace NokPortalAPI.Domians.Models
+namespace NokPortalAPI.Domains.Models
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum EnumEnvironmentType

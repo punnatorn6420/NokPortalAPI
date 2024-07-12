@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace NokPortal.Domians.Models
+namespace NokPortalAPI.Domains.Models
 {
     public class RequestAppInfo
     {

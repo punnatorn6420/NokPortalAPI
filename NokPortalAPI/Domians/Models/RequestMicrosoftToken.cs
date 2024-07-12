@@ -1,4 +1,4 @@
-﻿namespace NokPortal.Domians.Models
+﻿namespace NokPortalAPI.Domains.Models
 {
     public class RequestMicrosoftToken
     {

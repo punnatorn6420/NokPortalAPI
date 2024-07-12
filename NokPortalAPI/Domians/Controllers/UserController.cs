@@ -1,29 +1,24 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers;
-using NokCore.Api.JwtToken.Services;
-using NokPortalAPI.Domains.Services;
-using NokPortalAPI.Domains.Services;
+using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
+using NokPortalAPI.Domains.Services;
 
 namespace NokPortalAPI.Domains.Controllers
 {
     [ApiController]
-    [Route("me")]
-    public class MeController : NokController<ControllerBase>
+    [Route("user")]
+    public class UserController : NokController<ControllerBase>
     {
-        private readonly IManagePayloadService managePayload;
-        private readonly IUserAppsService userAppsService;
         private readonly IUserService userService;
 
-        public MeController(IManagePayloadService managePayload, IUserAppsService userAppsService, IUserService userService)
+        public UserController(IUserService userService)
         {
-            this.managePayload = managePayload;
-            this.userAppsService = userAppsService;
             this.userService = userService;
         }
 
-        [HttpGet("")]
-        public async Task<ActionResult<ApiResponse<object, string>>> GetMeInfo()
+        [HttpGet("all")]
+        public async Task<ActionResult<ApiResponse<object, string>>> UserAll()
         {
             if (!this.ModelState.IsValid)
             {
@@ -32,10 +27,27 @@ namespace NokPortalAPI.Domains.Controllers
 
             try
             {
-                int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
+                IEnumerable<User> user = await userService.GetAllUsersAsync();
 
-                IEnumerable<UserApps> user = await this.userService.GetUserAppsAsync(userId);
+                return this.Ok(this.FormatSuccessResponse(user));
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+            }
+        }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ApiResponse<object, string>>> UserId(int id)
+        {
+            if (!this.ModelState.IsValid)
+            {
+                return this.BadRequest(this.FormatInvalidFieldResponse(this.GetFieldErrors()));
+            }
+
+            try
+            {
+                IEnumerable<UserApps> user = await userService.GetUserAppsAsync(id);
                 return this.Ok(this.FormatSuccessResponse(user));
             }
             catch (Exception ex)

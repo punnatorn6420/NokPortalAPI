@@ -1,15 +1,14 @@
-﻿namespace NokPortal.Domains.Services
-{
-    using System.Data;
-    using System.Text.Json;
-    using NokCore.Api.JwtToken.Models;
-    using NokCore.Api.JwtToken.Services;
-    using NokCore.Identity.Models;
-    using NokPortal.Domains.Repositories;
-    using NokPortal.Domians.Models;
-    using NokPortal.Shared.DB;
-    using NokPortalAPI.Domians.Models;
+﻿using System.Data;
+using System.Text.Json;
+using NokCore.Api.JwtToken.Models;
+using NokCore.Api.JwtToken.Services;
+using NokCore.Identity.Models;
+using NokPortalAPI.Domains.Models;
+using NokPortalAPI.Domains.Repositorys;
+using NokPortalAPI.Shared.DB;
 
+namespace NokPortalAPI.Domains.Services
+{
     public class UserService : IUserService
     {
         private readonly IConfiguration configuration;
@@ -214,7 +213,8 @@
 
                 var jwtData = new JwtData
                 {
-                    UserId = user.UserId
+                    UserId = user.UserId,
+                    RoleId = (int)EnumUserRole.Root
                 };
 
                 return jwtService.GenerateToken(jwtData);

@@ -1,4 +1,4 @@
-namespace NokPortal
+namespace NokPortalAPI
 {
     public class WeatherForecast
     {

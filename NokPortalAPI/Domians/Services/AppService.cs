@@ -2,13 +2,13 @@
 using NokCore.Api.JwtToken.Models;
 using NokCore.Api.JwtToken.Services;
 using NokCore.Identity.Models;
-using NokPortal.Domians.Models;
-using NokPortal.Domians.Repositorys;
-using NokPortal.Domians.Services;
-using NokPortal.Shared.DB;
-using NokPortalAPI.Domians.Models;
+using NokPortalAPI.Domains.Models;
+using NokPortalAPI.Domains.Repositorys;
+using NokPortalAPI.Domains.Services;
+using NokPortalAPI.Shared.DB;
+using NokPortalAPI.Domains.Models;
 
-namespace NokPortal.Domains.Services
+namespace NokPortalAPI.Domains.Services
 {
     public class AppService : IAppService
     {
@@ -62,7 +62,7 @@ namespace NokPortal.Domains.Services
             return false;
         }
 
-        public async Task<IEnumerable<ModelApp>> GetAllAppAsync()
+        public async Task<IEnumerable<App>> GetAllAppAsync()
         {
             using var connection = connectionFactory.CreateConnection();
             connection.Open();
@@ -75,12 +75,11 @@ namespace NokPortal.Domains.Services
             }
             catch (Exception)
             {
-                tran.Rollback();
                 throw;
             }
         }
 
-        public async Task<ModelApp> GetAppByIdAsync(int appId)
+        public async Task<App> GetAppByIdAsync(int appId)
         {
             using var connection = connectionFactory.CreateConnection();
             connection.Open();
@@ -93,7 +92,6 @@ namespace NokPortal.Domains.Services
             }
             catch (Exception)
             {
-                tran.Rollback();
                 throw;
             }
         }
@@ -117,7 +115,6 @@ namespace NokPortal.Domains.Services
             }
             catch (Exception)
             {
-                tran.Rollback();
                 throw;
             }
         }

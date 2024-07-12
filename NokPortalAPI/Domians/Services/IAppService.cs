@@ -1,8 +1,8 @@
 ﻿using NokCore.Identity.Models;
-using NokPortal.Domians.Models;
-using NokPortalAPI.Domians.Models;
+using NokPortalAPI.Domains.Models;
+using NokPortalAPI.Domains.Models;
 
-namespace NokPortal.Domians.Services
+namespace NokPortalAPI.Domains.Services
 {
     public interface IAppService
     {
@@ -10,9 +10,9 @@ namespace NokPortal.Domians.Services
 
         Task<bool> UpdateAppAsync(RequestApp reqUpdate);
 
-        Task<IEnumerable<ModelApp>> GetAllAppAsync();
+        Task<IEnumerable<App>> GetAllAppAsync();
 
-        Task<ModelApp> GetAppByIdAsync(int appId);
+        Task<App> GetAppByIdAsync(int appId);
 
         // Task<ResponseJwt> AssignUserTargetAppAsync(int appId, int userId);
         Task<IEnumerable<Role>> GetAppTargetAllRole(int appId, EnumEnvironmentType env);

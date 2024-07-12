@@ -1,8 +1,8 @@
 ﻿using System.Data;
-using NokPortal.Domians.Models;
-using NokPortalAPI.Domians.Models;
+using NokPortalAPI.Domains.Models;
+using NokPortalAPI.Domains.Models;
 
-namespace NokPortal.Domians.Services
+namespace NokPortalAPI.Domains.Services
 {
     public interface IAppEnvService
     {
@@ -10,6 +10,6 @@ namespace NokPortal.Domians.Services
 
         Task<bool> UpdateAppsEnv(AppEnv reqCreateAppEnv, int appId);
 
-        Task<AppEnv> GetById(int appId, int userId, EnumEnvironmentType env);
+        Task<AppEnvResponse> GetById(int appId, int userId, EnumEnvironmentType env);
     }
 }

@@ -4,15 +4,16 @@ using System.Text.Json.Serialization;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using NokCore.Api.JwtToken.Services;
-using NokPortal.Domains.Middlewares;
-using NokPortal.Domains.Models;
-using NokPortal.Domains.Repositories;
-using NokPortal.Domains.Services;
-using NokPortal.Domians.Models;
-using NokPortal.Domians.Repositorys;
-using NokPortal.Domians.Services;
-using NokPortal.Domians.Validation;
-using NokPortal.Shared.DB;
+using NokPortalAPI.Domains.Middlewares;
+using NokPortalAPI.Domains.Models;
+using NokPortalAPI.Domains.Repositorys;
+using NokPortalAPI.Domains.Services;
+using NokPortalAPI.Domains.Models;
+using NokPortalAPI.Domains.Repositorys;
+using NokPortalAPI.Domains.Services;
+using NokPortalAPI.Domains.Validation;
+using NokPortalAPI.Shared.DB;
+using NokPortalAPI.Shareds;
 
 public class Program
 {
@@ -30,19 +31,19 @@ public class Program
         // Repository
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<IAppRepository, AppRepository>();
-        builder.Services.AddScoped<IUserAppRepository, UserAppRepository>();
+        builder.Services.AddScoped<IAssignedUsersRepositorys, AssignedUsersRepositorys>();
         builder.Services.AddScoped<IAppEnvRepository, AppEnvRepository>();
 
         // Service
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IAppService, AppService>();
-        builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IManagePayloadService, ManagePayloadService>();
         builder.Services.AddScoped<IAppEnvService, AppEnvService>();
-        builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IUserAppsService, UserAppsService>();
 
         builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+        builder.Services.AddSingleton<ReloadFileConfig>();
+        builder.Services.AddSingleton<CorsPolicyReloader>();
 
         string secretKey = "secret123456789abcdefghigklmnopqrst";
         int hourExpire = 24;
@@ -65,10 +66,12 @@ public class Program
         builder.Services.AddFluentValidationAutoValidation();
         builder.Services.AddFluentValidationClientsideAdapters();
         builder.Services.AddValidatorsFromAssemblyContaining<RequestTokenValidation>();
+
         // builder.Services.AddValidatorsFromAssemblyContaining<RequestToken>();
         builder.Services.AddValidatorsFromAssemblyContaining<RequestApp>();
         builder.Services.AddValidatorsFromAssemblyContaining<RequestAppInfo>();
-       // builder.Services.AddValidatorsFromAssemblyContaining<RequestCreateAppEnvValidator>();
+
+        // builder.Services.AddValidatorsFromAssemblyContaining<RequestCreateAppEnvValidator>();
         builder.Services.AddValidatorsFromAssemblyContaining<ModelUserApp>();
         builder.Services.AddControllers()
             .AddJsonOptions(options =>
@@ -95,8 +98,8 @@ public class Program
 
         app.UseMiddleware<JWTmiddleware>();
 
-        // app.UseAuthentication();
-        // app.UseAuthorization();
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.MapControllers();
 
         app.Run();

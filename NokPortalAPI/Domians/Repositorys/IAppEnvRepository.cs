@@ -1,8 +1,8 @@
 ﻿using System.Data;
-using NokPortal.Domians.Models;
-using NokPortalAPI.Domians.Models;
+using NokPortalAPI.Domains.Models;
+using NokPortalAPI.Domains.Models;
 
-namespace NokPortal.Domians.Repositorys
+namespace NokPortalAPI.Domains.Repositorys
 {
     public interface IAppEnvRepository
     {

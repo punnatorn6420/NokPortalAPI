@@ -1,10 +1,10 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
 using Dapper;
-using NokPortal.Domians.Models;
-using NokPortal.Domians.Repositorys;
+using NokPortalAPI.Domains.Models;
+using NokPortalAPI.Domains.Repositorys;
 
-namespace NokPortal.Domains.Repositories
+namespace NokPortalAPI.Domains.Repositorys
 {
     public class AppRepository : IAppRepository
     {
@@ -56,16 +56,16 @@ namespace NokPortal.Domains.Repositories
             return true;
         }
 
-        public async Task<IEnumerable<ModelApp>> GetAllAppAsync(IDbConnection conn, IDbTransaction tran)
+        public async Task<IEnumerable<App>> GetAllAppAsync(IDbConnection conn, IDbTransaction tran)
         {
             var sql = "SELECT * FROM Apps";
-            return await conn.QueryAsync<ModelApp>(sql, transaction: tran);
+            return await conn.QueryAsync<App>(sql, transaction: tran);
         }
 
-        public async Task<ModelApp> GetAppByIdAsync(IDbConnection conn, IDbTransaction tran, int id)
+        public async Task<App> GetAppByIdAsync(IDbConnection conn, IDbTransaction tran, int id)
         {
             var sql = "SELECT * FROM Apps WHERE AppId = @AppId";
-            ModelApp? app = await conn.QueryFirstOrDefaultAsync<ModelApp>(sql, new { AppID = id }, transaction: tran);
+            App? app = await conn.QueryFirstOrDefaultAsync<App>(sql, new { AppID = id }, transaction: tran);
             if (app == null)
             {
                 throw new Exception("Not found app");

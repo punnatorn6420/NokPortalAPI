@@ -1,15 +1,16 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers;
 using NokCore.Api.JwtToken.Services;
 using NokCore.Identity.Models;
-using NokPortal.Domains.Models;
-using NokPortal.Domians.Models;
-using NokPortal.Domians.Services;
-using NokPortalAPI.Domians.Models;
+using NokPortalAPI.Domains.Models;
+using NokPortalAPI.Domains.Models;
+using NokPortalAPI.Domains.Services;
+using NokPortalAPI.Domains.Models;
 
-namespace NokPortal.Domians.Controllers
+namespace NokPortalAPI.Domains.Controllers
 {
     [ApiController]
     [Route("app")]
@@ -95,7 +96,7 @@ namespace NokPortal.Domians.Controllers
         {
             try
             {
-                IEnumerable<ModelApp> app = await appService.GetAllAppAsync();
+                IEnumerable<App> app = await appService.GetAllAppAsync();
                 return this.Ok(this.FormatSuccessResponse(app));
             }
             catch (Exception ex)
@@ -104,21 +105,7 @@ namespace NokPortal.Domians.Controllers
             }
         }
 
-        [HttpGet("{id}/jwt")]
-        public async Task<ActionResult> GetJWTapplication()
-        {
-            try
-            {
-                IEnumerable<ModelApp> app = await appService.GetAllAppAsync();
-                return this.Ok(this.FormatSuccessResponse(app));
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
-            }
-        }
-
-        [HttpPost("{id}/create-env")]
+        [HttpPost("{id}/env")]
         public async Task<ActionResult<ApiResponse<object, string>>> CreateAppEnvironment(int id, AppEnv reqAppEnv)
         {
             if (!ModelState.IsValid)
@@ -148,7 +135,7 @@ namespace NokPortal.Domians.Controllers
             }
         }
 
-        [HttpPut("{id}/update-env")]
+        [HttpPut("{id}/env")]
         public async Task<ActionResult<ApiResponse<object, string>>> UpdateAppEnvironment(int id, AppEnv reqAppEnv)
         {
             if (!ModelState.IsValid)
@@ -181,7 +168,7 @@ namespace NokPortal.Domians.Controllers
 
             try
             {
-                ModelApp app = await this.appService.GetAppByIdAsync(id);
+                App app = await this.appService.GetAppByIdAsync(id);
                 return this.Ok(this.FormatSuccessResponse(app));
             }
             catch (Exception ex)
@@ -198,17 +185,13 @@ namespace NokPortal.Domians.Controllers
                 return this.BadRequest(this.FormatInvalidFieldResponse(this.GetFieldErrors()));
             }
 
-            int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
+            // int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
 
             // ResponseJwt jwtTokenTargetApp = await _appService.AssignUserTargetAppAsync(id, userId); // mock up
             try
             {
-                await this.usersAppService.AddUserAppAsync(new ModelUserApp
-                {
-                    AppId = id,
-                    RoleId = EnumUserRole.User,
-                    UserId = reqUserId.UserId,
-                });
+                await this.usersAppService.AddUserAppAsync(id, reqUserId);
+
                 return this.Ok(this.FormatSuccessResponse("Success"));
             }
             catch (ArgumentNullException ex)
@@ -258,7 +241,7 @@ namespace NokPortal.Domians.Controllers
 
             try
             {
-                AppEnv appEnv = await appsEnvService.GetById(id, userId, env);
+                AppEnvResponse appEnv = await appsEnvService.GetById(id, userId, env);
                 return this.Ok(this.FormatSuccessResponse(appEnv));
             }
             catch (DataException ex)

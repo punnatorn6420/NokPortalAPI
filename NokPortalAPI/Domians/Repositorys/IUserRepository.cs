@@ -1,9 +1,8 @@
 ﻿using System.Data;
 using NokCore.Identity.Models;
-using NokPortal.Domians.Models;
-using NokPortalAPI.Domians.Models;
+using NokPortalAPI.Domains.Models;
 
-namespace NokPortal.Domains.Repositories
+namespace NokPortalAPI.Domains.Repositorys
 {
     public interface IUserRepository
     {
