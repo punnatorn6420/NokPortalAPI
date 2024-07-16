@@ -1,15 +1,16 @@
 ﻿using System.Data;
 using NokCore.Identity.Models;
-using NokPortal.Domians.Models;
-using NokPortalAPI.Domians.Models;
+using NokPortalAPI.Domains.Models;
 
-namespace NokPortal.Domains.Repositories
+namespace NokPortalAPI.Domains.Repositorys
 {
     public interface IUserRepository
     {
         Task<IEnumerable<User>> GetAllUsersAsync(IDbConnection conn, IDbTransaction tran);
 
         Task<IEnumerable<UserApps>> GetUserAppsAsync(IDbConnection conn, IDbTransaction tran, int userId);
+
+        Task<UserAppWithEnvRoles> GetUserAppsWithEnvRolesAsync(IDbConnection conn, IDbTransaction tran, int userId);
 
         Task<User> GetUserByIdAsync(IDbConnection conn, IDbTransaction tran, int id);
 

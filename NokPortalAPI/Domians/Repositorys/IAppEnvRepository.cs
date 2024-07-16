@@ -1,18 +1,20 @@
 ﻿using System.Data;
-using NokPortal.Domians.Models;
+using NokPortalAPI.Domains.Models;
 
-namespace NokPortal.Domians.Repositorys
+namespace NokPortalAPI.Domains.Repositorys
 {
     public interface IAppEnvRepository
     {
-        Task Create(IDbConnection conn, IDbTransaction tran, AppEnv model);
+        Task CreateAsync(IDbConnection conn, IDbTransaction tran, AppEnv model);
 
-        Task<IEnumerable<AppEnv>> GetByIdAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId);
+        Task<AppEnv> GetByIdAdminAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId, EnumEnvironmentType env);
 
-        Task<IEnumerable<AppEnv>> GetAll(IDbConnection conn, IDbTransaction tran);
+        Task<AppEnv> GetByIdAsync(IDbConnection conn, IDbTransaction tran, int appId, EnumEnvironmentType env);
 
-        Task Update(IDbConnection conn, IDbTransaction tran, AppEnv model);
+        Task<IEnumerable<AppEnv>> GetAllAsync(IDbConnection conn, IDbTransaction tran);
 
-        Task Delete(IDbConnection conn, IDbTransaction tran, int appId);
+        Task UpdateAsync(IDbConnection conn, IDbTransaction tran, AppEnv model);
+
+        Task DeleteAsync(IDbConnection conn, IDbTransaction tran, int appId);
     }
 }

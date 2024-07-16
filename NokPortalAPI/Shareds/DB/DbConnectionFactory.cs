@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
 
-namespace NokPortal.Shared.DB
+namespace NokPortalAPI.Shared.DB
 {
     public interface IDbConnectionFactory
     {

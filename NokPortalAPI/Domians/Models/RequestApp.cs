@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace NokPortal.Domians.Models
+namespace NokPortalAPI.Domains.Models
 {
-    public class RequestCreateApp
+    public class RequestApp
     {
         [Required]
         [MaxLength(255)]

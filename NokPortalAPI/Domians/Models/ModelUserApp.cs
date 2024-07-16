@@ -1,11 +1,9 @@
 ﻿using System.Text.Json.Serialization;
-using NokPortalAPI.Domians.Models;
 
-namespace NokPortal.Domains.Models
+namespace NokPortalAPI.Domains.Models
 {
     public class ModelUserApp
     {
-
         [JsonPropertyName("appId")]
         public int AppId { get; set; }
 

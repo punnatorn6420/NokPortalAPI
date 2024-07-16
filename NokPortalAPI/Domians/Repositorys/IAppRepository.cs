@@ -1,15 +1,17 @@
 ﻿using System.Data;
-using NokPortal.Domians.Models;
+using NokPortalAPI.Domains.Models;
 
-namespace NokPortal.Domians.Repositorys
+namespace NokPortalAPI.Domains.Repositorys
 {
     public interface IAppRepository
     {
-        Task<bool> CreateAppAsync(IDbConnection conn, IDbTransaction tran, RequestCreateApp reqCreate);
+        Task<bool> CreateAppAsync(IDbConnection conn, IDbTransaction tran, RequestApp reqCreate);
 
-        Task<IEnumerable<ModelApp>> GetAllAppAsync(IDbConnection conn, IDbTransaction tran);
+        Task<bool> UpdateAppAsync(IDbConnection conn, IDbTransaction tran, RequestApp reqUpdate);
 
-        Task<ModelApp> GetAppByIdAsync(IDbConnection conn, IDbTransaction tran, int id);
+        Task<IEnumerable<App>> GetAllAppAsync(IDbConnection conn, IDbTransaction tran);
+
+        Task<App> GetAppByIdAsync(IDbConnection conn, IDbTransaction tran, int id);
 
         Task<bool> UpdateAppAsync(IDbConnection conn, IDbTransaction tran, int id, string name);
 

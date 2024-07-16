@@ -1,7 +1,7 @@
-﻿namespace NokPortal.Domians.Validation
+﻿namespace NokPortalAPI.Domains.Validation
 {
     using FluentValidation;
-    using NokPortal.Domians.Models;
+    using NokPortalAPI.Domains.Models;
 
     public class RequestTokenValidation : AbstractValidator<RequestMicrosoftToken>
     {

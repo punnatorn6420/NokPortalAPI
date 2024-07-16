@@ -1,11 +1,9 @@
 ﻿using System.Data;
 using Dapper;
 using NokCore.Identity.Models;
-using NokPortal.Domains.Models;
-using NokPortal.Domians.Models;
-using NokPortalAPI.Domians.Models;
+using NokPortalAPI.Domains.Models;
 
-namespace NokPortal.Domains.Repositories
+namespace NokPortalAPI.Domains.Repositorys
 {
     public class UserRepository : IUserRepository
     {
@@ -17,7 +15,7 @@ namespace NokPortal.Domains.Repositories
 
         public async Task<User> GetUserByIdAsync(IDbConnection conn, IDbTransaction tran, int id)
         {
-            string query = "SELECT * FROM Users WHERE UserId = @Id";
+            string query = "SELECT * FROM Users WHERE UserID = @Id";
             User? appUser = await conn.QuerySingleOrDefaultAsync<User>(query, new { Id = id }, tran);
             if (appUser == null)
             {
@@ -32,18 +30,18 @@ namespace NokPortal.Domains.Repositories
             // Join query to retrieve user and their apps
             string query = @"
                 SELECT 
-                    u.UserId, u.Email, u.FirstName, u.LastName, u.JobTitle, u.Department, 
+                    u.UserID, u.Email, u.FirstName, u.LastName, u.JobTitle, u.Department, 
                     u.ObjectId, u.CreatedAt, u.ModifiedAt, u.Active,
                     a.AppId, a.Name, a.Header, a.Subheader, a.Detail, a.Image
                 FROM Users u
-                INNER JOIN Users_Apps ua ON u.UserId = ua.UserId
+                INNER JOIN Assigned_Users ua ON u.UserID = ua.UserID
                 INNER JOIN Apps a ON ua.AppId = a.AppId
-                WHERE u.UserId = @UserId";
+                WHERE u.UserID = @UserID";
 
             // Dictionary to hold the results and group by user
             var userAppDictionary = new Dictionary<int, UserApps>();
 
-            var result = await conn.QueryAsync<User, ModelApp, UserApps>(
+            var result = await conn.QueryAsync<User, App, UserApps>(
                 query,
                 (user, app) =>
                 {
@@ -52,20 +50,18 @@ namespace NokPortal.Domains.Repositories
                         userApps = new UserApps
                         {
                             User = user,
-                            App = new List<ModelApp>() // Initialize as List<ModelApp>
+                            App = new List<App>()
                         };
                         userAppDictionary.Add(user.UserId, userApps);
                     }
 
-                    ((List<ModelApp>)userApps.App).Add(app); // Cast to List<ModelApp> to use Add method
+                    ((List<App>)userApps.App).Add(app);
                     return userApps;
                 },
-                new { UserId = userId },
+                new { UserID = userId },
                 splitOn: "AppId",
-                transaction: tran
-            );
+                transaction: tran);
 
-            // Convert List<ModelApp> to IEnumerable<ModelApp> before returning
             foreach (var userApps in userAppDictionary.Values)
             {
                 userApps.App = userApps.App.ToList();
@@ -73,6 +69,101 @@ namespace NokPortal.Domains.Repositories
 
             return userAppDictionary.Values;
         }
+
+        public async Task<UserAppWithEnvRoles> GetUserAppsWithEnvRolesAsync(IDbConnection conn, IDbTransaction tran, int userId)
+        {
+            var userQuery = @"
+        SELECT
+            UserId,
+            ObjectId,
+            FirstName,
+            LastName,
+            Email,
+            JobTitle,
+            Department,
+            Active,
+            CreatedAt,
+            ModifiedAt
+        FROM Users
+        WHERE UserId = @UserId;";
+
+            var appsQuery = @"
+        SELECT
+            a.AppID,
+            a.Name AS AppName,
+            ae.Environment,
+            ae.BaseURL,
+            ae.Additional,
+            ae.SecretKey,
+            ae.JwtHourLimit
+        FROM
+            Assigned_Users au
+            JOIN Apps a ON au.AppID = a.AppID
+            JOIN Apps_Env ae ON a.AppID = ae.AppID AND au.Environment = ae.Environment
+        WHERE
+            au.UserID = @UserId;";
+
+            var rolesQuery = @"
+        SELECT
+            au.AppID,
+            au.Environment,
+            ar.RoleID
+        FROM
+            Assigned_Users au
+            LEFT JOIN Apps_Roles ar ON au.AssignedUserID = ar.AssignedUserID
+        WHERE
+            au.UserID = @UserId;";
+
+            var commandText = $"{userQuery};{appsQuery};{rolesQuery}";
+
+            using (var multi = await conn.QueryMultipleAsync(new CommandDefinition(
+                commandText: commandText,
+                parameters: new { UserId = userId },
+                transaction: tran)))
+            {
+                // Map User
+                var user = await multi.ReadSingleOrDefaultAsync<User>();
+
+                // Map Applications and Environment Details
+                var appEnvDetails = (await multi.ReadAsync<dynamic>()).ToList(); // Convert to List<dynamic>
+
+                // Map Roles
+                var roles = (await multi.ReadAsync<dynamic>()).ToList(); // Convert to List<dynamic>
+
+                // Process applications and roles
+                var appWithEnvRolesDict = new Dictionary<int, AppWithEnvRoles>();
+
+                foreach (var appEnv in appEnvDetails)
+                {
+                    var appId = (int)appEnv.AppID;
+                    if (!appWithEnvRolesDict.TryGetValue(appId, out var appWithEnvRoles))
+                    {
+                        appWithEnvRoles = new AppWithEnvRoles
+                        {
+                            AppId = appId,
+                            Name = appEnv.AppName,
+                            EnvironmentRoles = new List<EnvRoles>() // Initialize as List
+                        };
+                        appWithEnvRolesDict.Add(appId, appWithEnvRoles);
+                    }
+
+                    var envRole = new EnvRoles
+                    {
+                        Environment = (EnumEnvironmentType)Enum.Parse(typeof(EnumEnvironmentType), (string)appEnv.Environment),
+                        Roles = roles.Where(r => r.AppID == appId && r.Environment == appEnv.Environment).Select(r => (int)r.RoleID).ToList()
+                    };
+
+                    ((List<EnvRoles>)appWithEnvRoles.EnvironmentRoles).Add(envRole);
+                }
+
+                return new UserAppWithEnvRoles
+                {
+                    User = user ?? throw new DataException("user null value"),
+                    AppWithEnvRoles = appWithEnvRolesDict.Values
+                };
+            }
+        }
+
 
         public async Task<int> CreateUserAsync(IDbConnection conn, IDbTransaction tran, User user)
         {
@@ -108,14 +199,14 @@ namespace NokPortal.Domains.Repositories
                 UPDATE Users
                 SET Email = @Email, FirstName = @FirstName, LastName = @LastName, JobTitle = @JobTitle,
                     Department = @Department, ModifiedAt = @ModifiedAt, Active = @Active
-                WHERE UserId = @UserId;";
+                WHERE UserID = @UserID;";
             int rowsAffected = await conn.ExecuteAsync(query, user, tran);
             return rowsAffected > 0;
         }
 
         public async Task<bool> DeleteUserAsync(IDbConnection conn, IDbTransaction tran, int id)
         {
-            string query = "DELETE FROM Users WHERE UserId = @Id";
+            string query = "DELETE FROM Users WHERE UserID = @Id";
             int rowsAffected = await conn.ExecuteAsync(query, id, tran);
             return rowsAffected > 0;
         }

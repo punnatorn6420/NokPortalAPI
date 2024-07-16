@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using NokCore.Api.JwtToken.Models;
-using NokPortalAPI.Domians.Models;
+using NokPortalAPI.Domains.Models;
 
-namespace NokPortal.Domians.Models
+namespace NokPortalAPI.Domains.Models
 {
     public class ResponseAppsEnv
     {

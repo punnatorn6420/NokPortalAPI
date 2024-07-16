@@ -1,39 +1,38 @@
-﻿namespace NokPortal.Domains.Services
-{
-    using System.Data;
-    using System.Text.Json;
-    using NokCore.Api.JwtToken.Models;
-    using NokCore.Api.JwtToken.Services;
-    using NokCore.Identity.Models;
-    using NokPortal.Domains.Repositories;
-    using NokPortal.Domians.Models;
-    using NokPortal.Shared.DB;
-    using NokPortalAPI.Domians.Models;
+﻿using System.Data;
+using System.Text.Json;
+using NokCore.Api.JwtToken.Models;
+using NokCore.Api.JwtToken.Services;
+using NokCore.Identity.Models;
+using NokPortalAPI.Domains.Models;
+using NokPortalAPI.Domains.Repositorys;
+using NokPortalAPI.Shared.DB;
 
+namespace NokPortalAPI.Domains.Services
+{
     public class UserService : IUserService
     {
-        private readonly IConfiguration _configuration;
-        private readonly IUserRepository _userRepository;
-        private readonly IDbConnection _connectionFactory;
-        private readonly HttpClient _httpClient;
-        private readonly IJwtService _jwtService;
+        private readonly IConfiguration configuration;
+        private readonly IUserRepository userRepository;
+        private readonly IDbConnection connectionFactory;
+        private readonly HttpClient httpClient;
+        private readonly IJwtService jwtService;
 
         public UserService(IConfiguration configuration, IDbConnectionFactory connectionFactory, IUserRepository userRepository, HttpClient httpClient, IJwtService jwtService)
         {
-            _userRepository = userRepository;
-            _configuration = configuration;
-            _connectionFactory = connectionFactory.CreateConnection();
-            _httpClient = httpClient;
-            _jwtService = jwtService;
+            this.userRepository = userRepository;
+            this.configuration = configuration;
+            this.connectionFactory = connectionFactory.CreateConnection();
+            this.httpClient = httpClient;
+            this.jwtService = jwtService;
         }
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            _connectionFactory.Open();
-            using var tran = _connectionFactory.BeginTransaction();
+            connectionFactory.Open();
+            using var tran = connectionFactory.BeginTransaction();
             try
             {
-                IEnumerable<User> listUser = await _userRepository.GetAllUsersAsync(_connectionFactory, tran);
+                IEnumerable<User> listUser = await userRepository.GetAllUsersAsync(connectionFactory, tran);
                 tran.Commit();
                 return listUser;
             }
@@ -45,11 +44,27 @@
 
         public async Task<IEnumerable<UserApps>> GetUserAppsAsync(int userId)
         {
-            _connectionFactory.Open();
-            using var tran = _connectionFactory.BeginTransaction();
+            connectionFactory.Open();
+            using var tran = connectionFactory.BeginTransaction();
             try
             {
-                IEnumerable<UserApps> userApps = await _userRepository.GetUserAppsAsync(_connectionFactory, tran, userId);
+                IEnumerable<UserApps> userApps = await userRepository.GetUserAppsAsync(connectionFactory, tran, userId);
+                tran.Commit();
+                return userApps;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<UserAppWithEnvRoles> GetUserAppsWithEnvRolesAsync(int userId)
+        {
+            connectionFactory.Open();
+            using var tran = connectionFactory.BeginTransaction();
+            try
+            {
+                UserAppWithEnvRoles userApps = await userRepository.GetUserAppsWithEnvRolesAsync(connectionFactory, tran, userId);
                 tran.Commit();
                 return userApps;
             }
@@ -61,54 +76,54 @@
 
         public async Task<User> GetUserByIdAsync(int id)
         {
-            _connectionFactory.Open();
-            using var tran = _connectionFactory.BeginTransaction();
-            User user = await _userRepository.GetUserByIdAsync(_connectionFactory, tran, id);
+            connectionFactory.Open();
+            using var tran = connectionFactory.BeginTransaction();
+            User user = await userRepository.GetUserByIdAsync(connectionFactory, tran, id);
             tran.Commit();
             return user;
         }
 
         public async Task<int> CreateUserAsync(User user)
         {
-            _connectionFactory.Open();
-            using var tran = _connectionFactory.BeginTransaction();
+            connectionFactory.Open();
+            using var tran = connectionFactory.BeginTransaction();
 
             user.CreatedAt = DateTime.UtcNow;
             user.ModifiedAt = DateTime.UtcNow;
-            int rowsAffected = await _userRepository.CreateUserAsync(_connectionFactory, tran, user);
+            int rowsAffected = await userRepository.CreateUserAsync(connectionFactory, tran, user);
             tran.Commit();
             return rowsAffected;
         }
 
         public async Task<bool> UpdateUserAsync(User user)
         {
-            _connectionFactory.Open();
-            using var tran = _connectionFactory.BeginTransaction();
+            connectionFactory.Open();
+            using var tran = connectionFactory.BeginTransaction();
 
             user.ModifiedAt = DateTime.UtcNow;
-            bool success = await _userRepository.UpdateUserAsync(_connectionFactory, tran, user);
+            bool success = await userRepository.UpdateUserAsync(connectionFactory, tran, user);
             tran.Commit();
             return success;
         }
 
         public async Task<bool> DeleteUserAsync(int id)
         {
-            _connectionFactory.Open();
-            using var tran = _connectionFactory.BeginTransaction();
+            connectionFactory.Open();
+            using var tran = connectionFactory.BeginTransaction();
 
-            bool success = await _userRepository.DeleteUserAsync(_connectionFactory, tran, id);
+            bool success = await userRepository.DeleteUserAsync(connectionFactory, tran, id);
             tran.Commit();
             return success;
         }
 
         public string GenerateAuthorizationUrlSignup()
         {
-            var clientId = _configuration["OAuth2:ClientId"] ?? throw new ArgumentNullException("OAuth2:ClientId configuration is missing");
-            var responseType = _configuration["OAuth2:ResponseType"] ?? throw new ArgumentNullException("OAuth2:ResponseType configuration is missing");
-            var redirectUri = _configuration["OAuth2:RedirectUriSigUp"] ?? throw new ArgumentNullException("OAuth2:RedirectUriSigUp configuration is missing");
-            var scope = _configuration["OAuth2:Scope"] ?? throw new ArgumentNullException("OAuth2:Scope configuration is missing");
-            var state = _configuration["OAuth2:State"] ?? throw new ArgumentNullException("OAuth2:State configuration is missing");
-            var tenantId = _configuration["OAuth2:TenantId"] ?? throw new ArgumentNullException("OAuth2:TenantId configuration is missing");
+            var clientId = configuration["OAuth2:ClientId"] ?? throw new ArgumentNullException("OAuth2:ClientId configuration is missing");
+            var responseType = configuration["OAuth2:ResponseType"] ?? throw new ArgumentNullException("OAuth2:ResponseType configuration is missing");
+            var redirectUri = configuration["OAuth2:RedirectUriSigUp"] ?? throw new ArgumentNullException("OAuth2:RedirectUriSigUp configuration is missing");
+            var scope = configuration["OAuth2:Scope"] ?? throw new ArgumentNullException("OAuth2:Scope configuration is missing");
+            var state = configuration["OAuth2:State"] ?? throw new ArgumentNullException("OAuth2:State configuration is missing");
+            var tenantId = configuration["OAuth2:TenantId"] ?? throw new ArgumentNullException("OAuth2:TenantId configuration is missing");
             var authorizationEndpoint = $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize";
             var authorizationUrl = $"{authorizationEndpoint}?client_id={Uri.EscapeDataString(clientId)}&response_type={Uri.EscapeDataString(responseType)}&redirect_uri={Uri.EscapeDataString(redirectUri)}&scope={Uri.EscapeDataString(scope)}&state={Uri.EscapeDataString(state)}";
 
@@ -117,12 +132,12 @@
 
         public string GenerateAuthorizationUrlSignin()
         {
-            var clientId = _configuration["OAuth2:ClientId"] ?? throw new ArgumentNullException("OAuth2:ClientId configuration is missing");
-            var responseType = _configuration["OAuth2:ResponseType"] ?? throw new ArgumentNullException("OAuth2:ResponseType configuration is missing");
-            var redirectUri = _configuration["OAuth2:RedirectUriSigIn"] ?? throw new ArgumentNullException("OAuth2:RedirectUriSigIn configuration is missing");
-            var scope = _configuration["OAuth2:Scope"] ?? throw new ArgumentNullException("OAuth2:Scope configuration is missing");
-            var state = _configuration["OAuth2:State"] ?? throw new ArgumentNullException("OAuth2:State configuration is missing");
-            var tenantId = _configuration["OAuth2:TenantId"] ?? throw new ArgumentNullException("OAuth2:TenantId configuration is missing");
+            var clientId = configuration["OAuth2:ClientId"] ?? throw new ArgumentNullException("OAuth2:ClientId configuration is missing");
+            var responseType = configuration["OAuth2:ResponseType"] ?? throw new ArgumentNullException("OAuth2:ResponseType configuration is missing");
+            var redirectUri = configuration["OAuth2:RedirectUriSigIn"] ?? throw new ArgumentNullException("OAuth2:RedirectUriSigIn configuration is missing");
+            var scope = configuration["OAuth2:Scope"] ?? throw new ArgumentNullException("OAuth2:Scope configuration is missing");
+            var state = configuration["OAuth2:State"] ?? throw new ArgumentNullException("OAuth2:State configuration is missing");
+            var tenantId = configuration["OAuth2:TenantId"] ?? throw new ArgumentNullException("OAuth2:TenantId configuration is missing");
             var authorizationEndpoint = $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize";
             var authorizationUrl = $"{authorizationEndpoint}?client_id={Uri.EscapeDataString(clientId)}&response_type={Uri.EscapeDataString(responseType)}&redirect_uri={Uri.EscapeDataString(redirectUri)}&scope={Uri.EscapeDataString(scope)}&state={Uri.EscapeDataString(state)}";
 
@@ -135,7 +150,7 @@
             var request = new HttpRequestMessage(HttpMethod.Get, "https://graph.microsoft.com/v1.0/me");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            var response = await _httpClient.SendAsync(request);
+            var response = await httpClient.SendAsync(request);
             ResponseMicrosoftUserInfo userAD;
             try
             {
@@ -168,10 +183,10 @@
                 Active = true,
             };
 
-            _connectionFactory.Open();
-            using var tran = _connectionFactory.BeginTransaction();
+            connectionFactory.Open();
+            using var tran = connectionFactory.BeginTransaction();
 
-            int rowsAffected = await _userRepository.CreateUserAsync(_connectionFactory, tran, user);
+            int rowsAffected = await userRepository.CreateUserAsync(connectionFactory, tran, user);
             if (rowsAffected > 0)
             {
                 tran.Commit();
@@ -189,7 +204,7 @@
                 var request = new HttpRequestMessage(HttpMethod.Get, "https://graph.microsoft.com/v1.0/me");
                 request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-                var response = await _httpClient.SendAsync(request);
+                var response = await httpClient.SendAsync(request);
                 ResponseMicrosoftUserInfo userAD;
                 try
                 {
@@ -207,17 +222,18 @@
                     throw;
                 }
 
-                _connectionFactory.Open();
-                using var tran = _connectionFactory.BeginTransaction();
-                User user = await _userRepository.GetUserByEmailAsync(_connectionFactory, tran, userAD.UserPrincipalName);
+                connectionFactory.Open();
+                using var tran = connectionFactory.BeginTransaction();
+                User user = await userRepository.GetUserByEmailAsync(connectionFactory, tran, userAD.UserPrincipalName);
                 tran.Commit();
 
                 var jwtData = new JwtData
                 {
-                    UserId = user.UserId
+                    UserId = user.UserId,
+                    RoleId = (int)EnumUserRole.Root
                 };
 
-                return _jwtService.GenerateToken(jwtData);
+                return jwtService.GenerateToken(jwtData);
             }
             catch (Exception)
             {
