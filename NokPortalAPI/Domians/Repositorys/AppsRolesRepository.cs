@@ -1,6 +1,5 @@
-﻿using NokPortalAPI.Domians.Models;
-
-namespace NokPortalAPI.Domians.Repositorys
+﻿
+namespace NokPortalAPI.Domains.Repositorys
 {
     public class AppsRolesRepository 
     {

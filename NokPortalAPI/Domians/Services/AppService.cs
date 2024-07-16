@@ -1,12 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using System.Data;
+using Newtonsoft.Json;
 using NokCore.Api.JwtToken.Models;
 using NokCore.Api.JwtToken.Services;
 using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Repositorys;
-using NokPortalAPI.Domains.Services;
-using NokPortalAPI.Shared.DB;
 using NokPortalAPI.Domains.Models;
+using NokPortalAPI.Shared.DB;
 
 namespace NokPortalAPI.Domains.Services
 {
@@ -120,49 +120,40 @@ namespace NokPortalAPI.Domains.Services
         }
         */
 
-
         public async Task<IEnumerable<Role>> GetAppTargetAllRole(int appId, EnumEnvironmentType env)
         {
-            /*
+            using var connection = connectionFactory.CreateConnection();
+            connection.Open();
+            using var tran = connection.BeginTransaction();
             try
             {
-                using var connection = connectionFactory.CreateConnection();
-                connection.Open();
-                using var tran = connection.BeginTransaction();
-                try
+                AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, tran, appId, env);
+                tran.Commit();
+
+                ResponseJwt jwtToken = jwtService.GenerateTokenForTargetApp(null, appEnv.SecretKey, appEnv.JwtHourLimit);
+                string fullLinkAppRoles = appEnv.BaseURL += "/roles";
+
+                var request = new HttpRequestMessage(HttpMethod.Get, fullLinkAppRoles);
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", $" {jwtToken.Token}");
+
+                var response = await httpClient.SendAsync(request);
+                string responseContent = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
                 {
-                    AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, tran, appId, env);
-                    tran.Commit();
-
-                    ResponseJwt jwtToken = jwtService.GenerateTokenForTargetApp(null, appEnv.SecretKey, appEnv.JwtHourLimit);
-                    string fullLinkAppRoles = appEnv.BaseURL += "/api/auth/roles";
-
-                    var request = new HttpRequestMessage(HttpMethod.Get, fullLinkAppRoles);
-                    request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", $" {jwtToken.Token}");
-
-                    var response = await httpClient.SendAsync(request);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string responseContent = await response.Content.ReadAsStringAsync();
-                        var responseData = JsonConvert.DeserializeObject<YourResponseModel>(responseContent);
-                    }
-                    else
-                    {
-                        string errorContent = await response.Content.ReadAsStringAsync();
-                        Console.WriteLine($"Error: {errorContent}");
-                    }
+                    ResponseRolesTargetApp roles = JsonConvert.DeserializeObject<ResponseRolesTargetApp>(responseContent) ?? throw new DataException("Empty roles data");
+                    return roles.Data;
                 }
-                catch (Exception)
+                else
                 {
-                    throw;
+                    throw new Exception($"Error: {responseContent}");
                 }
             }
             catch (Exception)
             {
                 throw;
             }
-            */
 
+            /*
             try
             {
                 string json = @"
@@ -224,6 +215,7 @@ namespace NokPortalAPI.Domains.Services
             {
                 throw;
             }
+            */
         }
 
         public async Task<ResponseAppLink> GetAppLink(int appId, int userId, EnumEnvironmentType env)

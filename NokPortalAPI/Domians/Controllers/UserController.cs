@@ -38,7 +38,7 @@ namespace NokPortalAPI.Domains.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<object, string>>> UserId(int id)
+        public async Task<ActionResult<ApiResponse<object, string>>> GetByUserId(int id)
         {
             if (!this.ModelState.IsValid)
             {
@@ -47,7 +47,7 @@ namespace NokPortalAPI.Domains.Controllers
 
             try
             {
-                IEnumerable<UserApps> user = await userService.GetUserAppsAsync(id);
+                UserAppWithEnvRoles user = await userService.GetUserAppsWithEnvRolesAsync(id);
                 return this.Ok(this.FormatSuccessResponse(user));
             }
             catch (Exception ex)

@@ -1,9 +1,8 @@
 ﻿using System.Text.Json.Serialization;
-using NokPortalAPI.Domains.Models;
 
 namespace NokPortalAPI.Domains.Models
 {
-    public class AppEnvResponse
+    public class ResponseAppEnv
     {
         [JsonPropertyName("appId")]
         public int? AppId { get; set; }

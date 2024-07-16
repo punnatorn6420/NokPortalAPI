@@ -84,7 +84,7 @@ namespace NokPortalAPI.Domains.Services
             }
         }
 
-        public async Task<AppEnvResponse> GetById(int appId, int userId, EnumEnvironmentType env)
+        public async Task<ResponseAppEnv> GetById(int appId, int userId, EnumEnvironmentType env)
         {
             using var connection = connectionFactory.CreateConnection();
             connection.Open();
@@ -96,7 +96,7 @@ namespace NokPortalAPI.Domains.Services
                 if (appEnv != null)
                 {
                     tran.Commit();
-                    return new AppEnvResponse
+                    return new ResponseAppEnv
                     {
                         AppId = appEnv.AppId,
                         Environment = appEnv.Environment,

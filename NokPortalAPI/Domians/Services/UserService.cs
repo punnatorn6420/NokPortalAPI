@@ -58,6 +58,22 @@ namespace NokPortalAPI.Domains.Services
             }
         }
 
+        public async Task<UserAppWithEnvRoles> GetUserAppsWithEnvRolesAsync(int userId)
+        {
+            connectionFactory.Open();
+            using var tran = connectionFactory.BeginTransaction();
+            try
+            {
+                UserAppWithEnvRoles userApps = await userRepository.GetUserAppsWithEnvRolesAsync(connectionFactory, tran, userId);
+                tran.Commit();
+                return userApps;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public async Task<User> GetUserByIdAsync(int id)
         {
             connectionFactory.Open();

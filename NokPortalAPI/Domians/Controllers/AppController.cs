@@ -1,14 +1,11 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers;
 using NokCore.Api.JwtToken.Services;
 using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
-using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Services;
-using NokPortalAPI.Domains.Models;
 
 namespace NokPortalAPI.Domains.Controllers
 {
@@ -241,7 +238,7 @@ namespace NokPortalAPI.Domains.Controllers
 
             try
             {
-                AppEnvResponse appEnv = await appsEnvService.GetById(id, userId, env);
+                ResponseAppEnv appEnv = await appsEnvService.GetById(id, userId, env);
                 return this.Ok(this.FormatSuccessResponse(appEnv));
             }
             catch (DataException ex)

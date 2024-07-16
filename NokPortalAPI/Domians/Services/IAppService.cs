@@ -1,6 +1,5 @@
 ﻿using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
-using NokPortalAPI.Domains.Models;
 
 namespace NokPortalAPI.Domains.Services
 {

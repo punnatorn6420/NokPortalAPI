@@ -36,7 +36,7 @@ namespace NokPortalAPI.Domains.Repositorys
             return userApps;
         }
 
-        public async Task AssignedUsersAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId, IEnumerable<int> roles)
+        public async Task AssignedUsersAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId, IEnumerable<int> roles, EnumEnvironmentType environment)
         {
             // Ensure the connection is open
             if (conn.State != ConnectionState.Open)
@@ -46,8 +46,9 @@ namespace NokPortalAPI.Domains.Repositorys
 
             // Insert into Assigned_Users table
             var insertAssignedUserQuery = @"
-                INSERT INTO Assigned_Users (UserID, AppID)
-                VALUES (@UserID, @AppID);
+                INSERT INTO Assigned_Users (UserID, AppID, Environment)
+                VALUES (@UserID, @AppID, @Environment);
+                SELECT SCOPE_IDENTITY();
             ";
 
             // Insert into Apps_Roles table
@@ -57,7 +58,7 @@ namespace NokPortalAPI.Domains.Repositorys
             ";
 
             // Insert Assigned User
-            var parameters = new { UserID = userId, AppID = appId };
+            var parameters = new { UserID = userId, AppID = appId, Environment = environment.ToString() };
             int assignedUserId = await conn.ExecuteScalarAsync<int>(insertAssignedUserQuery, parameters, tran);
 
             // Insert App Roles

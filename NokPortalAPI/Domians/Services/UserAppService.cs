@@ -1,13 +1,11 @@
 ﻿using System.Text;
-using System.Text.Json.Nodes;
 using Newtonsoft.Json;
-using NokCore.Api.Controllers;
 using NokCore.Api.JwtToken.Models;
 using NokCore.Api.JwtToken.Services;
 using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Repositorys;
-using NokPortalAPI.Domians.Models;
+using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Shared.DB;
 
 namespace NokPortalAPI.Domains.Services
@@ -78,7 +76,7 @@ namespace NokPortalAPI.Domains.Services
                     throw new Exception($"Error: {responseContent}");
                 }
 
-                await assignedUsersRepositiry.AssignedUsersAsync(connection, tran, appId, addUser.UserId, addUser.Roles);
+                await assignedUsersRepositiry.AssignedUsersAsync(connection, tran, appId, addUser.UserId, addUser.Roles, addUser.Environment);
             }
             catch (Exception)
             {

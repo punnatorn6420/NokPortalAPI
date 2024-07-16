@@ -1,6 +1,5 @@
 ﻿using System.Data;
 using NokPortalAPI.Domains.Models;
-using NokPortalAPI.Domains.Models;
 
 namespace NokPortalAPI.Domains.Repositorys
 {

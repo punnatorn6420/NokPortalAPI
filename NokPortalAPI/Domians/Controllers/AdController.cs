@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers;
 using NokCore.Api.JwtToken.Models;
 using NokCore.Api.JwtToken.Services;
-using NokPortalAPI.Domains.Services;
 using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Services;
 

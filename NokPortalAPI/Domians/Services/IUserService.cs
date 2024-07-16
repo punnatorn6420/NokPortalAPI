@@ -10,6 +10,8 @@ namespace NokPortalAPI.Domains.Services
 
         Task<IEnumerable<UserApps>> GetUserAppsAsync(int userId);
 
+        Task<UserAppWithEnvRoles> GetUserAppsWithEnvRolesAsync(int userId);
+
         Task<int> CreateUserAsync(User user);
 
         Task<bool> UpdateUserAsync(User user);

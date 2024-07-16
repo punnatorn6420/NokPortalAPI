@@ -9,6 +9,6 @@ namespace NokPortalAPI.Domains.Repositorys
 
         Task<IEnumerable<App>> GetUserAllAppAsync(IDbConnection conn, IDbTransaction tran, int userId);
 
-        Task AssignedUsersAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId, IEnumerable<int> roles);
+        Task AssignedUsersAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId, IEnumerable<int> roles, EnumEnvironmentType environment);
     }
 }

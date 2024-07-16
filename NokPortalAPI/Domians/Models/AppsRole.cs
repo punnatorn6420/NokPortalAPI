@@ -1,4 +1,4 @@
-﻿namespace NokPortalAPI.Domians.Models
+﻿namespace NokPortalAPI.Domains.Models
 {
     public class AppsRole
     {

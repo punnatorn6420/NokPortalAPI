@@ -6,28 +6,26 @@ namespace NokPortalAPI.Domains.Models
     public class App
     {
         [JsonPropertyName("appId")]
-        public int AppID { get; set; }
+        public int AppId { get; set; }
 
         [JsonPropertyName("name")]
-        [Required]
         [MaxLength(255)]
-        required public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [JsonPropertyName("header")]
-        [Required]
         [MaxLength(255)]
-        required public string Header { get; set; }
+        public string Header { get; set; } = string.Empty;
 
         [JsonPropertyName("subheader")]
         [MaxLength(255)]
-        required public string Subheader { get; set; }
+        public string Subheader { get; set; } = string.Empty;
 
         [JsonPropertyName("detail")]
         [MaxLength(255)]
-        required public string Detail { get; set; }
+        public string Detail { get; set; } = string.Empty;
 
         [JsonPropertyName("image")]
         [MaxLength(255)]
-        required public string Image { get; set; }
+        public string Image { get; set; } = string.Empty;
     }
 }

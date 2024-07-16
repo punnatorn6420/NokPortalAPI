@@ -1,6 +1,5 @@
 ﻿using System.Text.Json.Serialization;
 using NokCore.Identity.Models;
-using NokPortalAPI.Domains.Models;
 
 namespace NokPortalAPI.Domains.Models
 {

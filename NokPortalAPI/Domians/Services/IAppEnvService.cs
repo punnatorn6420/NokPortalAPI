@@ -10,6 +10,6 @@ namespace NokPortalAPI.Domains.Services
 
         Task<bool> UpdateAppsEnv(AppEnv reqCreateAppEnv, int appId);
 
-        Task<AppEnvResponse> GetById(int appId, int userId, EnumEnvironmentType env);
+        Task<ResponseAppEnv> GetById(int appId, int userId, EnumEnvironmentType env);
     }
 }
