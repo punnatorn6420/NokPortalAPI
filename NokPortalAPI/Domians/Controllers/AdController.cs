@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers;
-using NokCore.Api.JwtToken.Models;
-using NokCore.Api.JwtToken.Services;
+using NokCore.Api.JWT.Models;
+using NokCore.Api.JWT.Services;
 using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Services;
 
@@ -30,6 +30,7 @@ namespace NokPortalAPI.Domains.Controllers
         {
             try
             {
+                Console.WriteLine("hi");
                 var linkAD = this.userService.GenerateAuthorizationUrlSignup();
 
                 return this.Ok(this.FormatSuccessResponse(new { link = linkAD }));

@@ -1,4 +1,4 @@
-﻿using NokCore.Api.JwtToken.Models;
+﻿using NokCore.Api.JWT.Models;
 using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
 
@@ -8,7 +8,7 @@ namespace NokPortalAPI.Domains.Services
     {
         Task<IEnumerable<User>> GetAllUsersAsync();
 
-        Task<IEnumerable<UserApps>> GetUserAppsAsync(int userId);
+        Task<IEnumerable<UserApps>> GetUserAppsAsync(int userId, EnumEnvironmentType env);
 
         Task<UserAppWithEnvRoles> GetUserAppsWithEnvRolesAsync(int userId);
 

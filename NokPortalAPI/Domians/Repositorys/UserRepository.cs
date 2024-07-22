@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using Dapper;
+using Newtonsoft.Json;
 using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
 
@@ -25,47 +26,58 @@ namespace NokPortalAPI.Domains.Repositorys
             return appUser;
         }
 
-        public async Task<IEnumerable<UserApps>> GetUserAppsAsync(IDbConnection conn, IDbTransaction tran, int userId)
+        public async Task<IEnumerable<UserApps>> GetUserAppsAsync(IDbConnection conn, IDbTransaction tran, int userId, EnumEnvironmentType env)
         {
-            // Join query to retrieve user and their apps
+            // Join query to retrieve user and their apps with roles
             string query = @"
-                SELECT 
-                    u.UserID, u.Email, u.FirstName, u.LastName, u.JobTitle, u.Department, 
-                    u.ObjectId, u.CreatedAt, u.ModifiedAt, u.Active,
-                    a.AppId, a.Name, a.Header, a.Subheader, a.Detail, a.Image
-                FROM Users u
-                INNER JOIN Assigned_Users ua ON u.UserID = ua.UserID
-                INNER JOIN Apps a ON ua.AppId = a.AppId
-                WHERE u.UserID = @UserID";
+            SELECT 
+                u.UserID, u.Email, u.FirstName, u.LastName, u.JobTitle, u.Department, 
+                u.ObjectId, u.CreatedAt, u.ModifiedAt, u.Active,
+                a.AppId, a.Name, a.Header, a.Subheader, a.Detail, a.BaseUrl , a.Image, 
+                ar.RoleID,
+                ua.Environment
+            FROM Users u
+            INNER JOIN Assigned_Users ua ON u.UserID = ua.UserID
+            INNER JOIN Apps a ON ua.AppId = a.AppId
+            LEFT JOIN Apps_Roles ar ON ua.AssignedUserID = ar.AssignedUserID
+            ";
 
-            // Dictionary to hold the results and group by user
             var userAppDictionary = new Dictionary<int, UserApps>();
 
-            var result = await conn.QueryAsync<User, App, UserApps>(
+            var result = await conn.QueryAsync<User, AppWithRoles, int?, UserApps>(
                 query,
-                (user, app) =>
+                (user, appWithRoles, roleId) =>
                 {
+                    // Console.WriteLine($"User: {JsonConvert.SerializeObject(user)}");
+                    // Console.WriteLine($"AppWithRoles: {JsonConvert.SerializeObject(appWithRoles)}");
+
                     if (!userAppDictionary.TryGetValue(user.UserId, out var userApps))
                     {
                         userApps = new UserApps
                         {
                             User = user,
-                            App = new List<App>()
+                            App = new List<AppWithRoles>()
                         };
                         userAppDictionary.Add(user.UserId, userApps);
                     }
 
-                    ((List<App>)userApps.App).Add(app);
+                    var existingApp = ((List<AppWithRoles>)userApps.App).FirstOrDefault(a => a.AppId == appWithRoles.AppId);
+                    if (existingApp == null)
+                    {
+                        existingApp = appWithRoles;
+                        ((List<AppWithRoles>)userApps.App).Add(existingApp);
+                    }
+
+                    if (roleId.HasValue)
+                    {
+                        existingApp.Roles.Add(roleId.Value);
+                    }
+
                     return userApps;
                 },
-                new { UserID = userId },
-                splitOn: "AppId",
+                new { UserID = userId, Environment = (int)env },
+                splitOn: "AppId,RoleID",
                 transaction: tran);
-
-            foreach (var userApps in userAppDictionary.Values)
-            {
-                userApps.App = userApps.App.ToList();
-            }
 
             return userAppDictionary.Values;
         }
@@ -163,7 +175,6 @@ namespace NokPortalAPI.Domains.Repositorys
                 };
             }
         }
-
 
         public async Task<int> CreateUserAsync(IDbConnection conn, IDbTransaction tran, User user)
         {

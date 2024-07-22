@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers;
-using NokCore.Api.JwtToken.Services;
+using NokCore.Api.JWT.Services;
 using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Services;
 
@@ -22,7 +22,7 @@ namespace NokPortalAPI.Domains.Controllers
         }
 
         [HttpGet("")]
-        public async Task<ActionResult<ApiResponse<object, string>>> GetMeInfo()
+        public async Task<ActionResult<ApiResponse<object, string>>> GetMeInfo([FromQuery] EnumEnvironmentType env)
         {
             if (!this.ModelState.IsValid)
             {
@@ -31,9 +31,11 @@ namespace NokPortalAPI.Domains.Controllers
 
             try
             {
+
+
                 int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
 
-                IEnumerable<UserApps> user = await this.userService.GetUserAppsAsync(userId);
+                IEnumerable<UserApps> user = await this.userService.GetUserAppsAsync(userId, env);
 
                 return this.Ok(this.FormatSuccessResponse(user));
             }

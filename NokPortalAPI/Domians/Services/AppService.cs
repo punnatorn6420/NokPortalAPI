@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using Newtonsoft.Json;
-using NokCore.Api.JwtToken.Models;
-using NokCore.Api.JwtToken.Services;
+using NokCore.Api.JWT.Models;
+using NokCore.Api.JWT.Services;
 using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Repositorys;
@@ -128,6 +128,7 @@ namespace NokPortalAPI.Domains.Services
             try
             {
                 AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, tran, appId, env);
+                // Console.WriteLine("appEnv :", appEnv);
                 tran.Commit();
 
                 ResponseJwt jwtToken = jwtService.GenerateTokenForTargetApp(null, appEnv.SecretKey, appEnv.JwtHourLimit);
@@ -152,70 +153,6 @@ namespace NokPortalAPI.Domains.Services
             {
                 throw;
             }
-
-            /*
-            try
-            {
-                string json = @"
-                [
-                    {
-                        ""RoleId"": 1,
-                        ""RoleName"": ""Admin"",
-                        ""Permissions"": [
-                            {
-                                ""PermissionId"": 101,
-                                ""PermissionName"": ""CreateCreditNote""
-                            },
-                            {
-                                ""PermissionId"": 102,
-                                ""PermissionName"": ""CancelEtaxInvoice""
-                            }
-                        ],
-                        ""Active"": true,
-                        ""CreatedAt"": ""2024-06-26T12:00:00Z"",
-                        ""ModifiedAt"": ""2024-06-26T12:00:00Z""
-                    },
-                    {
-                        ""RoleId"": 2,
-                        ""RoleName"": ""User"",
-                        ""Permissions"": [
-                            {
-                                ""PermissionId"": 103,
-                                ""PermissionName"": ""ViewDashboard""
-                            },
-                            {
-                                ""PermissionId"": 104,
-                                ""PermissionName"": ""EditProfile""
-                            }
-                        ],
-                        ""Active"": true,
-                        ""CreatedAt"": ""2024-06-25T11:00:00Z"",
-                        ""ModifiedAt"": ""2024-06-25T11:00:00Z""
-                    },
-                    {
-                        ""RoleId"": 3,
-                        ""RoleName"": ""Guest"",
-                        ""Permissions"": [
-                            {
-                                ""PermissionId"": 105,
-                                ""PermissionName"": ""ViewPublicContent""
-                            }
-                        ],
-                        ""Active"": false,
-                        ""CreatedAt"": ""2024-06-24T10:00:00Z"",
-                        ""ModifiedAt"": ""2024-06-24T10:00:00Z""
-                    }
-                ]";
-
-                IEnumerable<Role> roles = JsonConvert.DeserializeObject<IEnumerable<Role>>(json);
-
-                return roles;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            */
         }
 
         public async Task<ResponseAppLink> GetAppLink(int appId, int userId, EnumEnvironmentType env)

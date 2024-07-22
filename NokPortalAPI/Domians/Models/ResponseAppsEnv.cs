@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using NokCore.Api.JwtToken.Models;
+using NokCore.Api.JWT.Models;
 using NokPortalAPI.Domains.Models;
 
 namespace NokPortalAPI.Domains.Models

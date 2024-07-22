@@ -1,14 +1,14 @@
-﻿using System.Data;
-using System.Text.Json;
-using NokCore.Api.JwtToken.Models;
-using NokCore.Api.JwtToken.Services;
-using NokCore.Identity.Models;
-using NokPortalAPI.Domains.Models;
-using NokPortalAPI.Domains.Repositorys;
-using NokPortalAPI.Shared.DB;
-
-namespace NokPortalAPI.Domains.Services
+﻿namespace NokPortalAPI.Domains.Services
 {
+    using System.Data;
+    using System.Text.Json;
+    using NokCore.Api.JWT.Models;
+    using NokCore.Api.JWT.Services;
+    using NokCore.Identity.Models;
+    using NokPortalAPI.Domains.Models;
+    using NokPortalAPI.Domains.Repositorys;
+    using NokPortalAPI.Shared.DB;
+
     public class UserService : IUserService
     {
         private readonly IConfiguration configuration;
@@ -42,13 +42,14 @@ namespace NokPortalAPI.Domains.Services
             }
         }
 
-        public async Task<IEnumerable<UserApps>> GetUserAppsAsync(int userId)
+        public async Task<IEnumerable<UserApps>> GetUserAppsAsync(int userId, EnumEnvironmentType env)
         {
             connectionFactory.Open();
             using var tran = connectionFactory.BeginTransaction();
             try
             {
-                IEnumerable<UserApps> userApps = await userRepository.GetUserAppsAsync(connectionFactory, tran, userId);
+
+                IEnumerable<UserApps> userApps = await userRepository.GetUserAppsAsync(connectionFactory, tran, userId, env);
                 tran.Commit();
                 return userApps;
             }
@@ -156,8 +157,7 @@ namespace NokPortalAPI.Domains.Services
             {
                 response.EnsureSuccessStatusCode();
                 var responseContent = await response.Content.ReadAsStringAsync();
-
-                userAD = JsonSerializer.Deserialize<ResponseMicrosoftUserInfo>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) !;
+                userAD = JsonSerializer.Deserialize<ResponseMicrosoftUserInfo>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 
                 if (userAD == null)
                 {
@@ -211,7 +211,7 @@ namespace NokPortalAPI.Domains.Services
                     response.EnsureSuccessStatusCode();
                     var responseContent = await response.Content.ReadAsStringAsync();
 
-                    userAD = JsonSerializer.Deserialize<ResponseMicrosoftUserInfo>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) !;
+                    userAD = JsonSerializer.Deserialize<ResponseMicrosoftUserInfo>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
                     if (userAD == null)
                     {
                         throw new InvalidOperationException("Deserialization returned null.");
@@ -230,7 +230,7 @@ namespace NokPortalAPI.Domains.Services
                 var jwtData = new JwtData
                 {
                     UserId = user.UserId,
-                    RoleId = (int)EnumUserRole.Root
+                    // RoleId = (int)EnumUserRole.Root
                 };
 
                 return jwtService.GenerateToken(jwtData);

@@ -20,5 +20,8 @@ namespace NokPortalAPI.Domains.Models
 
         [MaxLength(255)]
         required public string Image { get; set; }
+
+        [MaxLength(255)]
+        required public string BaseUrl { get; set; }
     }
 }

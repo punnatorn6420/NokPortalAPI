@@ -1,12 +1,14 @@
 ﻿using System.Text;
 using Newtonsoft.Json;
-using NokCore.Api.JwtToken.Models;
-using NokCore.Api.JwtToken.Services;
+using NokCore.Api.JWT.Models;
+using NokCore.Api.JWT.Services;
 using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Repositorys;
 using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Shared.DB;
+using System.Data;
+using System.Dynamic;
 
 namespace NokPortalAPI.Domains.Services
 {
@@ -136,5 +138,65 @@ namespace NokPortalAPI.Domains.Services
 
             return app;
         }
+
+        public async Task<(AppEnv, ResponseJwt)> GetJWTTokenTargetApp(int appId, EnumEnvironmentType env)
+        {
+            using var connection = connectionFactory.CreateConnection();
+            connection.Open();
+            using var tran = connection.BeginTransaction();
+            try
+            {
+                AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, tran, appId, env);
+                ResponseJwt jwtToken = jwtService.GenerateTokenForTargetApp(null, appEnv.SecretKey, appEnv.JwtHourLimit);
+                Console.WriteLine("appEnv", appEnv, "jwtToken", jwtToken);
+
+                tran.Commit();
+
+                return (appEnv, jwtToken);
+            }
+            catch (Exception)
+            {
+                tran.Rollback();
+                throw;
+            }
+        }
+
+        public async Task<(AppEnv, ResponseJwt)> GetJWTTokenTargetAppWithData(int appId, EnumEnvironmentType env, User user, IEnumerable<UserApps> userAppsList)
+        {
+            using var connection = connectionFactory.CreateConnection();
+            connection.Open();
+            using var tran = connection.BeginTransaction();
+            try
+            {
+                AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, tran, appId, env);
+
+                var roles = userAppsList
+                    .SelectMany(userApps => userApps.App)
+                    .SelectMany(app => app.Roles)
+                    .Distinct()
+                    .ToList();
+
+                dynamic jwtSetting = new ExpandoObject();
+                jwtSetting.userID = user.UserId;
+                jwtSetting.name = $"{user.FirstName} {user.LastName}";
+                jwtSetting.avatar = "";
+                jwtSetting.email = user.Email;
+                jwtSetting.company = "";
+                jwtSetting.department = user.Department;
+                jwtSetting.position = user.JobTitle;
+                jwtSetting.roles = roles;
+
+                ResponseJwt jwtToken = jwtService.GenerateTokenForTargetAppWithData(jwtSetting, appEnv.SecretKey, appEnv.JwtHourLimit);
+                tran.Commit();
+
+                return (appEnv, jwtToken);
+            }
+            catch (Exception)
+            {
+                tran.Rollback();
+                throw;
+            }
+        }
+
     }
 }
