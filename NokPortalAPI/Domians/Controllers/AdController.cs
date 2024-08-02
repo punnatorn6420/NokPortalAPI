@@ -30,7 +30,6 @@ namespace NokPortalAPI.Domains.Controllers
         {
             try
             {
-                Console.WriteLine("hi");
                 var linkAD = this.userService.GenerateAuthorizationUrlSignup();
 
                 return this.Ok(this.FormatSuccessResponse(new { link = linkAD }));

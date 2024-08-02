@@ -31,11 +31,9 @@ namespace NokPortalAPI.Domains.Controllers
 
             try
             {
-
-
                 int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
 
-                IEnumerable<UserApps> user = await this.userService.GetUserAppsAsync(userId, env);
+                UserApps user = await this.userService.GetUserAppsAsync(userId, env);
 
                 return this.Ok(this.FormatSuccessResponse(user));
             }

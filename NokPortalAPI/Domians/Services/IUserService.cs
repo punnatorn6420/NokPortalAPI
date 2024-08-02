@@ -8,7 +8,7 @@ namespace NokPortalAPI.Domains.Services
     {
         Task<IEnumerable<User>> GetAllUsersAsync();
 
-        Task<IEnumerable<UserApps>> GetUserAppsAsync(int userId, EnumEnvironmentType env);
+        Task<UserApps> GetUserAppsAsync(int userId, EnumEnvironmentType env);
 
         Task<UserAppWithEnvRoles> GetUserAppsWithEnvRolesAsync(int userId);
 

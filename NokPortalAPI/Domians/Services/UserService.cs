@@ -13,13 +13,15 @@
     {
         private readonly IConfiguration configuration;
         private readonly IUserRepository userRepository;
+        private readonly IAppsRolesRepositorys appsRolesRepository;
         private readonly IDbConnection connectionFactory;
         private readonly HttpClient httpClient;
         private readonly IJwtService jwtService;
 
-        public UserService(IConfiguration configuration, IDbConnectionFactory connectionFactory, IUserRepository userRepository, HttpClient httpClient, IJwtService jwtService)
+        public UserService(IConfiguration configuration, IDbConnectionFactory connectionFactory, IUserRepository userRepository, HttpClient httpClient, IJwtService jwtService, IAppsRolesRepositorys appsRolesRepository)
         {
             this.userRepository = userRepository;
+            this.appsRolesRepository = appsRolesRepository;
             this.configuration = configuration;
             this.connectionFactory = connectionFactory.CreateConnection();
             this.httpClient = httpClient;
@@ -42,19 +44,33 @@
             }
         }
 
-        public async Task<IEnumerable<UserApps>> GetUserAppsAsync(int userId, EnumEnvironmentType env)
+        public async Task<UserApps> GetUserAppsAsync(int userId, EnumEnvironmentType env)
         {
             connectionFactory.Open();
             using var tran = connectionFactory.BeginTransaction();
             try
             {
+                User user = await userRepository.GetUserByIdAsync(connectionFactory, tran, userId);
 
-                IEnumerable<UserApps> userApps = await userRepository.GetUserAppsAsync(connectionFactory, tran, userId, env);
+                if (user == null)
+                {
+                    return null;
+                }
+
+                var appsWithRoles = await this.appsRolesRepository.GetAppsWithRolesByUserIdAsync(connectionFactory, tran, userId, env);
+
+                var userApps = new UserApps
+                {
+                    User = user,
+                    App = appsWithRoles.ToList()
+                };
+
                 tran.Commit();
                 return userApps;
             }
-            catch
+            catch (Exception ex)
             {
+                tran.Rollback();
                 throw;
             }
         }
@@ -65,6 +81,7 @@
             using var tran = connectionFactory.BeginTransaction();
             try
             {
+
                 UserAppWithEnvRoles userApps = await userRepository.GetUserAppsWithEnvRolesAsync(connectionFactory, tran, userId);
                 tran.Commit();
                 return userApps;

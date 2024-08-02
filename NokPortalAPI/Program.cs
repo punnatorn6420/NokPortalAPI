@@ -31,6 +31,7 @@ public class Program
         builder.Services.AddScoped<IAppRepository, AppRepository>();
         builder.Services.AddScoped<IAssignedUsersRepositorys, AssignedUsersRepositorys>();
         builder.Services.AddScoped<IAppEnvRepository, AppEnvRepository>();
+        builder.Services.AddScoped<IAppsRolesRepositorys, AppsRolesRepository>();
 
         // Service
         builder.Services.AddScoped<IUserService, UserService>();

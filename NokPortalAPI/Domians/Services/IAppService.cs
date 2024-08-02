@@ -11,6 +11,8 @@ namespace NokPortalAPI.Domains.Services
 
         Task<IEnumerable<App>> GetAllAppAsync();
 
+        Task<IEnumerable<AppEnv>> GetAllAppEnvAsync();
+
         Task<App> GetAppByIdAsync(int appId);
 
         // Task<ResponseJwt> AssignUserTargetAppAsync(int appId, int userId);

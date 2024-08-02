@@ -79,6 +79,24 @@ namespace NokPortalAPI.Domains.Services
             }
         }
 
+
+        public async Task<IEnumerable<AppEnv>> GetAllAppEnvAsync()
+        {
+            using var connection = connectionFactory.CreateConnection();
+            connection.Open();
+            using var tran = connection.BeginTransaction();
+            try
+            {
+                var apps = await appRepository.GetAllAppEnvAsync(connection, tran);
+                tran.Commit();
+                return apps;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<App> GetAppByIdAsync(int appId)
         {
             using var connection = connectionFactory.CreateConnection();
@@ -128,7 +146,6 @@ namespace NokPortalAPI.Domains.Services
             try
             {
                 AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, tran, appId, env);
-                // Console.WriteLine("appEnv :", appEnv);
                 tran.Commit();
 
                 ResponseJwt jwtToken = jwtService.GenerateTokenForTargetApp(null, appEnv.SecretKey, appEnv.JwtHourLimit);

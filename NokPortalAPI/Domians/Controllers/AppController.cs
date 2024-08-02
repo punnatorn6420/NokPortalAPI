@@ -107,6 +107,28 @@ namespace NokPortalAPI.Domains.Controllers
             }
         }
 
+        [HttpGet("env-all")]
+        public async Task<ActionResult> GetAllAppEnv()
+        {
+            try
+            {
+                IEnumerable<AppEnv> apps = await appService.GetAllAppEnvAsync();
+                var responseApps = apps.Select(app => new ResponseAppEnv
+                {
+                    AppId = app.AppId,
+                    Environment = app.Environment,
+                    BaseURL = app.BaseURL,
+                    Additional = app.Additional,
+                    JwtHourLimit = app.JwtHourLimit
+                });
+                return this.Ok(this.FormatSuccessResponse(responseApps));
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+            }
+        }
+
         [HttpPost("{id}/env")]
         public async Task<ActionResult<ApiResponse<object, string>>> CreateAppEnvironment(int id, AppEnv reqAppEnv)
         {
@@ -187,9 +209,6 @@ namespace NokPortalAPI.Domains.Controllers
                 return this.BadRequest(this.FormatInvalidFieldResponse(this.GetFieldErrors()));
             }
 
-            // int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
-
-            // ResponseJwt jwtTokenTargetApp = await _appService.AssignUserTargetAppAsync(id, userId); // mock up
             try
             {
                 await this.usersAppService.AddUserAppAsync(id, reqUserId);
@@ -238,9 +257,9 @@ namespace NokPortalAPI.Domains.Controllers
             {
                 int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
 
-                IEnumerable<UserApps> userAppsList = await this.userService.GetUserAppsAsync(userId, env);
+                UserApps userApps = await this.userService.GetUserAppsAsync(userId, env);
 
-                var user = userAppsList.FirstOrDefault()?.User;
+                var user = userApps?.User;
                 if (user == null)
                 {
                     return this.BadRequest(new ApiResponse<object, string>
@@ -249,9 +268,9 @@ namespace NokPortalAPI.Domains.Controllers
                     });
                 }
 
-                var (appEnv, jwtTokenWithUser) = await this.usersAppService.GetJWTTokenTargetAppWithData(id, env, user, userAppsList);
+                var (appEnv, jwtTokenWithUser) = await this.usersAppService.GetJWTTokenTargetAppWithData(id, env, user, userApps.App);
 
-                var app = userAppsList.SelectMany(ua => ua.App).FirstOrDefault(a => a.AppId == id);
+                var app = userApps.App.FirstOrDefault(a => a.AppId == id);
                 if (app == null)
                 {
                     return this.BadRequest(new ApiResponse<object, string>
@@ -272,35 +291,6 @@ namespace NokPortalAPI.Domains.Controllers
                 {
                     Data = response,
                 });
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
-            }
-        }
-
-
-
-        [HttpGet("{id}/retireve_token")]
-        public async Task<ActionResult<ApiResponse<object, string>>> RetireveToken(int id, [FromQuery] EnumEnvironmentType env)
-        {
-            if (!this.ModelState.IsValid)
-            {
-                return this.BadRequest(this.FormatInvalidFieldResponse(this.GetFieldErrors()));
-            }
-
-            int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
-
-            IEnumerable<UserApps> user = await this.userService.GetUserAppsAsync(userId, env);
-
-            try
-            {
-                ResponseAppEnv appEnv = await appsEnvService.GetById(id, userId, env);
-                return this.Ok(this.FormatSuccessResponse(appEnv));
-            }
-            catch (DataException ex)
-            {
-                return this.Ok(this.FormatSuccessResponse(FormatInternalErrorReponse(ex.Message, null)));
             }
             catch (Exception ex)
             {

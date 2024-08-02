@@ -36,48 +36,11 @@ namespace NokPortalAPI.Domains.Services
             using var connection = connectionFactory.CreateConnection();
             connection.Open();
             using var tran = connection.BeginTransaction();
-
             try
             {
                 AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, tran, appId, addUser.Environment);
                 User user = await userRepository.GetUserByIdAsync(connection, tran, addUser.UserId);
                 tran.Commit();
-
-                ResponseJwt jwtToken = jwtService.GenerateTokenForTargetApp(null, appEnv.SecretKey, appEnv.JwtHourLimit);
-                string fullLinkAppRoles = $"{appEnv.BaseURL}/assign-user";
-
-                var assignedUser = new RequestAssignedUser
-                {
-                    Name = $"{user.FirstName} {user.LastName}",
-                    Email = user.Email,
-                    Roles = addUser.Roles,
-                    Department = user.Department,
-                    Position = string.Empty,
-                };
-
-                var json = JsonConvert.SerializeObject(assignedUser);
-
-                var request = new HttpRequestMessage(HttpMethod.Post, fullLinkAppRoles);
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwtToken.Token);
-                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                var response = await httpClient.SendAsync(request);
-                string responseContent = await response.Content.ReadAsStringAsync();
-                ApiAppResponse jsonResponse = JsonConvert.DeserializeObject<ApiAppResponse>(responseContent) ?? throw new InvalidOperationException("Deserialization resulted in null");
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var responseData = JsonConvert.DeserializeObject(responseContent);
-                }
-                else if (jsonResponse.Message == "Email already exists")
-                {
-                    Console.WriteLine($"Error: {responseContent}");
-                }
-                else
-                {
-                    throw new Exception($"Error: {responseContent}");
-                }
-
                 await assignedUsersRepositiry.AssignedUsersAsync(connection, tran, appId, addUser.UserId, addUser.Roles, addUser.Environment);
             }
             catch (Exception)
@@ -148,8 +111,6 @@ namespace NokPortalAPI.Domains.Services
             {
                 AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, tran, appId, env);
                 ResponseJwt jwtToken = jwtService.GenerateTokenForTargetApp(null, appEnv.SecretKey, appEnv.JwtHourLimit);
-                Console.WriteLine("appEnv", appEnv, "jwtToken", jwtToken);
-
                 tran.Commit();
 
                 return (appEnv, jwtToken);
@@ -161,7 +122,7 @@ namespace NokPortalAPI.Domains.Services
             }
         }
 
-        public async Task<(AppEnv, ResponseJwt)> GetJWTTokenTargetAppWithData(int appId, EnumEnvironmentType env, User user, IEnumerable<UserApps> userAppsList)
+        public async Task<(AppEnv, ResponseJwt)> GetJWTTokenTargetAppWithData(int appId, EnumEnvironmentType env, User user, IEnumerable<AppWithRoles> userAppsList)
         {
             using var connection = connectionFactory.CreateConnection();
             connection.Open();
@@ -171,7 +132,6 @@ namespace NokPortalAPI.Domains.Services
                 AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, tran, appId, env);
 
                 var roles = userAppsList
-                    .SelectMany(userApps => userApps.App)
                     .SelectMany(app => app.Roles)
                     .Distinct()
                     .ToList();
@@ -179,6 +139,7 @@ namespace NokPortalAPI.Domains.Services
                 dynamic jwtSetting = new ExpandoObject();
                 jwtSetting.userID = user.UserId;
                 jwtSetting.name = $"{user.FirstName} {user.LastName}";
+                jwtSetting.objectId = user.ObjectId;
                 jwtSetting.avatar = "";
                 jwtSetting.email = user.Email;
                 jwtSetting.company = "";
@@ -197,6 +158,5 @@ namespace NokPortalAPI.Domains.Services
                 throw;
             }
         }
-
     }
 }
