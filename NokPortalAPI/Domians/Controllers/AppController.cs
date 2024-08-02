@@ -1,8 +1,9 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers;
-using NokCore.Api.JwtToken.Services;
+using NokCore.Api.JWT.Services;
 using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Services;
@@ -17,17 +18,21 @@ namespace NokPortalAPI.Domains.Controllers
         private readonly IAppEnvService appsEnvService;
         private readonly IManagePayloadService managePayload;
         private readonly IUserAppsService usersAppService;
+        private readonly IUserService userService;
+
 
         public AppController(
             IAppService appService,
             IAppEnvService appsEnvService,
             IManagePayloadService managePayload,
-            IUserAppsService usersAppService)
+            IUserAppsService usersAppService,
+            IUserService userService)
         {
             this.appService = appService;
             this.appsEnvService = appsEnvService;
             this.managePayload = managePayload;
             this.usersAppService = usersAppService;
+            this.userService = userService;
         }
 
         [HttpPost("")]
@@ -95,6 +100,28 @@ namespace NokPortalAPI.Domains.Controllers
             {
                 IEnumerable<App> app = await appService.GetAllAppAsync();
                 return this.Ok(this.FormatSuccessResponse(app));
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+            }
+        }
+
+        [HttpGet("env-all")]
+        public async Task<ActionResult> GetAllAppEnv()
+        {
+            try
+            {
+                IEnumerable<AppEnv> apps = await appService.GetAllAppEnvAsync();
+                var responseApps = apps.Select(app => new ResponseAppEnv
+                {
+                    AppId = app.AppId,
+                    Environment = app.Environment,
+                    BaseURL = app.BaseURL,
+                    Additional = app.Additional,
+                    JwtHourLimit = app.JwtHourLimit
+                });
+                return this.Ok(this.FormatSuccessResponse(responseApps));
             }
             catch (Exception ex)
             {
@@ -182,9 +209,6 @@ namespace NokPortalAPI.Domains.Controllers
                 return this.BadRequest(this.FormatInvalidFieldResponse(this.GetFieldErrors()));
             }
 
-            // int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
-
-            // ResponseJwt jwtTokenTargetApp = await _appService.AssignUserTargetAppAsync(id, userId); // mock up
             try
             {
                 await this.usersAppService.AddUserAppAsync(id, reqUserId);
@@ -226,24 +250,47 @@ namespace NokPortalAPI.Domains.Controllers
             }
         }
 
-        [HttpGet("{id}/retireve_token")]
-        public async Task<ActionResult<ApiResponse<object, string>>> RetireveToken(int id, [FromQuery]EnumEnvironmentType env)
+        [HttpGet("{id}/redirect-target-app")]
+        public async Task<ActionResult<ApiResponse<object, string>>> GetJWTTokenForTargetApp(int id, [FromQuery] EnumEnvironmentType env)
         {
-            if (!this.ModelState.IsValid)
-            {
-                return this.BadRequest(this.FormatInvalidFieldResponse(this.GetFieldErrors()));
-            }
-
-            int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
-
             try
             {
-                ResponseAppEnv appEnv = await appsEnvService.GetById(id, userId, env);
-                return this.Ok(this.FormatSuccessResponse(appEnv));
-            }
-            catch (DataException ex)
-            {
-                return this.Ok(this.FormatSuccessResponse(FormatInternalErrorReponse(ex.Message, null)));
+                int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
+
+                UserApps userApps = await this.userService.GetUserAppsAsync(userId, env);
+
+                var user = userApps?.User;
+                if (user == null)
+                {
+                    return this.BadRequest(new ApiResponse<object, string>
+                    {
+                        Data = null,
+                    });
+                }
+
+                var (appEnv, jwtTokenWithUser) = await this.usersAppService.GetJWTTokenTargetAppWithData(id, env, user, userApps.App);
+
+                var app = userApps.App.FirstOrDefault(a => a.AppId == id);
+                if (app == null)
+                {
+                    return this.BadRequest(new ApiResponse<object, string>
+                    {
+                        Data = null,
+                    });
+                }
+
+                var response = new
+                {
+                    BaseURL = app.BaseUrl,
+                    appEnv.Environment,
+                    jwtTokenWithUser.Token,
+                    jwtTokenWithUser.ExpiresTime
+                };
+
+                return Ok(new ApiResponse<object, string>
+                {
+                    Data = response,
+                });
             }
             catch (Exception ex)
             {

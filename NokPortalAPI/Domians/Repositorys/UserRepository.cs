@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using Dapper;
+using Newtonsoft.Json;
 using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
 
@@ -23,51 +24,6 @@ namespace NokPortalAPI.Domains.Repositorys
             }
 
             return appUser;
-        }
-
-        public async Task<IEnumerable<UserApps>> GetUserAppsAsync(IDbConnection conn, IDbTransaction tran, int userId)
-        {
-            // Join query to retrieve user and their apps
-            string query = @"
-                SELECT 
-                    u.UserID, u.Email, u.FirstName, u.LastName, u.JobTitle, u.Department, 
-                    u.ObjectId, u.CreatedAt, u.ModifiedAt, u.Active,
-                    a.AppId, a.Name, a.Header, a.Subheader, a.Detail, a.Image
-                FROM Users u
-                INNER JOIN Assigned_Users ua ON u.UserID = ua.UserID
-                INNER JOIN Apps a ON ua.AppId = a.AppId
-                WHERE u.UserID = @UserID";
-
-            // Dictionary to hold the results and group by user
-            var userAppDictionary = new Dictionary<int, UserApps>();
-
-            var result = await conn.QueryAsync<User, App, UserApps>(
-                query,
-                (user, app) =>
-                {
-                    if (!userAppDictionary.TryGetValue(user.UserId, out var userApps))
-                    {
-                        userApps = new UserApps
-                        {
-                            User = user,
-                            App = new List<App>()
-                        };
-                        userAppDictionary.Add(user.UserId, userApps);
-                    }
-
-                    ((List<App>)userApps.App).Add(app);
-                    return userApps;
-                },
-                new { UserID = userId },
-                splitOn: "AppId",
-                transaction: tran);
-
-            foreach (var userApps in userAppDictionary.Values)
-            {
-                userApps.App = userApps.App.ToList();
-            }
-
-            return userAppDictionary.Values;
         }
 
         public async Task<UserAppWithEnvRoles> GetUserAppsWithEnvRolesAsync(IDbConnection conn, IDbTransaction tran, int userId)
@@ -163,7 +119,6 @@ namespace NokPortalAPI.Domains.Repositorys
                 };
             }
         }
-
 
         public async Task<int> CreateUserAsync(IDbConnection conn, IDbTransaction tran, User user)
         {

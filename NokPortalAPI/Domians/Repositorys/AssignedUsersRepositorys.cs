@@ -46,27 +46,41 @@ namespace NokPortalAPI.Domains.Repositorys
 
             // Insert into Assigned_Users table
             var insertAssignedUserQuery = @"
-                INSERT INTO Assigned_Users (UserID, AppID, Environment)
-                VALUES (@UserID, @AppID, @Environment);
-                SELECT SCOPE_IDENTITY();
-            ";
+                    INSERT INTO Assigned_Users (UserID, AppID, Environment)
+                    VALUES (@UserID, @AppID, @Environment);
+                    SELECT SCOPE_IDENTITY();
+                ";
 
             // Insert into Apps_Roles table
             var insertAppRolesQuery = @"
-                INSERT INTO Apps_Roles (AssignedUserID, RoleID)
-                VALUES (@AssignedUserID, @RoleID);
-            ";
+                    INSERT INTO Apps_Roles (AssignedUserID, RoleID)
+                    VALUES (@AssignedUserID, @RoleID);
+                ";
 
-            // Insert Assigned User
-            var parameters = new { UserID = userId, AppID = appId, Environment = environment.ToString() };
-            int assignedUserId = await conn.ExecuteScalarAsync<int>(insertAssignedUserQuery, parameters, tran);
-
-            // Insert App Roles
-            foreach (var role in roles)
+            try
             {
-                var roleParams = new { AssignedUserID = assignedUserId, RoleID = role };
-                await conn.ExecuteAsync(insertAppRolesQuery, roleParams, tran);
+                // Insert Assigned User
+                var parameters = new { UserID = userId, AppID = appId, Environment = environment.ToString() };
+                int assignedUserId = await conn.ExecuteScalarAsync<int>(insertAssignedUserQuery, parameters, tran);
+
+                // Log AssignedUserID
+
+                // Insert App Roles
+                foreach (var role in roles)
+                {
+                    var roleParams = new { AssignedUserID = assignedUserId, RoleID = role };
+                    int rowsAffected = await conn.ExecuteAsync(insertAppRolesQuery, roleParams, tran);
+
+                    // Log the result of each insert
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"Error in AssignedUsersAsync: {ex.Message}");
+                throw;
             }
         }
+
     }
 }

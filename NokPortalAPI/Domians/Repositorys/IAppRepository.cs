@@ -11,6 +11,8 @@ namespace NokPortalAPI.Domains.Repositorys
 
         Task<IEnumerable<App>> GetAllAppAsync(IDbConnection conn, IDbTransaction tran);
 
+        Task<IEnumerable<AppEnv>> GetAllAppEnvAsync(IDbConnection conn, IDbTransaction tran);
+
         Task<App> GetAppByIdAsync(IDbConnection conn, IDbTransaction tran, int id);
 
         Task<bool> UpdateAppAsync(IDbConnection conn, IDbTransaction tran, int id, string name);

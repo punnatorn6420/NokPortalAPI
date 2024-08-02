@@ -23,8 +23,8 @@ namespace NokPortalAPI.Domains.Repositorys
 
                 // Insert new record
                 var insertSql = @"
-                    INSERT INTO Apps (Name, Header, Subheader, Detail, Image)
-                    VALUES (@Name, @Header, @Subheader, @Detail, @Image);
+                    INSERT INTO Apps (Name, Header, Subheader, Detail, Image ,BaseUrl)
+                    VALUES (@Name, @Header, @Subheader, @Detail, @Image , @BaseUrl);
                     SELECT CAST(SCOPE_IDENTITY() as int);";
 
                 await conn.ExecuteScalarAsync<int>(insertSql, reqCreate, transaction: tran);
@@ -48,11 +48,10 @@ namespace NokPortalAPI.Domains.Repositorys
 
             var updateSql = @"
                     UPDATE Apps
-                    SET Header = @Header, Subheader = @Subheader, Detail = @Detail, Image = @Image
+                    SET Header = @Header, Subheader = @Subheader, Detail = @Detail, Image = @Image, BaseUrl = @BaseUrl
                     WHERE Name = @Name;";
 
             await conn.ExecuteAsync(updateSql, reqUpdate, transaction: tran);
-
             return true;
         }
 
@@ -60,6 +59,12 @@ namespace NokPortalAPI.Domains.Repositorys
         {
             var sql = "SELECT * FROM Apps";
             return await conn.QueryAsync<App>(sql, transaction: tran);
+        }
+
+        public async Task<IEnumerable<AppEnv>> GetAllAppEnvAsync(IDbConnection conn, IDbTransaction tran)
+        {
+            var sql = "SELECT * FROM Apps_Env";
+            return await conn.QueryAsync<AppEnv>(sql, transaction: tran);
         }
 
         public async Task<App> GetAppByIdAsync(IDbConnection conn, IDbTransaction tran, int id)

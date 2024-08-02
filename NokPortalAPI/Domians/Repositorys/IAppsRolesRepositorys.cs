@@ -1,4 +1,5 @@
 ﻿using NokPortalAPI.Domains.Models;
+using System.Data;
 
 namespace NokPortalAPI.Domains.Repositorys
 {
@@ -11,5 +12,7 @@ namespace NokPortalAPI.Domains.Repositorys
         Task<int> AddAsync(AppsRole appsRole);
 
         Task<int> DeleteAsync(int assignedUserId, int roleId);
+
+        Task<IEnumerable<AppWithRoles>> GetAppsWithRolesByUserIdAsync(IDbConnection conn, IDbTransaction tran, int userId, EnumEnvironmentType env);
     }
 }
