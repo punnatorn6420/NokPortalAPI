@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers;
+using NokCore.Api.JWT.Models;
 using NokCore.Api.JWT.Services;
 using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Services;
@@ -10,19 +11,20 @@ namespace NokPortalAPI.Domains.Controllers
     [Route("me")]
     public class MeController : NokController<ControllerBase>
     {
-        private readonly IManagePayloadService managePayload;
         private readonly IUserAppsService userAppsService;
         private readonly IUserService userService;
 
-        public MeController(IManagePayloadService managePayload, IUserAppsService userAppsService, IUserService userService)
+        public MeController(IUserAppsService userAppsService, IUserService userService)
         {
-            this.managePayload = managePayload;
             this.userAppsService = userAppsService;
             this.userService = userService;
         }
 
+        /// <summary>
+        /// Get user information based on the JWT token.
+        /// </summary>
         [HttpGet("")]
-        public async Task<ActionResult<ApiResponse<object, string>>> GetMeInfo([FromQuery] EnumEnvironmentType env)
+        public async Task<ActionResult> GetMeInfo([FromQuery] EnumEnvironmentType env)
         {
             if (!this.ModelState.IsValid)
             {
@@ -31,10 +33,14 @@ namespace NokPortalAPI.Domains.Controllers
 
             try
             {
-                int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
+                // Get user claims from http context.
+                var userClaims = this.GetUserClaims();
+                if (!userClaims.IsValid)
+                {
+                    return this.Unauthorized(this.FormatInternalErrorReponse("User claims not found", null));
+                }
 
-                UserApps user = await this.userService.GetUserAppsAsync(userId, env);
-
+                UserApps user = await this.userService.GetUserAppsAsync(userClaims.UserId, env);
                 return this.Ok(this.FormatSuccessResponse(user));
             }
             catch (Exception ex)
@@ -45,7 +51,7 @@ namespace NokPortalAPI.Domains.Controllers
                 }
                 else
                 {
-                    return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+                    return this.Ok(this.FormatInternalErrorReponse(ex.Message, null));
                 }
             }
         }

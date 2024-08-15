@@ -8,10 +8,12 @@ namespace NokPortalAPI.Domains.Models
         [JsonPropertyName("appId")]
         public int AppId { get; set; }
 
+        [Required]
         [JsonPropertyName("name")]
         [MaxLength(255)]
         public string Name { get; set; } = string.Empty;
 
+        [Required]
         [JsonPropertyName("header")]
         [MaxLength(255)]
         public string Header { get; set; } = string.Empty;

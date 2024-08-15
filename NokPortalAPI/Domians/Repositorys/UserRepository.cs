@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using Dapper;
 using Newtonsoft.Json;
+using NokCore.Exceptions;
 using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
 
@@ -114,7 +115,7 @@ namespace NokPortalAPI.Domains.Repositorys
 
                 return new UserAppWithEnvRoles
                 {
-                    User = user ?? throw new DataException("user null value"),
+                    User = user ?? throw new DataValidationException("user null value"),
                     AppWithEnvRoles = appWithEnvRolesDict.Values
                 };
             }
@@ -133,7 +134,7 @@ namespace NokPortalAPI.Domains.Repositorys
             if (count > 0)
             {
                 // Handle duplicate email error or return a message indicating the email is not unique
-                throw new DuplicateNameException("This email already exists in the system.");
+                throw new DataValidationException("This email already exists in the system.");
             }
             else
             {

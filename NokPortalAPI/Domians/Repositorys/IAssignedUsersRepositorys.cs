@@ -5,10 +5,10 @@ namespace NokPortalAPI.Domains.Repositorys
 {
     public interface IAssignedUsersRepositorys
     {
-        Task<ModelUserApp> GetUserAppAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId);
+        Task<ModelUserApp> GetAssignedUserAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId);
 
-        Task<IEnumerable<App>> GetUserAllAppAsync(IDbConnection conn, IDbTransaction tran, int userId);
+        Task<IEnumerable<App>> GetAllAssingedUsersAppAsync(IDbConnection conn, IDbTransaction tran, int userId);
 
-        Task AssignedUsersAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId, IEnumerable<int> roles, EnumEnvironmentType environment);
+        Task CreateAssignedUsersAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId, IEnumerable<int> roles, EnumEnvironmentType environment);
     }
 }

@@ -1,15 +1,15 @@
-﻿using System.Data;
-using NokPortalAPI.Domains.Models;
-using NokPortalAPI.Domains.Models;
+﻿using NokPortalAPI.Domains.Models;
 
 namespace NokPortalAPI.Domains.Services
 {
     public interface IAppEnvService
     {
-        Task<bool> CreateAppsEnv(AppEnv reqCreateAppEnv, int appId);
+        Task<bool> CreateAppEnvAsync(AppEnv appEnv);
 
-        Task<bool> UpdateAppsEnv(AppEnv reqCreateAppEnv, int appId);
+        Task<bool> UpdateAppEnvAsync(AppEnv appEnv);
 
-        Task<ResponseAppEnv> GetById(int appId, int userId, EnumEnvironmentType env);
+        Task<IEnumerable<AppEnv>> GetAllAppEnvAsync();
+
+        Task<AppEnv?> GetById(int appId, int userId, EnumEnvironmentType env);
     }
 }

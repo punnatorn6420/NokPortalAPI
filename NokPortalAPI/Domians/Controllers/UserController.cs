@@ -33,7 +33,7 @@ namespace NokPortalAPI.Domains.Controllers
             }
             catch (Exception ex)
             {
-                return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+                return this.Ok(this.FormatInternalErrorReponse(ex.Message, null));
             }
         }
 
@@ -58,7 +58,7 @@ namespace NokPortalAPI.Domains.Controllers
                 }
                 else
                 {
-                    return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+                    return this.Ok(this.FormatInternalErrorReponse(ex.Message, null));
                 }
             }
         }

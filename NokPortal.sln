@@ -3,16 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34916.146
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NokPortalAPI", "NokPortalAPI\NokPortalAPI.csproj", "{BFB5DA65-BC86-4D1F-9341-E9CAA8B8087E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NokPortalAPI", ".\NokPortalAPI\NokPortalAPI.csproj", "{BFB5DA65-BC86-4D1F-9341-E9CAA8B8087E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8B066A70-A13B-45D3-A9F6-518FEDE2EDCF}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NokCore", "..\NokCore\NokCore.csproj", "{A5EA56BF-25B0-4468-8820-0EB581BFDAAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NokCore", "..\NokCore\NokCore.csproj", "{48D6AEE2-8CCA-444F-AAE4-7FA02D5A3A00}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NokConnectPoint", "..\NokConnectPoint\NokConnectPoint.csproj", "{88CAACF6-101F-49CD-9132-B256AE1E8698}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NokConnectPoint", "..\NokConnectPoint\NokConnectPoint.csproj", "{0F1B6EDA-2F71-4822-BD2B-35087A1DEAFA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,14 +24,14 @@ Global
 		{BFB5DA65-BC86-4D1F-9341-E9CAA8B8087E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BFB5DA65-BC86-4D1F-9341-E9CAA8B8087E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BFB5DA65-BC86-4D1F-9341-E9CAA8B8087E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A5EA56BF-25B0-4468-8820-0EB581BFDAAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A5EA56BF-25B0-4468-8820-0EB581BFDAAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A5EA56BF-25B0-4468-8820-0EB581BFDAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A5EA56BF-25B0-4468-8820-0EB581BFDAAC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{88CAACF6-101F-49CD-9132-B256AE1E8698}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{88CAACF6-101F-49CD-9132-B256AE1E8698}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{88CAACF6-101F-49CD-9132-B256AE1E8698}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{88CAACF6-101F-49CD-9132-B256AE1E8698}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48D6AEE2-8CCA-444F-AAE4-7FA02D5A3A00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48D6AEE2-8CCA-444F-AAE4-7FA02D5A3A00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48D6AEE2-8CCA-444F-AAE4-7FA02D5A3A00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48D6AEE2-8CCA-444F-AAE4-7FA02D5A3A00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F1B6EDA-2F71-4822-BD2B-35087A1DEAFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F1B6EDA-2F71-4822-BD2B-35087A1DEAFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F1B6EDA-2F71-4822-BD2B-35087A1DEAFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F1B6EDA-2F71-4822-BD2B-35087A1DEAFA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

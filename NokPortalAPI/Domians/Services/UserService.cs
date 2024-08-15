@@ -9,6 +9,9 @@
     using NokPortalAPI.Domains.Repositorys;
     using NokPortalAPI.Shared.DB;
 
+    /// <summary>
+    /// This class implements the user service.
+    /// </summary>
     public class UserService : IUserService
     {
         private readonly IConfiguration configuration;
@@ -28,6 +31,10 @@
             this.jwtService = jwtService;
         }
 
+        /// <summary>
+        /// Get all users from the database.
+        /// </summary>
+        /// <returns>The list of users.</returns>
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
             connectionFactory.Open();
@@ -214,7 +221,7 @@
             }
         }
 
-        public async Task<ResponseJwt> SigninMicrosoftGraphGetMeAsync(string token)
+        public async Task<JwtResponse> SigninMicrosoftGraphGetMeAsync(string token)
         {
             try
             {
@@ -244,9 +251,10 @@
                 User user = await userRepository.GetUserByEmailAsync(connectionFactory, tran, userAD.UserPrincipalName);
                 tran.Commit();
 
-                var jwtData = new JwtData
+                var jwtData = new NokCore.Api.JWT.Models.UserClaims
                 {
                     UserId = user.UserId,
+
                     // RoleId = (int)EnumUserRole.Root
                 };
 

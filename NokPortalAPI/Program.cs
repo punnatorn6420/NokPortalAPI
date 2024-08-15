@@ -5,7 +5,6 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using NokCore.Api.JWT.Services;
 using NokCore.Api.Middlewares;
-// using NokPortalAPI.Domains.Middlewares;
 using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Repositorys;
 using NokPortalAPI.Domains.Services;
@@ -36,7 +35,6 @@ public class Program
         // Service
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IAppService, AppService>();
-        builder.Services.AddScoped<IManagePayloadService, ManagePayloadService>();
         builder.Services.AddScoped<IAppEnvService, AppEnvService>();
         builder.Services.AddScoped<IUserAppsService, UserAppsService>();
 
@@ -67,7 +65,7 @@ public class Program
         builder.Services.AddValidatorsFromAssemblyContaining<RequestTokenValidation>();
 
         // builder.Services.AddValidatorsFromAssemblyContaining<RequestToken>();
-        builder.Services.AddValidatorsFromAssemblyContaining<RequestApp>();
+        builder.Services.AddValidatorsFromAssemblyContaining<App>();
         builder.Services.AddValidatorsFromAssemblyContaining<RequestAppInfo>();
 
         // builder.Services.AddValidatorsFromAssemblyContaining<RequestCreateAppEnvValidator>();
@@ -95,6 +93,8 @@ public class Program
 
         app.UseCors("AllowSpecificOrigin");
 
+        // Register JWT middleware to check for JWT token in the request header.
+        // For endpoints that not require JWT token, add [AllowAnonymous] attribute.
         app.UseMiddleware<JWTmiddleware>();
 
         app.UseAuthentication();
