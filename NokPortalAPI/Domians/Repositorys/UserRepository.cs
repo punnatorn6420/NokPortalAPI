@@ -1,21 +1,20 @@
-﻿using System.Data;
-using Dapper;
-using Newtonsoft.Json;
-using NokCore.Exceptions;
-using NokCore.Identity.Models;
-using NokPortalAPI.Domains.Models;
-
-namespace NokPortalAPI.Domains.Repositorys
+﻿namespace NokPortalAPI.Domains.Repositorys
 {
+    using System.Data;
+    using Dapper;
+    using NokCore.Exceptions;
+    using NokCore.Identity.Models;
+    using NokPortalAPI.Domains.Models;
+
     public class UserRepository : IUserRepository
     {
-        public async Task<IEnumerable<User>> GetAllUsersAsync(IDbConnection conn, IDbTransaction tran)
+        public async Task<IEnumerable<User>> GetAllUsersAsync(IDbConnection conn, IDbTransaction? tran = null)
         {
             string query = "SELECT * FROM Users";
             return await conn.QueryAsync<User>(query, transaction: tran);
         }
 
-        public async Task<User> GetUserByIdAsync(IDbConnection conn, IDbTransaction tran, int id)
+        public async Task<User> GetUserByIdAsync(IDbConnection conn, int id, IDbTransaction? tran = null)
         {
             string query = "SELECT * FROM Users WHERE UserID = @Id";
             User? appUser = await conn.QuerySingleOrDefaultAsync<User>(query, new { Id = id }, tran);
@@ -27,7 +26,7 @@ namespace NokPortalAPI.Domains.Repositorys
             return appUser;
         }
 
-        public async Task<UserAppWithEnvRoles> GetUserAppsWithEnvRolesAsync(IDbConnection conn, IDbTransaction tran, int userId)
+        public async Task<UserAppWithEnvRoles> GetUserAppsWithEnvRolesAsync(IDbConnection conn, int userId, IDbTransaction? tran = null)
         {
             var userQuery = @"
         SELECT
@@ -121,7 +120,7 @@ namespace NokPortalAPI.Domains.Repositorys
             }
         }
 
-        public async Task<int> CreateUserAsync(IDbConnection conn, IDbTransaction tran, User user)
+        public async Task<int> CreateUserAsync(IDbConnection conn, User user, IDbTransaction? tran = null)
         {
             string checkQuery = @"
                 SELECT COUNT(*)
@@ -149,7 +148,7 @@ namespace NokPortalAPI.Domains.Repositorys
             }
         }
 
-        public async Task<bool> UpdateUserAsync(IDbConnection conn, IDbTransaction tran, User user)
+        public async Task<bool> UpdateUserAsync(IDbConnection conn, User user, IDbTransaction? tran = null)
         {
             string query = @"
                 UPDATE Users
@@ -160,14 +159,14 @@ namespace NokPortalAPI.Domains.Repositorys
             return rowsAffected > 0;
         }
 
-        public async Task<bool> DeleteUserAsync(IDbConnection conn, IDbTransaction tran, int id)
+        public async Task<bool> DeleteUserAsync(IDbConnection conn, int id, IDbTransaction? tran = null)
         {
             string query = "DELETE FROM Users WHERE UserID = @Id";
             int rowsAffected = await conn.ExecuteAsync(query, id, tran);
             return rowsAffected > 0;
         }
 
-        public async Task<User> GetUserByEmailAsync(IDbConnection conn, IDbTransaction tran, string email)
+        public async Task<User> GetUserByEmailAsync(IDbConnection conn, string email, IDbTransaction? tran = null)
         {
             string query = "SELECT * FROM Users WHERE Email = @Email";
             var queryByEmail = new { Email = email };

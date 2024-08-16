@@ -1,25 +1,33 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
+using NokCore.Db;
 
 namespace NokPortalAPI.Shared.DB
 {
-    public interface IDbConnectionFactory
+    public class DbConnectionFactory : BaseDbConnectionFactory
     {
-        IDbConnection CreateConnection();
-    }
-
-    public class DbConnectionFactory : IDbConnectionFactory
-    {
-        private readonly IConfiguration _configuration;
-
         public DbConnectionFactory(IConfiguration configuration)
+            : base(configuration)
         {
-            _configuration = configuration;
         }
 
-        public IDbConnection CreateConnection()
+        /// <summary>
+        /// Implements the CreateConnection method from the BaseDbConnectionFactory class.
+        /// </summary>
+        /// <returns></returns>
+        public override IDbConnection CreateConnection()
         {
-            return new SqlConnection(_configuration["ConnectionStrings:NokPortalDB"]);
+            return new SqlConnection(this.configuration["ConnectionStrings:NokPortalDB"]);
+        }
+
+        /// <summary>
+        /// Implements the CreateConnectionAsync method from the BaseDbConnectionFactory class.
+        /// </summary>
+        public override async Task<IDbConnection> CreateConnectionAsync()
+        {
+            var conn = new SqlConnection(this.configuration["ConnectionStrings:NokPortalDB"]);
+            await conn.OpenAsync();
+            return conn;
         }
     }
 }

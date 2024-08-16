@@ -1,8 +1,7 @@
-﻿using System.Data;
-using System.Data.SqlClient;
+﻿using System.Data.SqlClient;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers;
-using NokCore.Api.JWT.Services;
 using NokCore.Exceptions;
 using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
@@ -18,7 +17,6 @@ namespace NokPortalAPI.Domains.Controllers
         private readonly IAppEnvService appEnvService;
         private readonly IUserAppsService usersAppService;
         private readonly IUserService userService;
-
 
         public AppController(
             IAppService appService,
@@ -36,6 +34,7 @@ namespace NokPortalAPI.Domains.Controllers
         /// This endpoint is used to create a new app.
         /// </summary>
         [HttpPost("")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult> CreateApp(App app)
         {
             // Check if the model state is valid
@@ -68,6 +67,7 @@ namespace NokPortalAPI.Domains.Controllers
         /// This endpoint is used to update an existing app.
         /// </summary>
         [HttpPut("")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult> UpdateApp(App app)
         {
             // Check if the model state is valid
@@ -101,6 +101,7 @@ namespace NokPortalAPI.Domains.Controllers
         /// </summary>
         /// TODO: Discuss with the team about the endpoint name.
         [HttpGet("all")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult> GetAllApp()
         {
             try
@@ -119,6 +120,7 @@ namespace NokPortalAPI.Domains.Controllers
         /// </summary>
         /// TODO: Discuss with the team about the endpoint name.
         [HttpGet("env-all")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult> GetAllAppEnv()
         {
             try
@@ -136,6 +138,7 @@ namespace NokPortalAPI.Domains.Controllers
         /// This endpoint is used to create a new app environment.
         /// </summary>
         [HttpPost("{id}/env")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<ApiResponse<object, string>>> CreateAppEnvironment(int id, AppEnv appEnv)
         {
             if (!ModelState.IsValid)
@@ -170,6 +173,7 @@ namespace NokPortalAPI.Domains.Controllers
         /// This endpoint is used to update an existing app environment.
         /// </summary>
         [HttpPut("{id}/env")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<ApiResponse<object, string>>> UpdateAppEnvironment(int id, AppEnv appEnv)
         {
             if (!ModelState.IsValid)
@@ -197,6 +201,7 @@ namespace NokPortalAPI.Domains.Controllers
         /// This endpoint is used to get the app info by app id.
         /// </summary>
         [HttpGet("{id}")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<ApiResponse<object, string>>> GetAppInfo(int id)
         {
             if (!this.ModelState.IsValid)
@@ -219,6 +224,7 @@ namespace NokPortalAPI.Domains.Controllers
         /// This endpoint is used to assign a user to an app.
         /// </summary>
         [HttpPost("{id}/assign-user")] // Link app, user, (role)
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<ApiResponse<object, string>>> CreateUserApp(int id, RequestAddUserApp reqUserId)
         {
             if (!ModelState.IsValid)
@@ -258,6 +264,7 @@ namespace NokPortalAPI.Domains.Controllers
         /// </summary>
         /// TODO: Discuss with the team about the endpoint name.
         [HttpGet("{id}/get-roles")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<ApiResponse<object, string>>> GetRoles(int id, [FromQuery] EnumEnvironmentType env)
         {
             try
@@ -276,6 +283,7 @@ namespace NokPortalAPI.Domains.Controllers
         /// </summary>
         /// TODO: Discuss with the team about the endpoint name.
         [HttpGet("{id}/redirect-target-app")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<ApiResponse<object, string>>> GetJWTTokenForTargetApp(int id, [FromQuery] EnumEnvironmentType env)
         {
             try

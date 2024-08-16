@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers;
 using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
@@ -18,6 +19,7 @@ namespace NokPortalAPI.Domains.Controllers
         }
 
         [HttpGet("all")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<ApiResponse<object, string>>> UserAll()
         {
             if (!this.ModelState.IsValid)
@@ -38,6 +40,7 @@ namespace NokPortalAPI.Domains.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<ApiResponse<object, string>>> GetByUserId(int id)
         {
             if (!this.ModelState.IsValid)

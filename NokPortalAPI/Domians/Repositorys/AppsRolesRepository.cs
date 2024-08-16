@@ -45,7 +45,7 @@ namespace NokPortalAPI.Domains.Repositorys
         /// <param name="userId">User id.</param>
         /// <param name="env">Environment type.</param>
         /// <returns></returns>
-        public async Task<IEnumerable<AppWithRoles>> GetAppsWithRolesByUserIdAsync(IDbConnection conn, IDbTransaction tran, int userId, EnumEnvironmentType env)
+        public async Task<IEnumerable<AppWithRoles>> GetAppsWithRolesByUserIdAsync(IDbConnection conn, int userId, EnumEnvironmentType env, IDbTransaction? tran = null)
         {
             string appQuery = @"
                 SELECT 

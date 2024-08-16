@@ -13,6 +13,6 @@ namespace NokPortalAPI.Domains.Repositorys
 
         Task<int> DeleteAsync(int assignedUserId, int roleId);
 
-        Task<IEnumerable<AppWithRoles>> GetAppsWithRolesByUserIdAsync(IDbConnection conn, IDbTransaction tran, int userId, EnumEnvironmentType env);
+        Task<IEnumerable<AppWithRoles>> GetAppsWithRolesByUserIdAsync(IDbConnection conn, int userId, EnumEnvironmentType env, IDbTransaction? tran = null);
     }
 }
