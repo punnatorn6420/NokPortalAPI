@@ -1,6 +1,5 @@
 ﻿namespace NokPortalAPI.Domains.Services
 {
-    using System.Data;
     using System.Text.Json;
     using NokCore.Api.JWT.Models;
     using NokCore.Api.JWT.Services;
@@ -9,32 +8,39 @@
     using NokPortalAPI.Domains.Repositorys;
     using NokPortalAPI.Shared.DB;
 
+    /// <summary>
+    /// This class implements the user service.
+    /// </summary>
     public class UserService : IUserService
     {
         private readonly IConfiguration configuration;
         private readonly IUserRepository userRepository;
         private readonly IAppsRolesRepositorys appsRolesRepository;
-        private readonly IDbConnection connectionFactory;
+        private readonly DbConnectionFactory dbConnectionFactory;
         private readonly HttpClient httpClient;
         private readonly IJwtService jwtService;
 
-        public UserService(IConfiguration configuration, IDbConnectionFactory connectionFactory, IUserRepository userRepository, HttpClient httpClient, IJwtService jwtService, IAppsRolesRepositorys appsRolesRepository)
+        public UserService(IConfiguration configuration, DbConnectionFactory dbConnectionFactory, IUserRepository userRepository, HttpClient httpClient, IJwtService jwtService, IAppsRolesRepositorys appsRolesRepository)
         {
             this.userRepository = userRepository;
             this.appsRolesRepository = appsRolesRepository;
             this.configuration = configuration;
-            this.connectionFactory = connectionFactory.CreateConnection();
+            this.dbConnectionFactory = dbConnectionFactory;
             this.httpClient = httpClient;
             this.jwtService = jwtService;
         }
 
+        /// <summary>
+        /// Get all users from the database.
+        /// </summary>
+        /// <returns>The list of users.</returns>
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            connectionFactory.Open();
-            using var tran = connectionFactory.BeginTransaction();
+            using var conn = await this.dbConnectionFactory.CreateConnectionAsync();
+            using var tran = conn.BeginTransaction();
             try
             {
-                IEnumerable<User> listUser = await userRepository.GetAllUsersAsync(connectionFactory, tran);
+                IEnumerable<User> listUser = await userRepository.GetAllUsersAsync(conn, tran);
                 tran.Commit();
                 return listUser;
             }
@@ -46,18 +52,18 @@
 
         public async Task<UserApps> GetUserAppsAsync(int userId, EnumEnvironmentType env)
         {
-            connectionFactory.Open();
-            using var tran = connectionFactory.BeginTransaction();
+            using var conn = await this.dbConnectionFactory.CreateConnectionAsync();
+            using var tran = conn.BeginTransaction();
             try
             {
-                User user = await userRepository.GetUserByIdAsync(connectionFactory, tran, userId);
+                User user = await userRepository.GetUserByIdAsync(conn, userId, tran);
 
                 if (user == null)
                 {
                     return null;
                 }
 
-                var appsWithRoles = await this.appsRolesRepository.GetAppsWithRolesByUserIdAsync(connectionFactory, tran, userId, env);
+                var appsWithRoles = await this.appsRolesRepository.GetAppsWithRolesByUserIdAsync(conn, userId, env, tran);
 
                 var userApps = new UserApps
                 {
@@ -68,7 +74,7 @@
                 tran.Commit();
                 return userApps;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 tran.Rollback();
                 throw;
@@ -77,12 +83,11 @@
 
         public async Task<UserAppWithEnvRoles> GetUserAppsWithEnvRolesAsync(int userId)
         {
-            connectionFactory.Open();
-            using var tran = connectionFactory.BeginTransaction();
+            using var conn = await this.dbConnectionFactory.CreateConnectionAsync();
+            using var tran = conn.BeginTransaction();
             try
             {
-
-                UserAppWithEnvRoles userApps = await userRepository.GetUserAppsWithEnvRolesAsync(connectionFactory, tran, userId);
+                UserAppWithEnvRoles userApps = await userRepository.GetUserAppsWithEnvRolesAsync(conn, userId, tran);
                 tran.Commit();
                 return userApps;
             }
@@ -94,42 +99,42 @@
 
         public async Task<User> GetUserByIdAsync(int id)
         {
-            connectionFactory.Open();
-            using var tran = connectionFactory.BeginTransaction();
-            User user = await userRepository.GetUserByIdAsync(connectionFactory, tran, id);
+            using var conn = await dbConnectionFactory.CreateConnectionAsync();
+            using var tran = conn.BeginTransaction();
+            User user = await userRepository.GetUserByIdAsync(conn, id, tran);
             tran.Commit();
             return user;
         }
 
         public async Task<int> CreateUserAsync(User user)
         {
-            connectionFactory.Open();
-            using var tran = connectionFactory.BeginTransaction();
+            using var conn = await dbConnectionFactory.CreateConnectionAsync();
+            using var tran = conn.BeginTransaction();
 
             user.CreatedAt = DateTime.UtcNow;
             user.ModifiedAt = DateTime.UtcNow;
-            int rowsAffected = await userRepository.CreateUserAsync(connectionFactory, tran, user);
+            int rowsAffected = await userRepository.CreateUserAsync(conn, user, tran);
             tran.Commit();
             return rowsAffected;
         }
 
         public async Task<bool> UpdateUserAsync(User user)
         {
-            connectionFactory.Open();
-            using var tran = connectionFactory.BeginTransaction();
+            using var conn = await dbConnectionFactory.CreateConnectionAsync();
+            using var tran = conn.BeginTransaction();
 
             user.ModifiedAt = DateTime.UtcNow;
-            bool success = await userRepository.UpdateUserAsync(connectionFactory, tran, user);
+            bool success = await userRepository.UpdateUserAsync(conn, user, tran);
             tran.Commit();
             return success;
         }
 
         public async Task<bool> DeleteUserAsync(int id)
         {
-            connectionFactory.Open();
-            using var tran = connectionFactory.BeginTransaction();
+            using var conn = await dbConnectionFactory.CreateConnectionAsync();
+            using var tran = conn.BeginTransaction();
 
-            bool success = await userRepository.DeleteUserAsync(connectionFactory, tran, id);
+            bool success = await userRepository.DeleteUserAsync(conn, id, tran);
             tran.Commit();
             return success;
         }
@@ -200,10 +205,10 @@
                 Active = true,
             };
 
-            connectionFactory.Open();
-            using var tran = connectionFactory.BeginTransaction();
+            using var conn = await dbConnectionFactory.CreateConnectionAsync();
+            using var tran = conn.BeginTransaction();
 
-            int rowsAffected = await userRepository.CreateUserAsync(connectionFactory, tran, user);
+            int rowsAffected = await userRepository.CreateUserAsync(conn, user, tran);
             if (rowsAffected > 0)
             {
                 tran.Commit();
@@ -214,7 +219,7 @@
             }
         }
 
-        public async Task<ResponseJwt> SigninMicrosoftGraphGetMeAsync(string token)
+        public async Task<JwtResponse> SigninMicrosoftGraphGetMeAsync(string token)
         {
             try
             {
@@ -239,14 +244,15 @@
                     throw;
                 }
 
-                connectionFactory.Open();
-                using var tran = connectionFactory.BeginTransaction();
-                User user = await userRepository.GetUserByEmailAsync(connectionFactory, tran, userAD.UserPrincipalName);
+                using var conn = await dbConnectionFactory.CreateConnectionAsync();
+                using var tran = conn.BeginTransaction();
+                User user = await userRepository.GetUserByEmailAsync(conn, userAD.UserPrincipalName, tran);
                 tran.Commit();
 
-                var jwtData = new JwtData
+                var jwtData = new NokCore.Api.JWT.Models.UserClaims
                 {
                     UserId = user.UserId,
+
                     // RoleId = (int)EnumUserRole.Root
                 };
 

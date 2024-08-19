@@ -1,24 +1,34 @@
 ﻿using System.Data;
-using System.Data.SqlClient;
 using Dapper;
+using NokCore.Exceptions;
 using NokPortalAPI.Domains.Models;
-using NokPortalAPI.Domains.Repositorys;
 
 namespace NokPortalAPI.Domains.Repositorys
 {
+    /// <summary>
+    /// Repository for managing app data.
+    /// </summary>
     public class AppRepository : IAppRepository
     {
-        public async Task<bool> CreateAppAsync(IDbConnection conn, IDbTransaction tran, RequestApp reqCreate)
+        /// <summary>
+        /// Create a new app record.
+        /// </summary>
+        /// <param name="conn">Connection to the database.</param>
+        /// <param name="app">Request to create a new app.</param>
+        /// <param name="tran">Transaction to use.</param>
+        /// <returns></returns>
+        /// <exception cref="DataValidationException"></exception>
+        public async Task<bool> CreateAppAsync(IDbConnection conn, App app, IDbTransaction? tran = null)
         {
             try
             {
                 // Check if the name already exists
                 var checkSql = "SELECT COUNT(1) FROM Apps WHERE Name = @Name";
-                var nameExists = await conn.ExecuteScalarAsync<bool>(checkSql, new { reqCreate.Name }, transaction: tran);
+                var nameExists = await conn.ExecuteScalarAsync<bool>(checkSql, new { app.Name }, transaction: tran);
 
                 if (nameExists)
                 {
-                    throw new DuplicateNameException("An app with this name already exists.");
+                    throw new DataValidationException("An app with this name already exists.");
                 }
 
                 // Insert new record
@@ -27,7 +37,7 @@ namespace NokPortalAPI.Domains.Repositorys
                     VALUES (@Name, @Header, @Subheader, @Detail, @Image , @BaseUrl);
                     SELECT CAST(SCOPE_IDENTITY() as int);";
 
-                await conn.ExecuteScalarAsync<int>(insertSql, reqCreate, transaction: tran);
+                await conn.ExecuteScalarAsync<int>(insertSql, app, transaction: tran);
                 return true;
             }
             catch (Exception)
@@ -36,14 +46,22 @@ namespace NokPortalAPI.Domains.Repositorys
             }
         }
 
-        public async Task<bool> UpdateAppAsync(IDbConnection conn, IDbTransaction tran, RequestApp reqUpdate)
+        /// <summary>
+        /// Update an existing app record.
+        /// </summary>
+        /// <param name="conn">Connection to the database.</param>
+        /// <param name="app">Request to update an app.</param>
+        /// <param name="tran">Transaction to use.</param>
+        /// <returns></returns>
+        /// <exception cref="DataNotFoundException"></exception>
+        public async Task<bool> UpdateAppAsync(IDbConnection conn, App app, IDbTransaction? tran = null)
         {
             var checkSql = "SELECT COUNT(1) FROM Apps WHERE Name = @Name";
-            var appExists = await conn.ExecuteScalarAsync<int>(checkSql, new { reqUpdate.Name }, transaction: tran) > 0;
+            var appExists = await conn.ExecuteScalarAsync<int>(checkSql, new { app.Name }, transaction: tran) > 0;
 
             if (!appExists)
             {
-                throw new KeyNotFoundException("App not found.");
+                throw new DataNotFoundException("App not found.");
             }
 
             var updateSql = @"
@@ -51,41 +69,49 @@ namespace NokPortalAPI.Domains.Repositorys
                     SET Header = @Header, Subheader = @Subheader, Detail = @Detail, Image = @Image, BaseUrl = @BaseUrl
                     WHERE Name = @Name;";
 
-            await conn.ExecuteAsync(updateSql, reqUpdate, transaction: tran);
+            await conn.ExecuteAsync(updateSql, app, transaction: tran);
             return true;
         }
 
-        public async Task<IEnumerable<App>> GetAllAppAsync(IDbConnection conn, IDbTransaction tran)
+        /// <summary>
+        /// Get all app records.
+        /// </summary>
+        /// <param name="conn">Connection to the database.</param>
+        /// <param name="tran">Transaction to use.</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<App>> GetAllAppAsync(IDbConnection conn, IDbTransaction? tran = null)
         {
             var sql = "SELECT * FROM Apps";
             return await conn.QueryAsync<App>(sql, transaction: tran);
         }
 
-        public async Task<IEnumerable<AppEnv>> GetAllAppEnvAsync(IDbConnection conn, IDbTransaction tran)
-        {
-            var sql = "SELECT * FROM Apps_Env";
-            return await conn.QueryAsync<AppEnv>(sql, transaction: tran);
-        }
-
-        public async Task<App> GetAppByIdAsync(IDbConnection conn, IDbTransaction tran, int id)
+        /// <summary>
+        /// Get an app record by ID.
+        /// </summary>
+        /// <param name="conn">Connection to the database.</param>
+        /// <param name="tran">Transaction to use.</param>
+        /// <param name="id">App ID.</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<App> GetAppByIdAsync(IDbConnection conn, int id, IDbTransaction? tran = null)
         {
             var sql = "SELECT * FROM Apps WHERE AppId = @AppId";
             App? app = await conn.QueryFirstOrDefaultAsync<App>(sql, new { AppID = id }, transaction: tran);
             if (app == null)
             {
-                throw new Exception("Not found app");
+                throw new DataNotFoundException("Not found app");
             }
             return app;
         }
 
-        public async Task<bool> UpdateAppAsync(IDbConnection conn, IDbTransaction tran, int id, string name)
-        {
-            var sql = "UPDATE Apps SET Name = @Name WHERE AppId = @AppId";
-            var rowsAffected = await conn.ExecuteAsync(sql, new { AppID = id, Name = name }, transaction: tran);
-            return rowsAffected > 0;
-        }
-
-        public async Task<bool> DeleteAppAsync(IDbConnection conn, IDbTransaction tran, int id)
+        /// <summary>
+        /// Delete an app record by ID.
+        /// </summary>
+        /// <param name="conn">Connection to the database.</param>
+        /// <param name="tran">Transaction to use.</param>
+        /// <param name="id">App ID.</param>
+        /// <returns></returns>
+        public async Task<bool> DeleteAppByIdAsync(IDbConnection conn, int id, IDbTransaction? tran = null)
         {
             var sql = "DELETE FROM Apps WHERE AppId = @AppId";
             var rowsAffected = await conn.ExecuteAsync(sql, new { AppID = id }, transaction: tran);

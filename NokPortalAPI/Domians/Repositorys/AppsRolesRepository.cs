@@ -1,36 +1,51 @@
-﻿using Dapper;
+﻿using System.Data;
+using Dapper;
 using NokPortalAPI.Domains.Models;
-using System.Data;
 
 namespace NokPortalAPI.Domains.Repositorys
 {
+    /// <summary>
+    /// Repository for managing apps roles data.
+    /// </summary>
     public class AppsRolesRepository : IAppsRolesRepositorys
     {
-        public async Task<IEnumerable<AppsRole>> GetAllAsync()
+        /// <summary>
+        /// Get all apps roles.
+        /// </summary>
+        /// <returns></returns>
+        public Task<IEnumerable<AppsRole>> GetAllAsync()
         {
             // Implement method
             throw new NotImplementedException();
         }
 
-        public async Task<AppsRole> GetByAssignedUserIdAsync(int assignedUserId)
+        public Task<AppsRole> GetByAssignedUserIdAsync(int assignedUserId)
         {
             // Implement method
             throw new NotImplementedException();
         }
 
-        public async Task<int> AddAsync(AppsRole appsRole)
+        public Task<int> AddAsync(AppsRole appsRole)
         {
             // Implement method
             throw new NotImplementedException();
         }
 
-        public async Task<int> DeleteAsync(int assignedUserId, int roleId)
+        public Task<int> DeleteAsync(int assignedUserId, int roleId)
         {
             // Implement method
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<AppWithRoles>> GetAppsWithRolesByUserIdAsync(IDbConnection conn, IDbTransaction tran, int userId, EnumEnvironmentType env)
+        /// <summary>
+        /// Get all apps roles by user id.
+        /// </summary>
+        /// <param name="conn">Connection to the database.</param>
+        /// <param name="tran">Transaction to use.</param>
+        /// <param name="userId">User id.</param>
+        /// <param name="env">Environment type.</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<AppWithRoles>> GetAppsWithRolesByUserIdAsync(IDbConnection conn, int userId, EnumEnvironmentType env, IDbTransaction? tran = null)
         {
             string appQuery = @"
                 SELECT 

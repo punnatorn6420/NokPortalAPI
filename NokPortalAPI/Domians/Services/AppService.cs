@@ -1,11 +1,10 @@
-﻿using System.Data;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using NokCore.Api.JWT.Models;
 using NokCore.Api.JWT.Services;
+using NokCore.Exceptions;
 using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Repositorys;
-using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Shared.DB;
 
 namespace NokPortalAPI.Domains.Services
@@ -34,12 +33,17 @@ namespace NokPortalAPI.Domains.Services
             this.appEnvRepository = appEnvRepository;
         }
 
-        public async Task<bool> CreateAppAsync(RequestApp reqCreate)
+        /// <summary>
+        /// Create application.
+        /// </summary>
+        /// <param name="app">Application.</param>
+        /// <returns>True if success, otherwise false.</returns>
+        public async Task<bool> CreateAppAsync(App app)
         {
             using var connection = connectionFactory.CreateConnection();
             connection.Open();
             using var tran = connection.BeginTransaction();
-            bool result = await appRepository.CreateAppAsync(connection, tran, reqCreate);
+            bool result = await appRepository.CreateAppAsync(connection, app, tran);
             if (result)
             {
                 tran.Commit();
@@ -48,12 +52,17 @@ namespace NokPortalAPI.Domains.Services
             return false;
         }
 
-        public async Task<bool> UpdateAppAsync(RequestApp reqCreate)
+        /// <summary>
+        /// Update application.
+        /// </summary>
+        /// <param name="app">Application.</param>
+        /// <returns>True if success, otherwise false.</returns>
+        public async Task<bool> UpdateAppAsync(App app)
         {
             using var connection = connectionFactory.CreateConnection();
             connection.Open();
             using var tran = connection.BeginTransaction();
-            bool result = await appRepository.UpdateAppAsync(connection, tran, reqCreate);
+            bool result = await appRepository.UpdateAppAsync(connection, app, tran);
             if (result)
             {
                 tran.Commit();
@@ -62,33 +71,18 @@ namespace NokPortalAPI.Domains.Services
             return false;
         }
 
-        public async Task<IEnumerable<App>> GetAllAppAsync()
+        /// <summary>
+        /// Get all applications.
+        /// </summary>
+        /// <returns>List of applications.</returns>
+        public async Task<IEnumerable<App>> GetAllAppsAsync()
         {
             using var connection = connectionFactory.CreateConnection();
             connection.Open();
-            using var tran = connection.BeginTransaction();
+
             try
             {
-                var apps = await appRepository.GetAllAppAsync(connection, tran);
-                tran.Commit();
-                return apps;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-
-        public async Task<IEnumerable<AppEnv>> GetAllAppEnvAsync()
-        {
-            using var connection = connectionFactory.CreateConnection();
-            connection.Open();
-            using var tran = connection.BeginTransaction();
-            try
-            {
-                var apps = await appRepository.GetAllAppEnvAsync(connection, tran);
-                tran.Commit();
+                var apps = await appRepository.GetAllAppAsync(connection);
                 return apps;
             }
             catch (Exception)
@@ -104,7 +98,7 @@ namespace NokPortalAPI.Domains.Services
             using var tran = connection.BeginTransaction();
             try
             {
-                var app = await appRepository.GetAppByIdAsync(connection, tran, appId);
+                var app = await appRepository.GetAppByIdAsync(connection, appId, tran);
                 tran.Commit();
                 return app;
             }
@@ -142,13 +136,12 @@ namespace NokPortalAPI.Domains.Services
         {
             using var connection = connectionFactory.CreateConnection();
             connection.Open();
-            using var tran = connection.BeginTransaction();
+
             try
             {
-                AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, tran, appId, env);
-                tran.Commit();
+                AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, appId, env);
 
-                ResponseJwt jwtToken = jwtService.GenerateTokenForTargetApp(null, appEnv.SecretKey, appEnv.JwtHourLimit);
+                JwtResponse jwtToken = jwtService.GenerateTokenForTargetApp(null, appEnv.SecretKey, appEnv.JwtHourLimit);
                 string fullLinkAppRoles = appEnv.BaseURL += "/roles";
 
                 var request = new HttpRequestMessage(HttpMethod.Get, fullLinkAppRoles);
@@ -158,7 +151,7 @@ namespace NokPortalAPI.Domains.Services
                 string responseContent = await response.Content.ReadAsStringAsync();
                 if (response.IsSuccessStatusCode)
                 {
-                    ResponseRolesTargetApp roles = JsonConvert.DeserializeObject<ResponseRolesTargetApp>(responseContent) ?? throw new DataException("Empty roles data");
+                    ResponseRolesTargetApp roles = JsonConvert.DeserializeObject<ResponseRolesTargetApp>(responseContent) ?? throw new DataValidationException("Empty roles data");
                     return roles.Data;
                 }
                 else
@@ -176,12 +169,11 @@ namespace NokPortalAPI.Domains.Services
         {
             using var connection = connectionFactory.CreateConnection();
             connection.Open();
-            using var tran = connection.BeginTransaction();
+
             try
             {
-                var appEnv = await appEnvRepository.GetByIdAdminAsync(connection, tran, appId, userId, env);
+                var appEnv = await appEnvRepository.GetByIdForAdminAsync(connection, appId, userId, env);
                 string fullLinkAppRedirect = appEnv.BaseURL += "/app_link?jwt=";
-                tran.Commit();
                 return new ResponseAppLink { AppLink = fullLinkAppRedirect };
             }
             catch (Exception)

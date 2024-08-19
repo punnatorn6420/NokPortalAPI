@@ -5,18 +5,14 @@ namespace NokPortalAPI.Domains.Repositorys
 {
     public interface IAppRepository
     {
-        Task<bool> CreateAppAsync(IDbConnection conn, IDbTransaction tran, RequestApp reqCreate);
+        Task<bool> CreateAppAsync(IDbConnection conn, App app, IDbTransaction? tran = null);
 
-        Task<bool> UpdateAppAsync(IDbConnection conn, IDbTransaction tran, RequestApp reqUpdate);
+        Task<bool> UpdateAppAsync(IDbConnection conn, App app, IDbTransaction? tran = null);
 
-        Task<IEnumerable<App>> GetAllAppAsync(IDbConnection conn, IDbTransaction tran);
+        Task<IEnumerable<App>> GetAllAppAsync(IDbConnection conn, IDbTransaction? tran = null);
 
-        Task<IEnumerable<AppEnv>> GetAllAppEnvAsync(IDbConnection conn, IDbTransaction tran);
+        Task<App> GetAppByIdAsync(IDbConnection conn, int id, IDbTransaction? tran = null);
 
-        Task<App> GetAppByIdAsync(IDbConnection conn, IDbTransaction tran, int id);
-
-        Task<bool> UpdateAppAsync(IDbConnection conn, IDbTransaction tran, int id, string name);
-
-        Task<bool> DeleteAppAsync(IDbConnection conn, IDbTransaction tran, int id);
+        Task<bool> DeleteAppByIdAsync(IDbConnection conn, int id, IDbTransaction? tran = null);
     }
 }

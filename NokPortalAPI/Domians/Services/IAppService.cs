@@ -5,13 +5,11 @@ namespace NokPortalAPI.Domains.Services
 {
     public interface IAppService
     {
-        Task<bool> CreateAppAsync(RequestApp reqCreate);
+        Task<bool> CreateAppAsync(App app);
 
-        Task<bool> UpdateAppAsync(RequestApp reqUpdate);
+        Task<bool> UpdateAppAsync(App app);
 
-        Task<IEnumerable<App>> GetAllAppAsync();
-
-        Task<IEnumerable<AppEnv>> GetAllAppEnvAsync();
+        Task<IEnumerable<App>> GetAllAppsAsync();
 
         Task<App> GetAppByIdAsync(int appId);
 

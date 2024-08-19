@@ -1,11 +1,9 @@
-using System.Data;
-using System.Data.SqlClient;
 using System.Text.Json.Serialization;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using NokCore.Api.JWT.Services;
 using NokCore.Api.Middlewares;
-// using NokPortalAPI.Domains.Middlewares;
 using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Repositorys;
 using NokPortalAPI.Domains.Services;
@@ -19,30 +17,35 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddScoped<IDbConnection>(sp =>
-            new SqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
+        // builder.Services.AddScoped<IDbConnection>(sp =>
+        //     new SqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        // DB
-        builder.Services.AddScoped<DbConnectionFactory>();
-        builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
+        // TODO: Check with team, the reason for use this approach
+        builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
-        // Repository
+        // Database factory
+        builder.Services.AddSingleton<DbConnectionFactory>();
+
+        // Repositories
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<IAppRepository, AppRepository>();
         builder.Services.AddScoped<IAssignedUsersRepositorys, AssignedUsersRepositorys>();
         builder.Services.AddScoped<IAppEnvRepository, AppEnvRepository>();
         builder.Services.AddScoped<IAppsRolesRepositorys, AppsRolesRepository>();
 
-        // Service
+        // Services
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IAppService, AppService>();
-        builder.Services.AddScoped<IManagePayloadService, ManagePayloadService>();
         builder.Services.AddScoped<IAppEnvService, AppEnvService>();
         builder.Services.AddScoped<IUserAppsService, UserAppsService>();
 
-        builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
         builder.Services.AddSingleton<ReloadFileConfig>();
         builder.Services.AddSingleton<CorsPolicyReloader>();
+
+        // Permission service
+        builder.Services.AddSingleton<IAuthorizationHandler, NokCore.Api.Authorizations.PermissionHandler>();
+        builder.Services.AddSingleton<IAuthorizationHandler, NokCore.Api.Authorizations.MultiPermissionHandler>();
+        builder.Services.AddSingleton<NokCore.Identity.Services.IPermissionService, NokCore.Identity.Services.PermissionService>();
 
         string secretKey = "secret123456789abcdefghigklmnopqrst";
         int hourExpire = 24;
@@ -67,7 +70,7 @@ public class Program
         builder.Services.AddValidatorsFromAssemblyContaining<RequestTokenValidation>();
 
         // builder.Services.AddValidatorsFromAssemblyContaining<RequestToken>();
-        builder.Services.AddValidatorsFromAssemblyContaining<RequestApp>();
+        builder.Services.AddValidatorsFromAssemblyContaining<App>();
         builder.Services.AddValidatorsFromAssemblyContaining<RequestAppInfo>();
 
         // builder.Services.AddValidatorsFromAssemblyContaining<RequestCreateAppEnvValidator>();
@@ -79,6 +82,21 @@ public class Program
             });
 
         builder.Services.AddControllers();
+
+        // Set the list of permissions that will be used in the application.
+        var permissions = new List<string> { "Admin", "EndUser" };
+
+        // Register the permission handler.
+        builder.Services.AddAuthorization(options =>
+        {
+            foreach (var permission in permissions)
+            {
+                options.AddPolicy(permission, policy => policy.Requirements.Add(new NokCore.Api.Authorizations.PermissionRequirement(permission)));
+            }
+
+            options.AddPolicy("CombinedPolicy", policy => policy.Requirements.Add(new NokCore.Api.Authorizations.MultiPermissionRequirement(new[] { "Admin", "EndUser" })));
+        });
+
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Configuration.SetBasePath(AppDomain.CurrentDomain.BaseDirectory).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
@@ -95,10 +113,13 @@ public class Program
 
         app.UseCors("AllowSpecificOrigin");
 
-        app.UseMiddleware<JWTmiddleware>();
-
         app.UseAuthentication();
         app.UseAuthorization();
+
+        // Register JWT middleware to check for JWT token in the request header.
+        // For endpoints that not require JWT token, add [AllowAnonymous] attribute.
+        app.UseMiddleware<JWTmiddleware>();
+
         app.MapControllers();
 
         app.Run();

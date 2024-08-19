@@ -1,24 +1,44 @@
 ﻿using System.Data;
-using System.Data.SqlClient;
 using Dapper;
+using NokCore.Exceptions;
 using NokPortalAPI.Domains.Models;
 
 namespace NokPortalAPI.Domains.Repositorys
 {
+    /// <summary>
+    /// Repository for managing users that are assigned to applications data.
+    /// </summary>
     public class AssignedUsersRepositorys : IAssignedUsersRepositorys
     {
-        public async Task<ModelUserApp> GetUserAppAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId)
+        /// <summary>
+        /// Get assigned user by application id and user id.
+        /// </summary>
+        /// <param name="conn">Database connection.</param>
+        /// <param name="tran">Database transaction.</param>
+        /// <param name="appId">Application id.</param>
+        /// <param name="userId">User id.</param>
+        /// <returns>Assigned user.</returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<ModelUserApp> GetAssignedUserAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId)
         {
             var sql = "SELECT * FROM Assigned_Users WHERE AppId = @AppId AND UserId = @UserId;";
             ModelUserApp? userApp = await conn.QueryFirstOrDefaultAsync<ModelUserApp>(sql, new { AppId = appId, UserId = userId }, transaction: tran);
             if (userApp == null)
             {
-                throw new Exception("Not found userApp");
+                throw new DataNotFoundException("Not found assigned user.");
             }
+
             return userApp;
         }
 
-        public async Task<IEnumerable<App>> GetUserAllAppAsync(IDbConnection conn, IDbTransaction tran, int userId)
+        /// <summary>
+        /// Get all assigned users for an application.
+        /// </summary>
+        /// <param name="conn">Database connection.</param>
+        /// <param name="tran">Database transaction.</param>
+        /// <param name="appId">Application id.</param>
+        /// <returns>Assigned users.</returns>
+        public async Task<IEnumerable<App>> GetAllAssingedUsersAppAsync(IDbConnection conn, IDbTransaction tran, int userId)
         {
             const string sql = @"
                 SELECT a.*
@@ -30,13 +50,23 @@ namespace NokPortalAPI.Domains.Repositorys
 
             if (!userApps.Any())
             {
-                throw new Exception("No applications found for this user.");
+                return [];
             }
 
             return userApps;
         }
 
-        public async Task AssignedUsersAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId, IEnumerable<int> roles, EnumEnvironmentType environment)
+        /// <summary>
+        /// Create assigned users.
+        /// </summary>
+        /// <param name="conn">Database connection.</param>
+        /// <param name="tran">Database transaction.</param>
+        /// <param name="appId">Application id.</param>
+        /// <param name="userId">User id.</param>
+        /// <param name="roles">Roles of the target application.</param>
+        /// <param name="environment">Application environment.</param>
+        /// <returns></returns>
+        public async Task CreateAssignedUsersAsync(IDbConnection conn, IDbTransaction tran, int appId, int userId, IEnumerable<int> roles, EnumEnvironmentType environment)
         {
             // Ensure the connection is open
             if (conn.State != ConnectionState.Open)
@@ -81,6 +111,5 @@ namespace NokPortalAPI.Domains.Repositorys
                 throw;
             }
         }
-
     }
 }

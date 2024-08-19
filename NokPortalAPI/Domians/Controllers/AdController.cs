@@ -1,9 +1,9 @@
-﻿using System.Data;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers;
 using NokCore.Api.JWT.Models;
 using NokCore.Api.JWT.Services;
+using NokCore.Exceptions;
 using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Services;
 
@@ -14,19 +14,20 @@ namespace NokPortalAPI.Domains.Controllers
     public class AdController : NokController<ControllerBase>
     {
         private readonly IUserService userService;
-        private readonly IManagePayloadService managePayload;
         private readonly IUserAppsService userAppsService;
 
-        public AdController(IUserService userService, IManagePayloadService managePayload, IUserAppsService userAppsService)
+        public AdController(IUserService userService, IUserAppsService userAppsService)
         {
             this.userService = userService;
-            this.managePayload = managePayload;
             this.userAppsService = userAppsService;
         }
 
+        /// <summary>
+        /// This endpoint is used to request a link for signing up with Microsoft Graph.
+        /// </summary>
         [HttpGet("authorization-link-signup")]
         [AllowAnonymous]
-        public ActionResult RequestLinkSignup()
+        public ActionResult GetAuthorizationLinkSignupAsync()
         {
             try
             {
@@ -36,13 +37,16 @@ namespace NokPortalAPI.Domains.Controllers
             }
             catch (Exception ex)
             {
-                return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+                return this.Ok(this.FormatInternalErrorReponse(ex.Message, null));
             }
         }
 
+        /// <summary>
+        /// This endpoint is used to sign up with Microsoft Graph.
+        /// </summary>
         [HttpPost("signup")]
         [AllowAnonymous]
-        public async Task<ActionResult<ApiResponse<object, string>>> Signup(RequestMicrosoftToken req)
+        public async Task<ActionResult<ApiResponse<object, string>>> SignupAsync(RequestMicrosoftToken req)
         {
             try
             {
@@ -55,7 +59,7 @@ namespace NokPortalAPI.Domains.Controllers
 
                 return this.Ok(this.FormatSuccessResponse("Success"));
             }
-            catch (DuplicateNameException ex)
+            catch (DataValidationException ex)
             {
                 return this.Ok(this.FormatInternalErrorReponse(ex.Message, null));
             }
@@ -67,14 +71,17 @@ namespace NokPortalAPI.Domains.Controllers
                 }
                 else
                 {
-                    return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+                    return this.Ok(this.FormatInternalErrorReponse(ex.Message, null));
                 }
             }
         }
 
+        /// <summary>
+        /// This endpoint is used to request a link for signing in with Microsoft Graph.
+        /// </summary>
         [HttpGet("authorization-link-signin")]
         [AllowAnonymous]
-        public ActionResult<ApiResponse<object, string>> RequestLinkSigin()
+        public ActionResult<ApiResponse<object, string>> GetAuthorizationLinkSignInAsync()
         {
             try
             {
@@ -84,13 +91,16 @@ namespace NokPortalAPI.Domains.Controllers
             }
             catch (Exception ex)
             {
-                return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+                return this.Ok(this.FormatInternalErrorReponse(ex.Message, null));
             }
         }
 
+        /// <summary>
+        /// This endpoint is used to sign in with Microsoft Graph.
+        /// </summary>
         [HttpPost("signin")]
         [AllowAnonymous]
-        public async Task<ActionResult<ApiResponse<object, string>>> Sigin(RequestMicrosoftToken req)
+        public async Task<ActionResult<ApiResponse<object, string>>> SiginAsync(RequestMicrosoftToken req)
         {
             if (!this.ModelState.IsValid)
             {
@@ -99,7 +109,7 @@ namespace NokPortalAPI.Domains.Controllers
 
             try
             {
-                ResponseJwt jwt_token = await userService.SigninMicrosoftGraphGetMeAsync(req.Token);
+                JwtResponse jwt_token = await userService.SigninMicrosoftGraphGetMeAsync(req.Token);
 
                 return this.Ok(this.FormatSuccessResponse(jwt_token));
             }
@@ -111,7 +121,7 @@ namespace NokPortalAPI.Domains.Controllers
                 }
                 else
                 {
-                    return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+                    return this.Ok(this.FormatInternalErrorReponse(ex.Message, null));
                 }
             }
         }

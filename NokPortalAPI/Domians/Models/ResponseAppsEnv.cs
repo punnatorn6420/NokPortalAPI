@@ -20,6 +20,6 @@ namespace NokPortalAPI.Domains.Models
         public string Additional { get; set; } = string.Empty;
 
         [JsonPropertyName("jwtTargetApp")]
-        required public ResponseJwt JwtTargetApp { get; set; }
+        required public JwtResponse JwtTargetApp { get; set; }
     }
 }

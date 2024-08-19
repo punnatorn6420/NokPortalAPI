@@ -1,14 +1,10 @@
-﻿using System.Text;
-using Newtonsoft.Json;
+﻿using System.Dynamic;
 using NokCore.Api.JWT.Models;
 using NokCore.Api.JWT.Services;
 using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Repositorys;
-using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Shared.DB;
-using System.Data;
-using System.Dynamic;
 
 namespace NokPortalAPI.Domains.Services
 {
@@ -31,17 +27,29 @@ namespace NokPortalAPI.Domains.Services
             this.userRepository = userRepository;
         }
 
-        public async Task AddUserAppAsync(int appId, RequestAddUserApp addUser)
+        /// <summary>
+        /// Add relation between user and app with roles for each environment.
+        /// </summary>
+        /// <param name="appId">App id.</param>
+        /// <param name="reqAddUserApp">Request to add user app.</param>
+        /// <returns></returns>
+        public async Task AddUserAppAsync(int appId, RequestAddUserApp reqAddUserApp)
         {
             using var connection = connectionFactory.CreateConnection();
             connection.Open();
             using var tran = connection.BeginTransaction();
             try
             {
-                AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, tran, appId, addUser.Environment);
-                User user = await userRepository.GetUserByIdAsync(connection, tran, addUser.UserId);
+                // Get app environment
+                AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, appId, reqAddUserApp.Environment, tran);
+
+                // Get user
+                User user = await userRepository.GetUserByIdAsync(connection, tran, reqAddUserApp.UserId);
+
+                // Add relation between user and app
+                await assignedUsersRepositiry.CreateAssignedUsersAsync(connection, tran, appId, reqAddUserApp.UserId, reqAddUserApp.Roles, reqAddUserApp.Environment);
+
                 tran.Commit();
-                await assignedUsersRepositiry.AssignedUsersAsync(connection, tran, appId, addUser.UserId, addUser.Roles, addUser.Environment);
             }
             catch (Exception)
             {
@@ -49,6 +57,12 @@ namespace NokPortalAPI.Domains.Services
             }
         }
 
+        /// <summary>
+        /// Get user app info.
+        /// </summary>
+        /// <param name="appId">App id.</param>
+        /// <param name="userId">User id.</param>
+        /// <returns>User app info.</returns>
         public async Task<ModelUserApp> GetUserAppAsync(int appId, int userId)
         {
             using var connection = connectionFactory.CreateConnection();
@@ -57,7 +71,7 @@ namespace NokPortalAPI.Domains.Services
 
             try
             {
-                ModelUserApp userAppInfo = await assignedUsersRepositiry.GetUserAppAsync(connection, tran, appId, userId);
+                ModelUserApp userAppInfo = await assignedUsersRepositiry.GetAssignedUserAsync(connection, tran, appId, userId);
                 return userAppInfo;
             }
             catch (Exception)
@@ -66,6 +80,13 @@ namespace NokPortalAPI.Domains.Services
             }
         }
 
+        /// <summary>
+        /// Check role level.
+        /// </summary>
+        /// <param name="roleLevel">Role level.</param>
+        /// <param name="appId">App id.</param>
+        /// <param name="userId">User id.</param>
+        /// <returns>True if role level is valid, otherwise false.</returns>
         public async Task<bool> CheckRoleLevelAsync(EnumUserRole roleLevel, int appId, int userId)
         {
             using var connection = connectionFactory.CreateConnection();
@@ -74,7 +95,7 @@ namespace NokPortalAPI.Domains.Services
 
             try
             {
-                ModelUserApp userAppInfo = await assignedUsersRepositiry.GetUserAppAsync(connection, tran, appId, userId);
+                ModelUserApp userAppInfo = await assignedUsersRepositiry.GetAssignedUserAsync(connection, tran, appId, userId);
 
                 if ((int)userAppInfo.RoleId >= (int)roleLevel)
                 {
@@ -91,26 +112,37 @@ namespace NokPortalAPI.Domains.Services
             }
         }
 
-        public async Task<IEnumerable<App>> GetUserAllAppAsync(int userId)
+        /// <summary>
+        /// Get all apps by user id.
+        /// </summary>
+        /// <param name="userId">User id.</param>
+        /// <returns>List of apps.</returns>
+        public async Task<IEnumerable<App>> GetAllAppsByUserIdAsync(int userId)
         {
             using var connection = connectionFactory.CreateConnection();
             connection.Open();
             using var tran = connection.BeginTransaction();
 
-            IEnumerable<App> app = await assignedUsersRepositiry.GetUserAllAppAsync(connection, tran, userId);
+            IEnumerable<App> app = await assignedUsersRepositiry.GetAllAssingedUsersAppAsync(connection, tran, userId);
 
             return app;
         }
 
-        public async Task<(AppEnv, ResponseJwt)> GetJWTTokenTargetApp(int appId, EnumEnvironmentType env)
+        /// <summary>
+        /// Get JWT for target app.
+        /// </summary>
+        /// <param name="appId">App id.</param>
+        /// <param name="env">App environment.</param>
+        /// <returns></returns>
+        public async Task<(AppEnv, JwtResponse)> GetJWTForTargetAppAsync(int appId, EnumEnvironmentType env)
         {
             using var connection = connectionFactory.CreateConnection();
             connection.Open();
             using var tran = connection.BeginTransaction();
             try
             {
-                AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, tran, appId, env);
-                ResponseJwt jwtToken = jwtService.GenerateTokenForTargetApp(null, appEnv.SecretKey, appEnv.JwtHourLimit);
+                AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, appId, env, tran);
+                JwtResponse jwtToken = jwtService.GenerateTokenForTargetApp(null, appEnv.SecretKey, appEnv.JwtHourLimit);
                 tran.Commit();
 
                 return (appEnv, jwtToken);
@@ -122,14 +154,14 @@ namespace NokPortalAPI.Domains.Services
             }
         }
 
-        public async Task<(AppEnv, ResponseJwt)> GetJWTTokenTargetAppWithData(int appId, EnumEnvironmentType env, User user, IEnumerable<AppWithRoles> userAppsList)
+        public async Task<(AppEnv, JwtResponse)> GetJWTTokenTargetAppWithData(int appId, EnumEnvironmentType env, User user, IEnumerable<AppWithRoles> userAppsList)
         {
             using var connection = connectionFactory.CreateConnection();
             connection.Open();
             using var tran = connection.BeginTransaction();
             try
             {
-                AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, tran, appId, env);
+                AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, appId, env, tran);
 
                 var roles = userAppsList
                     .SelectMany(app => app.Roles)
@@ -140,14 +172,14 @@ namespace NokPortalAPI.Domains.Services
                 jwtSetting.userID = user.UserId;
                 jwtSetting.name = $"{user.FirstName} {user.LastName}";
                 jwtSetting.objectId = user.ObjectId;
-                jwtSetting.avatar = "";
+                jwtSetting.avatar = string.Empty;
                 jwtSetting.email = user.Email;
-                jwtSetting.company = "";
+                jwtSetting.company = string.Empty;
                 jwtSetting.department = user.Department;
                 jwtSetting.position = user.JobTitle;
                 jwtSetting.roles = roles;
 
-                ResponseJwt jwtToken = jwtService.GenerateTokenForTargetAppWithData(jwtSetting, appEnv.SecretKey, appEnv.JwtHourLimit);
+                JwtResponse jwtToken = jwtService.GenerateTokenForTargetAppWithData(jwtSetting, appEnv.SecretKey, appEnv.JwtHourLimit);
                 tran.Commit();
 
                 return (appEnv, jwtToken);

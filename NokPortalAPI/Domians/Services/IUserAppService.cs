@@ -12,11 +12,11 @@ namespace NokPortalAPI.Domains.Services
 
         Task<bool> CheckRoleLevelAsync(EnumUserRole roleLevel, int appId, int userId);
 
-        Task<IEnumerable<App>> GetUserAllAppAsync(int userId);
+        Task<IEnumerable<App>> GetAllAppsByUserIdAsync(int userId);
 
-        Task<(AppEnv, ResponseJwt)> GetJWTTokenTargetApp(int appId, EnumEnvironmentType env);
+        Task<(AppEnv, JwtResponse)> GetJWTForTargetAppAsync(int appId, EnumEnvironmentType env);
 
-        Task<(AppEnv, ResponseJwt)> GetJWTTokenTargetAppWithData(int appId, EnumEnvironmentType env, User user, IEnumerable<AppWithRoles> userAppsList);
+        Task<(AppEnv, JwtResponse)> GetJWTTokenTargetAppWithData(int appId, EnumEnvironmentType env, User user, IEnumerable<AppWithRoles> userAppsList);
 
     }
 }

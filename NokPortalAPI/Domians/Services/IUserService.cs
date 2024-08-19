@@ -24,6 +24,6 @@ namespace NokPortalAPI.Domains.Services
 
         Task SignupMicrosoftGraphGetMeAsync(string token);
 
-        Task<ResponseJwt> SigninMicrosoftGraphGetMeAsync(string token);
+        Task<JwtResponse> SigninMicrosoftGraphGetMeAsync(string token);
     }
 }

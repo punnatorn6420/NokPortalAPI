@@ -2,6 +2,7 @@
 
 namespace NokPortalAPI.Domains.Models
 {
+    [Obsolete("This class is obsolete, use AppEnv instead.")]
     public class RequestApp
     {
         [Required]

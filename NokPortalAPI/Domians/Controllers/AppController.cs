@@ -1,9 +1,8 @@
-﻿using System.Data;
-using System.Data.SqlClient;
-using System.Text.Json;
+﻿using System.Data.SqlClient;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers;
-using NokCore.Api.JWT.Services;
+using NokCore.Exceptions;
 using NokCore.Identity.Models;
 using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Services;
@@ -15,46 +14,46 @@ namespace NokPortalAPI.Domains.Controllers
     public class AppController : NokController<ControllerBase>
     {
         private readonly IAppService appService;
-        private readonly IAppEnvService appsEnvService;
-        private readonly IManagePayloadService managePayload;
+        private readonly IAppEnvService appEnvService;
         private readonly IUserAppsService usersAppService;
         private readonly IUserService userService;
-
 
         public AppController(
             IAppService appService,
             IAppEnvService appsEnvService,
-            IManagePayloadService managePayload,
             IUserAppsService usersAppService,
             IUserService userService)
         {
             this.appService = appService;
-            this.appsEnvService = appsEnvService;
-            this.managePayload = managePayload;
+            this.appEnvService = appsEnvService;
             this.usersAppService = usersAppService;
             this.userService = userService;
         }
 
+        /// <summary>
+        /// This endpoint is used to create a new app.
+        /// </summary>
         [HttpPost("")]
-        public async Task<ActionResult> CreateApp(RequestApp reqApp)
+        [Authorize(Policy = "Admin")]
+        public async Task<ActionResult> CreateApp(App app)
         {
+            // Check if the model state is valid
             if (!this.ModelState.IsValid)
             {
                 return this.BadRequest(this.FormatInvalidFieldResponse(this.GetFieldErrors()));
             }
 
-            int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
-
             try
             {
-                bool chkSuccess = await this.appService.CreateAppAsync(reqApp);
+                bool chkSuccess = await this.appService.CreateAppAsync(app);
                 if (chkSuccess)
                 {
                     return this.Ok(this.FormatSuccessResponse("Success"));
                 }
+
                 throw new Exception("Create failed.");
             }
-            catch (DuplicateNameException ex)
+            catch (DataValidationException ex)
             {
                 return this.Ok(this.FormatInternalErrorReponse(ex.Message, null));
             }
@@ -64,26 +63,30 @@ namespace NokPortalAPI.Domains.Controllers
             }
         }
 
+        /// <summary>
+        /// This endpoint is used to update an existing app.
+        /// </summary>
         [HttpPut("")]
-        public async Task<ActionResult> UpdateApp(RequestApp reqApp)
+        [Authorize(Policy = "Admin")]
+        public async Task<ActionResult> UpdateApp(App app)
         {
+            // Check if the model state is valid
             if (!this.ModelState.IsValid)
             {
                 return this.BadRequest(this.FormatInvalidFieldResponse(this.GetFieldErrors()));
             }
 
-            int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
-
             try
             {
-                bool chkSuccess = await this.appService.UpdateAppAsync(reqApp);
+                bool chkSuccess = await this.appService.UpdateAppAsync(app);
                 if (chkSuccess)
                 {
                     return this.Ok(this.FormatSuccessResponse("Success"));
                 }
+
                 throw new Exception("Create failed.");
             }
-            catch (DuplicateNameException ex)
+            catch (DataValidationException ex)
             {
                 return this.Ok(this.FormatInternalErrorReponse(ex.Message, null));
             }
@@ -93,44 +96,50 @@ namespace NokPortalAPI.Domains.Controllers
             }
         }
 
+        /// <summary>
+        /// This endpoint is used to get all apps.
+        /// </summary>
+        /// TODO: Discuss with the team about the endpoint name.
         [HttpGet("all")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult> GetAllApp()
         {
             try
             {
-                IEnumerable<App> app = await appService.GetAllAppAsync();
+                IEnumerable<App> app = await appService.GetAllAppsAsync();
                 return this.Ok(this.FormatSuccessResponse(app));
             }
             catch (Exception ex)
             {
-                return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+                return this.Ok(this.FormatInternalErrorReponse(ex.Message, null));
             }
         }
 
+        /// <summary>
+        /// This endpoint is used to get all app environments.
+        /// </summary>
+        /// TODO: Discuss with the team about the endpoint name.
         [HttpGet("env-all")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult> GetAllAppEnv()
         {
             try
             {
-                IEnumerable<AppEnv> apps = await appService.GetAllAppEnvAsync();
-                var responseApps = apps.Select(app => new ResponseAppEnv
-                {
-                    AppId = app.AppId,
-                    Environment = app.Environment,
-                    BaseURL = app.BaseURL,
-                    Additional = app.Additional,
-                    JwtHourLimit = app.JwtHourLimit
-                });
-                return this.Ok(this.FormatSuccessResponse(responseApps));
+                IEnumerable<AppEnv> apps = await appEnvService.GetAllAppEnvAsync();
+                return this.Ok(this.FormatSuccessResponse(apps));
             }
             catch (Exception ex)
             {
-                return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+                return this.Ok(this.FormatInternalErrorReponse(ex.Message, null));
             }
         }
 
+        /// <summary>
+        /// This endpoint is used to create a new app environment.
+        /// </summary>
         [HttpPost("{id}/env")]
-        public async Task<ActionResult<ApiResponse<object, string>>> CreateAppEnvironment(int id, AppEnv reqAppEnv)
+        [Authorize(Policy = "Admin")]
+        public async Task<ActionResult<ApiResponse<object, string>>> CreateAppEnvironment(int id, AppEnv appEnv)
         {
             if (!ModelState.IsValid)
             {
@@ -139,7 +148,8 @@ namespace NokPortalAPI.Domains.Controllers
 
             try
             {
-                await this.appsEnvService.CreateAppsEnv(reqAppEnv, id);
+                appEnv.AppId = id;
+                await this.appEnvService.CreateAppEnvAsync(appEnv);
                 return this.Ok(this.FormatSuccessResponse("Success"));
             }
             catch (SqlException sqlEx)
@@ -150,17 +160,21 @@ namespace NokPortalAPI.Domains.Controllers
                 }
                 else
                 {
-                    return this.StatusCode(500, this.FormatInternalErrorReponse(sqlEx.Message, null));
+                    return this.Ok(this.FormatInternalErrorReponse(sqlEx.Message, null));
                 }
             }
             catch (Exception ex)
             {
-                return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+                return this.Ok(this.FormatInternalErrorReponse(ex.Message, null));
             }
         }
 
+        /// <summary>
+        /// This endpoint is used to update an existing app environment.
+        /// </summary>
         [HttpPut("{id}/env")]
-        public async Task<ActionResult<ApiResponse<object, string>>> UpdateAppEnvironment(int id, AppEnv reqAppEnv)
+        [Authorize(Policy = "Admin")]
+        public async Task<ActionResult<ApiResponse<object, string>>> UpdateAppEnvironment(int id, AppEnv appEnv)
         {
             if (!ModelState.IsValid)
             {
@@ -169,20 +183,25 @@ namespace NokPortalAPI.Domains.Controllers
 
             try
             {
-                await this.appsEnvService.UpdateAppsEnv(reqAppEnv, id);
+                appEnv.AppId = id;
+                await this.appEnvService.UpdateAppEnvAsync(appEnv);
                 return this.Ok(this.FormatSuccessResponse("Success"));
             }
-            catch (KeyNotFoundException ex)
+            catch (DataNotFoundException ex)
             {
                 return this.Ok(this.FormatInternalErrorReponse(ex.Message, null));
             }
             catch (Exception ex)
             {
-                return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+                return this.Ok(this.FormatInternalErrorReponse(ex.Message, null));
             }
         }
 
+        /// <summary>
+        /// This endpoint is used to get the app info by app id.
+        /// </summary>
         [HttpGet("{id}")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<ApiResponse<object, string>>> GetAppInfo(int id)
         {
             if (!this.ModelState.IsValid)
@@ -197,11 +216,15 @@ namespace NokPortalAPI.Domains.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+                return Ok(this.FormatInternalErrorReponse(ex.Message, null));
             }
         }
 
+        /// <summary>
+        /// This endpoint is used to assign a user to an app.
+        /// </summary>
         [HttpPost("{id}/assign-user")] // Link app, user, (role)
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<ApiResponse<object, string>>> CreateUserApp(int id, RequestAddUserApp reqUserId)
         {
             if (!ModelState.IsValid)
@@ -227,16 +250,21 @@ namespace NokPortalAPI.Domains.Controllers
                 }
                 else
                 {
-                    return this.StatusCode(500, this.FormatInternalErrorReponse(sqlEx.Message, null));
+                    return this.Ok(this.FormatInternalErrorReponse(sqlEx.Message, null));
                 }
             }
             catch (Exception ex)
             {
-                return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+                return Ok(this.FormatInternalErrorReponse(ex.Message, null));
             }
         }
 
+        /// <summary>
+        /// This endpoint is used to get the list of roles for a specific app.
+        /// </summary>
+        /// TODO: Discuss with the team about the endpoint name.
         [HttpGet("{id}/get-roles")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<ApiResponse<object, string>>> GetRoles(int id, [FromQuery] EnumEnvironmentType env)
         {
             try
@@ -246,18 +274,27 @@ namespace NokPortalAPI.Domains.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, FormatInternalErrorReponse(ex.Message, null));
+                return Ok(FormatInternalErrorReponse(ex.Message, null));
             }
         }
 
+        /// <summary>
+        /// This endpoint is used to get the JWT token for the target app.
+        /// </summary>
+        /// TODO: Discuss with the team about the endpoint name.
         [HttpGet("{id}/redirect-target-app")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<ApiResponse<object, string>>> GetJWTTokenForTargetApp(int id, [FromQuery] EnumEnvironmentType env)
         {
             try
             {
-                int userId = this.managePayload.GetUserIdFromJwtDecode(this.HttpContext);
+                var userClaims = this.GetUserClaims();
+                if (!userClaims.IsValid)
+                {
+                    return this.Unauthorized(this.FormatInternalErrorReponse("User claims not found", null));
+                }
 
-                UserApps userApps = await this.userService.GetUserAppsAsync(userId, env);
+                UserApps userApps = await this.userService.GetUserAppsAsync(userClaims.UserId, env);
 
                 var user = userApps?.User;
                 if (user == null)
@@ -268,9 +305,9 @@ namespace NokPortalAPI.Domains.Controllers
                     });
                 }
 
-                var (appEnv, jwtTokenWithUser) = await this.usersAppService.GetJWTTokenTargetAppWithData(id, env, user, userApps.App);
+                var (appEnv, jwtTokenWithUser) = await this.usersAppService.GetJWTTokenTargetAppWithData(id, env, user, userApps?.App ?? []);
 
-                var app = userApps.App.FirstOrDefault(a => a.AppId == id);
+                var app = userApps?.App.FirstOrDefault(a => a.AppId == id);
                 if (app == null)
                 {
                     return this.BadRequest(new ApiResponse<object, string>
@@ -294,7 +331,7 @@ namespace NokPortalAPI.Domains.Controllers
             }
             catch (Exception ex)
             {
-                return this.StatusCode(500, this.FormatInternalErrorReponse(ex.Message, null));
+                return Ok(this.FormatInternalErrorReponse(ex.Message, null));
             }
         }
     }
