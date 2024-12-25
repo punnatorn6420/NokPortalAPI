@@ -1,9 +1,9 @@
-﻿using System.Data;
-using System.Data.SqlClient;
-using NokCore.Db;
-
-namespace NokPortalAPI.Shared.DB
+﻿namespace NokPortalAPI.Shared.DB
 {
+    using System.Data;
+    using Microsoft.Data.SqlClient;
+    using NokCore.Db;
+
     public class DbConnectionFactory : BaseDbConnectionFactory
     {
         public DbConnectionFactory(IConfiguration configuration)
@@ -17,7 +17,7 @@ namespace NokPortalAPI.Shared.DB
         /// <returns></returns>
         public override IDbConnection CreateConnection()
         {
-            return new SqlConnection(this.configuration["ConnectionStrings:NokPortalDB"]);
+            return new SqlConnection(configuration["ConnectionStrings:NokPortalDB"]);
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace NokPortalAPI.Shared.DB
         /// </summary>
         public override async Task<IDbConnection> CreateConnectionAsync()
         {
-            var conn = new SqlConnection(this.configuration["ConnectionStrings:NokPortalDB"]);
+            var conn = new SqlConnection(configuration["ConnectionStrings:NokPortalDB"]);
             await conn.OpenAsync();
             return conn;
         }

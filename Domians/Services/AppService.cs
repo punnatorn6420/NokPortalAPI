@@ -11,14 +11,14 @@ namespace NokPortalAPI.Domains.Services
 {
     public class AppService : IAppService
     {
-        private readonly IDbConnectionFactory connectionFactory;
+        private readonly DbConnectionFactory connectionFactory;
         private readonly IConfiguration configuration;
         private readonly IAppRepository appRepository;
         private readonly IJwtService jwtService;
         private readonly HttpClient httpClient;
         private readonly IAppEnvRepository appEnvRepository;
 
-        public AppService(IDbConnectionFactory connectionFactory, IConfiguration configuration, IAppRepository appRepository, IJwtService jwtService, HttpClient httpClient, IAppEnvRepository appEnvRepository)
+        public AppService(DbConnectionFactory connectionFactory, IConfiguration configuration, IAppRepository appRepository, IJwtService jwtService, HttpClient httpClient, IAppEnvRepository appEnvRepository)
         {
             this.connectionFactory = connectionFactory;
             this.appRepository = appRepository;
@@ -40,7 +40,7 @@ namespace NokPortalAPI.Domains.Services
         /// <returns>True if success, otherwise false.</returns>
         public async Task<bool> CreateAppAsync(App app)
         {
-            using var connection = connectionFactory.CreateConnection();
+            using var connection = await connectionFactory.CreateConnectionAsync();
             connection.Open();
             using var tran = connection.BeginTransaction();
             bool result = await appRepository.CreateAppAsync(connection, app, tran);

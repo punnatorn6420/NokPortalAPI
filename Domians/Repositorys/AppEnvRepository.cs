@@ -1,7 +1,7 @@
-﻿using System.Data;
-using Dapper;
+﻿using Dapper;
 using NokCore.Exceptions;
 using NokPortalAPI.Domains.Models;
+using System.Data;
 
 namespace NokPortalAPI.Domains.Repositorys
 {

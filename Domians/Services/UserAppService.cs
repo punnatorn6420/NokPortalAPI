@@ -10,14 +10,14 @@ namespace NokPortalAPI.Domains.Services
 {
     public class UserAppsService : IUserAppsService
     {
-        private readonly IDbConnectionFactory connectionFactory;
+        private readonly DbConnectionFactory connectionFactory;
         private readonly IAssignedUsersRepositorys assignedUsersRepositiry;
         private readonly HttpClient httpClient;
         private readonly IAppEnvRepository appEnvRepository;
         private readonly IJwtService jwtService;
         private readonly IUserRepository userRepository;
 
-        public UserAppsService(IDbConnectionFactory connectionFactory, IAssignedUsersRepositorys assignedUsersRepositiry, HttpClient httpClient, IAppEnvRepository appEnvRepository, IJwtService jwtService, IUserRepository userRepository)
+        public UserAppsService(DbConnectionFactory connectionFactory, IAssignedUsersRepositorys assignedUsersRepositiry, HttpClient httpClient, IAppEnvRepository appEnvRepository, IJwtService jwtService, IUserRepository userRepository)
         {
             this.connectionFactory = connectionFactory;
             this.assignedUsersRepositiry = assignedUsersRepositiry;
@@ -44,7 +44,7 @@ namespace NokPortalAPI.Domains.Services
                 AppEnv appEnv = await appEnvRepository.GetByIdAsync(connection, appId, reqAddUserApp.Environment, tran);
 
                 // Get user
-                User user = await userRepository.GetUserByIdAsync(connection, tran, reqAddUserApp.UserId);
+                User user = await userRepository.GetUserByIdAsync(connection, reqAddUserApp.UserId, tran);
 
                 // Add relation between user and app
                 await assignedUsersRepositiry.CreateAssignedUsersAsync(connection, tran, appId, reqAddUserApp.UserId, reqAddUserApp.Roles, reqAddUserApp.Environment);

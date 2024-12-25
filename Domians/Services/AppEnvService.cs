@@ -1,6 +1,6 @@
-﻿using NokPortalAPI.Domains.Models;
+﻿using NokCore.Db;
+using NokPortalAPI.Domains.Models;
 using NokPortalAPI.Domains.Repositorys;
-using NokPortalAPI.Shared.DB;
 
 namespace NokPortalAPI.Domains.Services
 {
