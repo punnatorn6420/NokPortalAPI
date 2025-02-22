@@ -1,4 +1,4 @@
-﻿namespace NokPortalAPI.Shared.DB
+﻿namespace NokPortalAPI.Shareds.DB
 {
     using System.Data;
     using Microsoft.Data.SqlClient;
