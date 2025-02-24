@@ -8,16 +8,16 @@
 
     public class UserRepository : IUserRepository
     {
-        public async Task<IEnumerable<User>> GetAllUsersAsync(IDbConnection conn, IDbTransaction? tran = null)
+        public async Task<IEnumerable<IUser>> GetAllUsersAsync(IDbConnection conn, IDbTransaction? tran = null)
         {
             string query = "SELECT * FROM Users";
-            return await conn.QueryAsync<User>(query, transaction: tran);
+            return await conn.QueryAsync<IUser>(query, transaction: tran);
         }
 
-        public async Task<User> GetUserByIdAsync(IDbConnection conn, int id, IDbTransaction? tran = null)
+        public async Task<IUser> GetUserByIdAsync(IDbConnection conn, int id, IDbTransaction? tran = null)
         {
             string query = "SELECT * FROM Users WHERE UserID = @Id";
-            User? appUser = await conn.QuerySingleOrDefaultAsync<User>(query, new { Id = id }, tran);
+            IUser? appUser = await conn.QuerySingleOrDefaultAsync<IUser>(query, new { Id = id }, tran);
             if (appUser == null)
             {
                 throw new Exception("Not found user");
@@ -120,7 +120,7 @@
             }
         }
 
-        public async Task<int> CreateUserAsync(IDbConnection conn, User user, IDbTransaction? tran = null)
+        public async Task<int> CreateUserAsync(IDbConnection conn, IUser user, IDbTransaction? tran = null)
         {
             string checkQuery = @"
                 SELECT COUNT(*)
@@ -148,7 +148,7 @@
             }
         }
 
-        public async Task<bool> UpdateUserAsync(IDbConnection conn, User user, IDbTransaction? tran = null)
+        public async Task<bool> UpdateUserAsync(IDbConnection conn, IUser user, IDbTransaction? tran = null)
         {
             string query = @"
                 UPDATE Users
@@ -166,11 +166,11 @@
             return rowsAffected > 0;
         }
 
-        public async Task<User> GetUserByEmailAsync(IDbConnection conn, string email, IDbTransaction? tran = null)
+        public async Task<IUser> GetUserByEmailAsync(IDbConnection conn, string email, IDbTransaction? tran = null)
         {
             string query = "SELECT * FROM Users WHERE Email = @Email";
             var queryByEmail = new { Email = email };
-            User? appUser = await conn.QuerySingleOrDefaultAsync<User>(query, queryByEmail, tran);
+            IUser? appUser = await conn.QuerySingleOrDefaultAsync<IUser>(query, queryByEmail, tran);
             if (appUser == null)
             {
                 throw new Exception("Not found user");

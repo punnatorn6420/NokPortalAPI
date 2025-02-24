@@ -18,6 +18,6 @@ namespace NokPortalAPI.Models
         /// The user that has access to the apps.
         /// </summary>
         [JsonPropertyName("user")]
-        required public User User { get; set; }
+        required public IUser User { get; set; }
     }
 }

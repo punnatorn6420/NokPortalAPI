@@ -1,4 +1,5 @@
 ﻿using NokCore.Identity.Models;
+using NokPortalAPI.Models;
 using NokPortalAPI.Repositories;
 
 namespace NokPortalAPI.Services
@@ -9,9 +10,9 @@ namespace NokPortalAPI.Services
     public class UserService : IUserService
     {
         private readonly AppDbContext context;
-        private readonly IUserRepository userRepository;
+        private readonly IUserRepository<User> userRepository;
 
-        public UserService(AppDbContext context, IUserRepository userRepository)
+        public UserService(AppDbContext context, IUserRepository<User> userRepository)
         {
             this.context = context;
             this.userRepository = userRepository;
@@ -48,13 +49,13 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc />
-        public async Task<IList<User>> GetUsersByAppIdAsync(int appId)
+        public async Task<ICollection<User>> GetUsersByAppIdAsync(int appId)
         {
             return await userRepository.GetUsersByAppIdAsync(appId);
         }
 
         /// <inheritdoc />
-        public async Task<IList<User>> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria)
+        public async Task<ICollection<User>> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria)
         {
             return await userRepository.GetUsersByCriteriaAsync(searchCriteria);
         }

@@ -53,16 +53,16 @@ namespace NokPortalAPI
             builder.Host.UseSerilog();
 
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("NokPortalDB")));
 
             // TODO: Check with team, the reason for use this approach
-            builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+            // builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
             // Database factory
             builder.Services.AddSingleton<DbConnectionFactory>();
 
             // Repositories
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IUserRepository<User>, UserRepository>();
             builder.Services.AddScoped<IAppRepository, AppRepository>();
             //builder.Services.AddScoped<IAssignedUsersRepositorys, AssignedUsersRepositorys>();
             //builder.Services.AddScoped<IAppEnvRepository, AppEnvRepository>();
@@ -78,8 +78,8 @@ namespace NokPortalAPI
             builder.Services.AddSingleton<CorsPolicyReloader>();
 
             // Permission service
-            builder.Services.AddSingleton<IAuthorizationHandler, NokCore.Api.Authorizations.PermissionHandler>();
-            builder.Services.AddSingleton<IAuthorizationHandler, NokCore.Api.Authorizations.MultiPermissionHandler>();
+            // builder.Services.AddSingleton<IAuthorizationHandler, NokCore.Api.Authorizations.PermissionHandler>();
+            // builder.Services.AddSingleton<IAuthorizationHandler, NokCore.Api.Authorizations.MultiPermissionHandler>();
             
             string secretKey = "secret123456789abcdefghigklmnopqrst";
             int hourExpire = 24;
@@ -133,8 +133,7 @@ namespace NokPortalAPI
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Configuration.SetBasePath(AppDomain.CurrentDomain.BaseDirectory).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-
+            
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())

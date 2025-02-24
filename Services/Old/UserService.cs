@@ -34,13 +34,13 @@
         /// Get all users from the database.
         /// </summary>
         /// <returns>The list of users.</returns>
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        public async Task<IEnumerable<IUser>> GetAllUsersAsync()
         {
             using var conn = await dbConnectionFactory.CreateConnectionAsync();
             using var tran = conn.BeginTransaction();
             try
             {
-                IEnumerable<User> listUser = await userRepository.GetAllUsersAsync(conn, tran);
+                IEnumerable<IUser> listUser = await userRepository.GetAllUsersAsync(conn, tran);
                 tran.Commit();
                 return listUser;
             }
@@ -56,7 +56,7 @@
             using var tran = conn.BeginTransaction();
             try
             {
-                User user = await userRepository.GetUserByIdAsync(conn, userId, tran);
+                IUser user = await userRepository.GetUserByIdAsync(conn, userId, tran);
 
                 if (user == null)
                 {
@@ -97,16 +97,16 @@
             }
         }
 
-        public async Task<User> GetUserByIdAsync(int id)
+        public async Task<IUser> GetUserByIdAsync(int id)
         {
             using var conn = await dbConnectionFactory.CreateConnectionAsync();
             using var tran = conn.BeginTransaction();
-            User user = await userRepository.GetUserByIdAsync(conn, id, tran);
+            IUser user = await userRepository.GetUserByIdAsync(conn, id, tran);
             tran.Commit();
             return user;
         }
 
-        public async Task<int> CreateUserAsync(User user)
+        public async Task<int> CreateUserAsync(IUser user)
         {
             using var conn = await dbConnectionFactory.CreateConnectionAsync();
             using var tran = conn.BeginTransaction();
@@ -118,7 +118,7 @@
             return rowsAffected;
         }
 
-        public async Task<bool> UpdateUserAsync(User user)
+        public async Task<bool> UpdateUserAsync(IUser user)
         {
             using var conn = await dbConnectionFactory.CreateConnectionAsync();
             using var tran = conn.BeginTransaction();
@@ -246,7 +246,7 @@
 
                 using var conn = await dbConnectionFactory.CreateConnectionAsync();
                 using var tran = conn.BeginTransaction();
-                User user = await userRepository.GetUserByEmailAsync(conn, userAD.UserPrincipalName, tran);
+                IUser user = await userRepository.GetUserByEmailAsync(conn, userAD.UserPrincipalName, tran);
                 tran.Commit();
 
                 var jwtData = new UserClaims

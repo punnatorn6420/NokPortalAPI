@@ -74,7 +74,7 @@ namespace NokPortalAPI.Repositories
         {
             return await context.Apps
                 .Include(a => a.Environments)
-                .Where(a => a.AssignedUserApps.Any(aua => aua.UserId == userId))
+                .Where(a => a.AssignedApps.Any(aua => aua.UserId == userId))
                 .ToListAsync();
         }
 

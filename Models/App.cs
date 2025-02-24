@@ -54,11 +54,11 @@ namespace NokPortalAPI.Models
         /// <summary>
         /// Gets or sets the application environments.
         /// </summary>
-        public IList<AppEnvironment> Environments { get; set; } = new List<AppEnvironment>();
+        public ICollection<AppEnvironment> Environments { get; set; } = new List<AppEnvironment>();
 
         /// <summary>
         /// Gets or sets the assigned user applications.
         /// </summary>
-        public IList<AssignedUserApp> AssignedUserApps { get; set; } = new List<AssignedUserApp>();
+        public ICollection<AssignedUserAppRole> AssignedApps { get; set; } = new List<AssignedUserAppRole>();
     }
 }

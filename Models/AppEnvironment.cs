@@ -9,10 +9,21 @@ namespace NokPortalAPI.Models
     public class AppEnvironment
     {
         /// <summary>
+        /// Surrogate key for the application environment.
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
         /// Gets or sets the application ID.
         /// </summary>
         [Required]
         public int AppId { get; set; } = 0;
+
+        /// <summary>
+        /// Gets or sets the application. This is a navigation property.
+        /// </summary>
+        [JsonIgnore]
+        public App App { get; set; } = new App();
 
         /// <summary>
         /// Gets or sets the environment type.
@@ -49,11 +60,5 @@ namespace NokPortalAPI.Models
         /// Gets or sets the date and time when the user was last modified.
         /// </summary>
         public DateTime ModifiedAt { get; set; } = DateTime.Now;
-
-        /// <summary>
-        /// Gets or sets the application. This is a navigation property.
-        /// </summary>
-        [JsonIgnore]
-        public App AssociatedApp { get; set; } = new App();
     }
 }

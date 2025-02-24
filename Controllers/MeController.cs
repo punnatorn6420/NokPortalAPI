@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers;
-using NokCore.Api.JWT.Models;
-using NokCore.Api.JWT.Services;
 using NokPortalAPI.Models;
 using NokPortalAPI.Services.Old;
 

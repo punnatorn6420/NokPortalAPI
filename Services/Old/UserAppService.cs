@@ -44,7 +44,7 @@ namespace NokPortalAPI.Services.Old
                 AppEnvironment appEnv = await appEnvRepository.GetByIdAsync(connection, appId, reqAddUserApp.Environment, tran);
 
                 // Get user
-                User user = await userRepository.GetUserByIdAsync(connection, reqAddUserApp.UserId, tran);
+                IUser user = await userRepository.GetUserByIdAsync(connection, reqAddUserApp.UserId, tran);
 
                 // Add relation between user and app
                 await assignedUsersRepositiry.CreateAssignedUsersAsync(connection, tran, appId, reqAddUserApp.UserId, reqAddUserApp.Roles, reqAddUserApp.Environment);
@@ -154,7 +154,7 @@ namespace NokPortalAPI.Services.Old
             }
         }
 
-        public async Task<(AppEnvironment, JwtResponse)> GetJWTTokenTargetAppWithData(int appId, EnumEnvironmentType env, User user, IEnumerable<AppWithRoles> userAppsList)
+        public async Task<(AppEnvironment, JwtResponse)> GetJWTTokenTargetAppWithData(int appId, EnumEnvironmentType env, IUser user, IEnumerable<AppWithRoles> userAppsList)
         {
             using var connection = connectionFactory.CreateConnection();
             connection.Open();

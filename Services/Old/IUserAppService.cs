@@ -16,7 +16,7 @@ namespace NokPortalAPI.Services.Old
 
         Task<(AppEnvironment, JwtResponse)> GetJWTForTargetAppAsync(int appId, EnumEnvironmentType env);
 
-        Task<(AppEnvironment, JwtResponse)> GetJWTTokenTargetAppWithData(int appId, EnumEnvironmentType env, User user, IEnumerable<AppWithRoles> userAppsList);
+        Task<(AppEnvironment, JwtResponse)> GetJWTTokenTargetAppWithData(int appId, EnumEnvironmentType env, IUser user, IEnumerable<AppWithRoles> userAppsList);
 
     }
 }

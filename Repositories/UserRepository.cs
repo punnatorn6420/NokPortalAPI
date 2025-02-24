@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NokCore.Identity.Models;
+using NokPortalAPI.Models;
 using System.Linq.Dynamic.Core;
 
 namespace NokPortalAPI.Repositories
@@ -7,7 +8,7 @@ namespace NokPortalAPI.Repositories
     /// <summary>
     /// User repository.
     /// </summary>
-    public class UserRepository : IUserRepository
+    public class UserRepository : IUserRepository<User>
     {
         private readonly AppDbContext context;
 
@@ -29,7 +30,7 @@ namespace NokPortalAPI.Repositories
         {
             return await context.Users
                .Include(u => u.UserRoles)
-                   .ThenInclude(ur => ur.AssociatedRole)
+                   .ThenInclude(ur => ur.Role)
                .FirstOrDefaultAsync(u => u.Email == email);
         }
 
@@ -38,12 +39,12 @@ namespace NokPortalAPI.Repositories
         {
             return await context.Users
                 .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.AssociatedRole)
+                    .ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
 
         /// <inheritdoc />
-        public async Task<IList<User>> GetUsersByAppIdAsync(int appId)
+        public async Task<ICollection<User>> GetUsersByAppIdAsync(int appId)
         {
             // Get users by application ID from AssignedUserApps table.
             var query = from aua in context.AssignedUserApps
@@ -55,7 +56,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<IList<User>> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria)
+        public async Task<ICollection<User>> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria)
         {
             IQueryable<User> query = context.Users;
 

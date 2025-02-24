@@ -6,15 +6,15 @@ namespace NokPortalAPI.Services.Old
 {
     public interface IUserService
     {
-        Task<IEnumerable<User>> GetAllUsersAsync();
+        Task<IEnumerable<IUser>> GetAllUsersAsync();
 
         Task<UserApps?> GetUserAppsAsync(int userId, EnumEnvironmentType env);
 
         Task<UserAppWithEnvRoles> GetUserAppsWithEnvRolesAsync(int userId);
 
-        Task<int> CreateUserAsync(User user);
+        Task<int> CreateUserAsync(IUser user);
 
-        Task<bool> UpdateUserAsync(User user);
+        Task<bool> UpdateUserAsync(IUser user);
 
         Task<bool> DeleteUserAsync(int userId);
 

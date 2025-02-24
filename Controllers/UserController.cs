@@ -29,7 +29,7 @@ namespace NokPortalAPI.Controllers
 
             try
             {
-                IEnumerable<User> user = await userService.GetAllUsersAsync();
+                IEnumerable<IUser> user = await userService.GetAllUsersAsync();
 
                 return Ok(FormatSuccessResponse(user));
             }

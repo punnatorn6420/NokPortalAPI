@@ -1,4 +1,5 @@
 ﻿using NokCore.Identity.Models;
+using NokPortalAPI.Models;
 
 namespace NokPortalAPI.Services
 {
@@ -33,14 +34,14 @@ namespace NokPortalAPI.Services
         /// </summary>
         /// <param name="searchCriteria">Search criteria.</param>
         /// <returns>List of users.</returns>
-        Task<IList<User>> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria);
+        Task<ICollection<User>> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria);
 
         /// <summary>
         /// Gets list of users by application ID.
         /// </summary>
         /// <param name="appId">Application ID.</param>
         /// <returns>List of users.</returns>
-        Task<IList<User>> GetUsersByAppIdAsync(int appId);
+        Task<ICollection<User>> GetUsersByAppIdAsync(int appId);
 
         /// <summary>
         /// Updates a user.
