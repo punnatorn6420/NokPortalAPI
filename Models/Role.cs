@@ -1,4 +1,5 @@
 ﻿using NokCore.Identity.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace NokPortalAPI.Models
 {
@@ -8,9 +9,14 @@ namespace NokPortalAPI.Models
     public class Role : IRole
     {
         public int Id { get; set; } = 0;
+
+        [MaxLength(255)]
         public string Name { get; set; } = string.Empty;
+
         public bool Active { get; set; } = false;
+
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
         public DateTime ModifiedAt { get; set; } = DateTime.Now;
 
         /// <summary>

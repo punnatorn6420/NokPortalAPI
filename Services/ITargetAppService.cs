@@ -15,7 +15,5 @@ namespace NokPortalAPI.Services
         /// <param name="env">Environment type.</param>
         /// <returns>List of roles.</returns>
         Task<IList<Role>> GetAppRolesByAppIdAndEnvAsync(int appId, EnumEnvironmentType env);
-
-
     }
 }

@@ -1,10 +1,7 @@
 namespace NokPortalAPI
 {
-    using System.Net;
-    using System.Text.Json.Serialization;
     using FluentValidation;
     using FluentValidation.AspNetCore;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.EntityFrameworkCore;
     using NokCore.Api.JWT.Services;
     using NokCore.Api.Middlewares;
@@ -15,6 +12,8 @@ namespace NokPortalAPI
     using NokPortalAPI.Shareds.DB;
     using NokPortalAPI.Validation;
     using Serilog;
+    using System.Net;
+    using System.Text.Json.Serialization;
 
     public static class Program
     {
@@ -54,9 +53,8 @@ namespace NokPortalAPI
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("NokPortalDB")));
+            builder.Services.Configure<ServiceSettings>(builder.Configuration.GetSection("ServiceSettings"));
 
-            // TODO: Check with team, the reason for use this approach
-            // builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
             // Database factory
             builder.Services.AddSingleton<DbConnectionFactory>();
@@ -69,7 +67,7 @@ namespace NokPortalAPI
             //builder.Services.AddScoped<IAppsRolesRepositorys, AppsRolesRepository>();
 
             // Services
-            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IUserService<User>, UserService>();
             builder.Services.AddScoped<IAppService, AppService>();
             //builder.Services.AddScoped<IAppEnvService, AppEnvService>();
             //builder.Services.AddScoped<IUserAppsService, UserAppsService>();
@@ -80,7 +78,8 @@ namespace NokPortalAPI
             // Permission service
             // builder.Services.AddSingleton<IAuthorizationHandler, NokCore.Api.Authorizations.PermissionHandler>();
             // builder.Services.AddSingleton<IAuthorizationHandler, NokCore.Api.Authorizations.MultiPermissionHandler>();
-            
+
+
             string secretKey = "secret123456789abcdefghigklmnopqrst";
             int hourExpire = 24;
             builder.Services.AddSingleton<IJwtService>(new JwtService(secretKey, hourExpire));
@@ -133,7 +132,8 @@ namespace NokPortalAPI
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            
+
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())

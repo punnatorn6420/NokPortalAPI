@@ -1,12 +1,12 @@
 ﻿namespace NokPortalAPI.Services.Old
 {
-    using System.Text.Json;
     using NokCore.Api.JWT.Models;
     using NokCore.Api.JWT.Services;
     using NokCore.Identity.Models;
     using NokPortalAPI.Models;
     using NokPortalAPI.Repositories.Old;
     using NokPortalAPI.Shareds.DB;
+    using System.Text.Json;
 
     /// <summary>
     /// This class implements the user service.
@@ -137,20 +137,6 @@
             bool success = await userRepository.DeleteUserAsync(conn, id, tran);
             tran.Commit();
             return success;
-        }
-
-        public string GenerateAuthorizationUrlSignup()
-        {
-            var clientId = configuration["OAuth2:ClientId"] ?? throw new ArgumentNullException("OAuth2:ClientId configuration is missing");
-            var responseType = configuration["OAuth2:ResponseType"] ?? throw new ArgumentNullException("OAuth2:ResponseType configuration is missing");
-            var redirectUri = configuration["OAuth2:RedirectUriSigUp"] ?? throw new ArgumentNullException("OAuth2:RedirectUriSigUp configuration is missing");
-            var scope = configuration["OAuth2:Scope"] ?? throw new ArgumentNullException("OAuth2:Scope configuration is missing");
-            var state = configuration["OAuth2:State"] ?? throw new ArgumentNullException("OAuth2:State configuration is missing");
-            var tenantId = configuration["OAuth2:TenantId"] ?? throw new ArgumentNullException("OAuth2:TenantId configuration is missing");
-            var authorizationEndpoint = $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize";
-            var authorizationUrl = $"{authorizationEndpoint}?client_id={Uri.EscapeDataString(clientId)}&response_type={Uri.EscapeDataString(responseType)}&redirect_uri={Uri.EscapeDataString(redirectUri)}&scope={Uri.EscapeDataString(scope)}&state={Uri.EscapeDataString(state)}";
-
-            return authorizationUrl;
         }
 
         public string GenerateAuthorizationUrlSignin()

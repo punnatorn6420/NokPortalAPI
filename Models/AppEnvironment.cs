@@ -28,17 +28,20 @@ namespace NokPortalAPI.Models
         /// <summary>
         /// Gets or sets the environment type.
         /// </summary>
+        /// 
         public EnumEnvironmentType EnvironmentType { get; set; }
 
         /// <summary>
         /// Gets or sets the base URL.
         /// </summary>
+        [MaxLength(255)]
         public string BaseURL { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the secret key for JWT.
         /// </summary>
         [JsonIgnore]
+        [MaxLength(255)]
         public string SecretKey { get; set; } = string.Empty;
 
         /// <summary>

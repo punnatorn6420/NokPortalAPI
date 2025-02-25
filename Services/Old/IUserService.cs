@@ -18,8 +18,6 @@ namespace NokPortalAPI.Services.Old
 
         Task<bool> DeleteUserAsync(int userId);
 
-        string GenerateAuthorizationUrlSignup();
-
         string GenerateAuthorizationUrlSignin();
 
         Task SignupMicrosoftGraphGetMeAsync(string token);

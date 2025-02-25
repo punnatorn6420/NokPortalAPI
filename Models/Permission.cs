@@ -1,4 +1,5 @@
 ﻿using NokCore.Identity.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace NokPortalAPI.Models
 {
@@ -8,6 +9,8 @@ namespace NokPortalAPI.Models
     public class Permission : IPermission
     {
         public int Id { get; set; } = 0;
+
+        [MaxLength(255)]
         public string Name { get; set; } = string.Empty;
 
         /// <summary>

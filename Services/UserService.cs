@@ -1,4 +1,5 @@
 ﻿using NokCore.Identity.Models;
+using NokCore.Identity.Services;
 using NokPortalAPI.Models;
 using NokPortalAPI.Repositories;
 
@@ -7,7 +8,7 @@ namespace NokPortalAPI.Services
     /// <summary>
     /// User service.
     /// </summary>
-    public class UserService : IUserService
+    public class UserService : IUserService<User>
     {
         private readonly AppDbContext context;
         private readonly IUserRepository<User> userRepository;
@@ -33,7 +34,7 @@ namespace NokPortalAPI.Services
             {
                 await transaction.RollbackAsync();
                 throw;
-            }   
+            }
         }
 
         /// <inheritdoc />
@@ -59,6 +60,7 @@ namespace NokPortalAPI.Services
         {
             return await userRepository.GetUsersByCriteriaAsync(searchCriteria);
         }
+
 
         /// <inheritdoc />
         public async Task<bool> UpdateUserAsync(User user)

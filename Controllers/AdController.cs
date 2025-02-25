@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using NokCore.Api.Controllers;
 using NokCore.Api.JWT.Models;
 using NokCore.Exceptions;
@@ -12,11 +13,13 @@ namespace NokPortalAPI.Controllers
     [Route("ad")]
     public class AdController : NokController<ControllerBase>
     {
+        private readonly ServiceSettings serviceSettings;
         private readonly IUserService userService;
         private readonly IUserAppsService userAppsService;
 
-        public AdController(IUserService userService, IUserAppsService userAppsService)
+        public AdController(IOptions<ServiceSettings> options, IUserService userService, IUserAppsService userAppsService)
         {
+            this.serviceSettings = options.Value;
             this.userService = userService;
             this.userAppsService = userAppsService;
         }
@@ -26,13 +29,20 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpGet("authorization-link-signup")]
         [AllowAnonymous]
-        public ActionResult GetAuthorizationLinkSignupAsync()
+        public async Task<ActionResult> GetAuthorizationLinkSignupAsync()
         {
             try
             {
-                var linkAD = userService.GenerateAuthorizationUrlSignup();
+                var clientId = serviceSettings.OAuth2.ClientId ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
+                var responseType = serviceSettings.OAuth2.ResponseType ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
+                var redirectUri = serviceSettings.OAuth2.RedirectUriSignUp ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
+                var scope = serviceSettings.OAuth2.Scope ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
+                var state = serviceSettings.OAuth2.State ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
+                var tenantId = serviceSettings.OAuth2.TenantId ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
+                var authorizationEndpoint = $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize";
+                var authorizationUrl = $"{authorizationEndpoint}?client_id={Uri.EscapeDataString(clientId)}&response_type={Uri.EscapeDataString(responseType)}&redirect_uri={Uri.EscapeDataString(redirectUri)}&scope={Uri.EscapeDataString(scope)}&state={Uri.EscapeDataString(state)}";
 
-                return Ok(FormatSuccessResponse(new { link = linkAD }));
+                return await Task.FromResult(Ok(FormatSuccessResponse(new { link = authorizationUrl })));
             }
             catch (Exception ex)
             {
@@ -45,7 +55,7 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpPost("signup")]
         [AllowAnonymous]
-        public async Task<ActionResult<ApiResponse<object, string>>> SignupAsync(RequestMicrosoftToken req)
+        public async Task<ActionResult> SignupAsync(RequestMicrosoftToken req)
         {
             try
             {
@@ -80,13 +90,20 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpGet("authorization-link-signin")]
         [AllowAnonymous]
-        public ActionResult<ApiResponse<object, string>> GetAuthorizationLinkSignInAsync()
+        public async Task<ActionResult> GetAuthorizationLinkSignInAsync()
         {
             try
             {
-                var linkAD = userService.GenerateAuthorizationUrlSignin();
+                var clientId = serviceSettings.OAuth2.ClientId ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
+                var responseType = serviceSettings.OAuth2.ResponseType ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
+                var redirectUri = serviceSettings.OAuth2.RedirectUriSignIn ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
+                var scope = serviceSettings.OAuth2.Scope ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
+                var state = serviceSettings.OAuth2.State ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
+                var tenantId = serviceSettings.OAuth2.TenantId ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
+                var authorizationEndpoint = $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize";
+                var authorizationUrl = $"{authorizationEndpoint}?client_id={Uri.EscapeDataString(clientId)}&response_type={Uri.EscapeDataString(responseType)}&redirect_uri={Uri.EscapeDataString(redirectUri)}&scope={Uri.EscapeDataString(scope)}&state={Uri.EscapeDataString(state)}";
 
-                return Ok(FormatSuccessResponse(new { link = linkAD }));
+                return await Task.FromResult(Ok(FormatSuccessResponse(new { link = authorizationUrl })));
             }
             catch (Exception ex)
             {
