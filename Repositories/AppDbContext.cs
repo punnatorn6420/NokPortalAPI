@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using NokCore.Identity.Models;
 using NokPortalAPI.Models;
 
 namespace NokPortalAPI.Repositories

@@ -160,12 +160,12 @@
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             var response = await httpClient.SendAsync(request);
-            ResponseMicrosoftUserInfo userAD;
+            MicrosoftUserInfo userAD;
             try
             {
                 response.EnsureSuccessStatusCode();
                 var responseContent = await response.Content.ReadAsStringAsync();
-                userAD = JsonSerializer.Deserialize<ResponseMicrosoftUserInfo>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+                userAD = JsonSerializer.Deserialize<MicrosoftUserInfo>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 
                 if (userAD == null)
                 {
@@ -213,13 +213,13 @@
                 request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
                 var response = await httpClient.SendAsync(request);
-                ResponseMicrosoftUserInfo userAD;
+                MicrosoftUserInfo userAD;
                 try
                 {
                     response.EnsureSuccessStatusCode();
                     var responseContent = await response.Content.ReadAsStringAsync();
 
-                    userAD = JsonSerializer.Deserialize<ResponseMicrosoftUserInfo>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+                    userAD = JsonSerializer.Deserialize<MicrosoftUserInfo>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
                     if (userAD == null)
                     {
                         throw new InvalidOperationException("Deserialization returned null.");

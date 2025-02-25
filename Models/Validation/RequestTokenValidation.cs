@@ -1,4 +1,4 @@
-﻿namespace NokPortalAPI.Validation
+﻿namespace NokPortalAPI.Models.Validation
 {
     using FluentValidation;
     using NokPortalAPI.Models;

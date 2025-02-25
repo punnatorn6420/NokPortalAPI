@@ -2,7 +2,7 @@
 
 namespace NokPortalAPI.Models
 {
-    public class ResponseMicrosoftUserInfo
+    public class MicrosoftUserInfo
     {
         [JsonPropertyName("@odata.context")]
         required public string ODataContext { get; set; }

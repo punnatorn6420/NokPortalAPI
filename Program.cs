@@ -6,11 +6,12 @@ namespace NokPortalAPI
     using NokCore.Api.JWT.Services;
     using NokCore.Api.Middlewares;
     using NokPortalAPI.Models;
+    using NokPortalAPI.Models.Validation;
     using NokPortalAPI.Repositories;
+    using NokPortalAPI.Responses;
     using NokPortalAPI.Services;
     using NokPortalAPI.Shareds;
     using NokPortalAPI.Shareds.DB;
-    using NokPortalAPI.Validation;
     using Serilog;
     using System.Net;
     using System.Text.Json.Serialization;
@@ -62,18 +63,16 @@ namespace NokPortalAPI
             // Repositories
             builder.Services.AddScoped<IUserRepository<User>, UserRepository>();
             builder.Services.AddScoped<IAppRepository, AppRepository>();
-            //builder.Services.AddScoped<IAssignedUsersRepositorys, AssignedUsersRepositorys>();
-            //builder.Services.AddScoped<IAppEnvRepository, AppEnvRepository>();
-            //builder.Services.AddScoped<IAppsRolesRepositorys, AppsRolesRepository>();
 
             // Services
+            builder.Services.AddSingleton<MsActiveDirectoryService>();
             builder.Services.AddScoped<IUserService<User>, UserService>();
             builder.Services.AddScoped<IAppService, AppService>();
-            //builder.Services.AddScoped<IAppEnvService, AppEnvService>();
-            //builder.Services.AddScoped<IUserAppsService, UserAppsService>();
 
             builder.Services.AddSingleton<ReloadFileConfig>();
             builder.Services.AddSingleton<CorsPolicyReloader>();
+
+            builder.Services.AddScoped<ApiResponseFactory>();
 
             // Permission service
             // builder.Services.AddSingleton<IAuthorizationHandler, NokCore.Api.Authorizations.PermissionHandler>();

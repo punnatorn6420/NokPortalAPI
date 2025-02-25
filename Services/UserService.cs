@@ -1,5 +1,5 @@
-﻿using NokCore.Identity.Models;
-using NokCore.Identity.Services;
+﻿using NokCore.Api.JWT.Services;
+using NokCore.Identity.Models;
 using NokPortalAPI.Models;
 using NokPortalAPI.Repositories;
 
@@ -13,7 +13,10 @@ namespace NokPortalAPI.Services
         private readonly AppDbContext context;
         private readonly IUserRepository<User> userRepository;
 
-        public UserService(AppDbContext context, IUserRepository<User> userRepository)
+        public UserService(
+            AppDbContext context,
+            IUserRepository<User> userRepository,
+            IJwtService jwtService)
         {
             this.context = context;
             this.userRepository = userRepository;
@@ -60,7 +63,6 @@ namespace NokPortalAPI.Services
         {
             return await userRepository.GetUsersByCriteriaAsync(searchCriteria);
         }
-
 
         /// <inheritdoc />
         public async Task<bool> UpdateUserAsync(User user)

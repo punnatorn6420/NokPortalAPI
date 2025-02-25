@@ -1,5 +1,4 @@
 ﻿using NokCore.Identity.Repositories;
-using NokPortalAPI.Models;
 
 namespace NokPortalAPI.Repositories
 {
