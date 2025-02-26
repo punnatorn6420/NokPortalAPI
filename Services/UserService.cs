@@ -13,10 +13,7 @@ namespace NokPortalAPI.Services
         private readonly AppDbContext context;
         private readonly IUserRepository<User> userRepository;
 
-        public UserService(
-            AppDbContext context,
-            IUserRepository<User> userRepository,
-            IJwtService jwtService)
+        public UserService(AppDbContext context, IUserRepository<User> userRepository)
         {
             this.context = context;
             this.userRepository = userRepository;

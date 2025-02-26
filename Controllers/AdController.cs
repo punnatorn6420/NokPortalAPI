@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using NokCore.Api.JWT.Models;
 using NokCore.Api.JWT.Services;
 using NokCore.Errors;
@@ -15,24 +14,21 @@ namespace NokPortalAPI.Controllers
     [Route("ad")]
     public class AdController : ControllerBase
     {
-        private readonly ServiceSettings serviceSettings;
         private readonly MsActiveDirectoryService msActiveDirectoryService;
         private readonly IUserService<User> userService;
         private readonly IJwtService jwtService;
-        private readonly ApiResponseFactory apiResponseFactory;
+        private readonly ApiResponseFactory resFactory;
 
         public AdController(
-            IOptions<ServiceSettings> options,
             MsActiveDirectoryService msActiveDirectoryService,
             IUserService<User> userService,
             IJwtService jwtService,
             ApiResponseFactory apiResponseFactory)
         {
-            this.serviceSettings = options.Value;
             this.msActiveDirectoryService = msActiveDirectoryService;
             this.userService = userService;
             this.jwtService = jwtService;
-            this.apiResponseFactory = apiResponseFactory;
+            this.resFactory = apiResponseFactory;
         }
 
         /// <summary>
@@ -45,11 +41,11 @@ namespace NokPortalAPI.Controllers
             try
             {
                 var authorizationUrl = await msActiveDirectoryService.GenerateAuthorizationUrlSignUpAsync();
-                return await Task.FromResult(Ok(apiResponseFactory.CreateSuccessResponse<object>(new { link = authorizationUrl }, null)));
+                return await Task.FromResult(Ok(resFactory.CreateSuccessResponse(new { link = authorizationUrl }, null)));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, apiResponseFactory.CreateInternalErrorResponse(ServiceError.UnexpectedErrorE999, ex.Message, null));
+                return StatusCode(500, resFactory.CreateInternalErrorResponse(ServiceError.UnexpectedErrorE999, ex.Message, null));
             }
         }
 
@@ -64,7 +60,7 @@ namespace NokPortalAPI.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(apiResponseFactory.CreateMessageResponse(""));
+                    return BadRequest(resFactory.CreateMessageResponse(""));
                 }
 
                 // Retrieve the Microsoft user info using the token.
@@ -72,7 +68,7 @@ namespace NokPortalAPI.Controllers
 
                 if (msUserInfo == null)
                 {
-                    return BadRequest(apiResponseFactory.CreateMessageResponse("Failed to get user info"));
+                    return BadRequest(resFactory.CreateMessageResponse("Failed to get user info"));
                 }
 
                 User user = new User
@@ -89,21 +85,21 @@ namespace NokPortalAPI.Controllers
                 };
                 await userService.AddUserAsync(user);
 
-                return Ok(apiResponseFactory.CreateSuccessResponse("Success", null));
+                return Ok(resFactory.CreateSuccessResponse("Success", null));
             }
             catch (DataValidationException ex)
             {
-                return Ok(apiResponseFactory.CreateErrorResponse(ex.ErrorCode, ex.Message, null));
+                return Ok(resFactory.CreateErrorResponse(ex.ErrorCode, ex.Message, null));
             }
             catch (Exception ex)
             {
                 if (ex.Message == "Response status code does not indicate success: 401 (Unauthorized).")
                 {
-                    return BadRequest(apiResponseFactory.CreateMessageResponse("Token is either not in correct format or has expired"));
+                    return BadRequest(resFactory.CreateMessageResponse("Token is either not in correct format or has expired"));
                 }
                 else
                 {
-                    return StatusCode(500, apiResponseFactory.CreateInternalErrorResponse(ServiceError.UnexpectedErrorE999, ex.Message, null));
+                    return StatusCode(500, resFactory.CreateInternalErrorResponse(ServiceError.UnexpectedErrorE999, ex.Message, null));
                 }
             }
         }
@@ -118,11 +114,11 @@ namespace NokPortalAPI.Controllers
             try
             {
                 var authorizationUrl = await msActiveDirectoryService.GenerateAuthorizationUrlSignInAsync();
-                return await Task.FromResult(Ok(apiResponseFactory.CreateSuccessResponse<object>(new { link = authorizationUrl }, null)));
+                return await Task.FromResult(Ok(resFactory.CreateSuccessResponse<object>(new { link = authorizationUrl }, null)));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, apiResponseFactory.CreateInternalErrorResponse(ServiceError.UnexpectedErrorE999, ex.Message, null));
+                return StatusCode(500, resFactory.CreateInternalErrorResponse(ServiceError.UnexpectedErrorE999, ex.Message, null));
             }
         }
 
@@ -135,7 +131,7 @@ namespace NokPortalAPI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(apiResponseFactory.CreateMessageResponse(""));
+                return BadRequest(resFactory.CreateMessageResponse(""));
             }
 
             try
@@ -143,13 +139,13 @@ namespace NokPortalAPI.Controllers
                 var msUserInfo = await msActiveDirectoryService.GetMicrosoftUserInfoByTokenAsync(req.Token);
                 if (msUserInfo == null)
                 {
-                    return BadRequest(apiResponseFactory.CreateMessageResponse("Failed to get user info"));
+                    return BadRequest(resFactory.CreateMessageResponse("Failed to get user info"));
                 }
 
                 var user = await userService.GetUserByEmailAsync(msUserInfo.UserPrincipalName);
                 if (user == null)
                 {
-                    return Ok(apiResponseFactory.CreateMessageResponse("User not found"));
+                    return Ok(resFactory.CreateMessageResponse("User not found"));
                 }
 
                 var jwtData = new UserClaims
@@ -158,17 +154,17 @@ namespace NokPortalAPI.Controllers
                 };
 
                 var token = await jwtService.GenerateToken(jwtData);
-                return Ok(apiResponseFactory.CreateSuccessResponse(token, null));
+                return Ok(resFactory.CreateSuccessResponse(token, null));
             }
             catch (Exception ex)
             {
                 if (ex.Message == "Response status code does not indicate success: 401 (Unauthorized).")
                 {
-                    return Unauthorized(apiResponseFactory.CreateMessageResponse("Token is either not in correct format or has expired"));
+                    return Unauthorized(resFactory.CreateMessageResponse("Token is either not in correct format or has expired"));
                 }
                 else
                 {
-                    return StatusCode(500, apiResponseFactory.CreateInternalErrorResponse(ServiceError.UnexpectedErrorE999, ex.Message, null));
+                    return StatusCode(500, resFactory.CreateInternalErrorResponse(ServiceError.UnexpectedErrorE999, ex.Message, null));
                 }
             }
         }
