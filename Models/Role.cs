@@ -27,6 +27,6 @@ namespace NokPortalAPI.Models
         /// <summary>
         /// Gets or sets the collection of role privileges.
         /// </summary>
-        public ICollection<RolePermission> RolePrivileges { get; set; } = new List<RolePermission>();
+        public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
     }
 }

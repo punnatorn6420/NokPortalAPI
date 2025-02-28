@@ -41,13 +41,6 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<AppEnvironment?> GetAppEnvironmentByIdAndEnvAsync(int id, EnumEnvironmentType env)
-        {
-            return await context.AppEnvironments
-                .FirstOrDefaultAsync(ae => ae.AppId == id && ae.EnvironmentType == env);
-        }
-
-        /// <inheritdoc/>
         public async Task<IList<App>> GetAppsByCriteriaAsync(AppSearchCriteria searchCriteria)
         {
             IQueryable<App> query = context.Apps;
@@ -73,7 +66,6 @@ namespace NokPortalAPI.Repositories
         public async Task<IList<App>> GetAppsByUserIdAsync(int userId)
         {
             return await context.Apps
-                .Include(a => a.Environments)
                 .Where(a => a.AssignedApps.Any(aua => aua.UserId == userId))
                 .ToListAsync();
         }
@@ -82,13 +74,6 @@ namespace NokPortalAPI.Repositories
         public async Task<int> UpdateAppAsync(App app)
         {
             context.Apps.Update(app);
-
-            // Update each AppEnvironment entity
-            foreach (var environment in app.Environments)
-            {
-                context.Entry(environment).State = EntityState.Modified;
-            }
-
             return await context.SaveChangesAsync();
         }
     }

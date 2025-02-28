@@ -3,7 +3,7 @@
     using FluentValidation;
     using NokPortalAPI.Models;
 
-    public class RequestTokenValidation : AbstractValidator<RequestMicrosoftToken>
+    public class RequestTokenValidation : AbstractValidator<MicrosoftTokenRequest>
     {
         public RequestTokenValidation()
         {

@@ -5,7 +5,7 @@ namespace NokPortalAPI.Models
     /// <summary>
     /// Represents the association between a user to an application with a role.
     /// </summary>
-    public class AssignedUserAppRole
+    public class UserAppRoleAssignment
     {
         /// <summary>
         /// Surrogate key for the assigned user application.
@@ -35,9 +35,9 @@ namespace NokPortalAPI.Models
         public App App { get; set; } = new App();
 
         /// <summary>
-        /// Gets or sets the application role ID.
+        /// Gets or sets the application's role ID.
         /// </summary>
-        public int AppRoleId { get; set; }
+        public int RoleId { get; set; }
 
         /// <summary>
         /// Gets or sets the date and time when the user was assigned to the application role.

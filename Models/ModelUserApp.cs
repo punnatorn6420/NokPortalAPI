@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using NokPortalAPI.Enums;
+using System.Text.Json.Serialization;
 
 namespace NokPortalAPI.Models
 {
@@ -11,6 +12,6 @@ namespace NokPortalAPI.Models
         public int UserId { get; set; }
 
         [JsonPropertyName("roleId")]
-        public EnumUserRole RoleId { get; set; }
+        public AppRole RoleId { get; set; }
     }
 }

@@ -1,68 +1,44 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NokCore.Api.Controllers;
+using NokCore.Api.Controllers.Internal;
+using NokCore.Api.Responses.Web;
 using NokCore.Identity.Models;
 using NokPortalAPI.Models;
-using NokPortalAPI.Services.Old;
+using NokPortalAPI.Resources;
+using NokPortalAPI.Services;
 
 namespace NokPortalAPI.Controllers
 {
     [ApiController]
-    [Route("user")]
-    public class UserController : NokController<ControllerBase>
+    [Route("v1/user")]
+    public class UserController : BaseController
     {
-        private readonly IUserService userService;
+        private readonly IUserService<User> userService;
 
-        public UserController(IUserService userService)
+        public UserController(
+            IUserService<User> userService,
+            ApiResponseFactory<ApiResponseLocalize> apiResponseFactory) : base(apiResponseFactory)
         {
             this.userService = userService;
         }
 
         [HttpGet("all")]
         [Authorize(Policy = "Admin")]
-        public async Task<ActionResult<ApiResponse<object, string>>> UserAll()
+        public async Task<ActionResult> SearchUsersAsync([FromQuery] UserSearchCriteria searchCriteria)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(FormatInvalidFieldResponse(GetFieldErrors()));
+                return BadRequestResponseFromInvalidRequest();
             }
 
             try
             {
-                IEnumerable<IUser> user = await userService.GetAllUsersAsync();
-
-                return Ok(FormatSuccessResponse(user));
+                IEnumerable<IUser> user = await userService.GetUsersByCriteriaAsync(searchCriteria);
+                return OkResponseWithResult(user);
             }
             catch (Exception ex)
             {
-                return Ok(FormatInternalErrorReponse(ex.Message, null));
-            }
-        }
-
-        [HttpGet("{id}")]
-        [Authorize(Policy = "Admin")]
-        public async Task<ActionResult<ApiResponse<object, string>>> GetByUserId(int id)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(FormatInvalidFieldResponse(GetFieldErrors()));
-            }
-
-            try
-            {
-                UserAppWithEnvRoles user = await userService.GetUserAppsWithEnvRolesAsync(id);
-                return Ok(FormatSuccessResponse(user));
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message == "Response status code does not indicate success: 401 (Unauthorized).")
-                {
-                    return Unauthorized(FormatInternalErrorReponse("Token is either not in correct format or has expired", null));
-                }
-                else
-                {
-                    return Ok(FormatInternalErrorReponse(ex.Message, null));
-                }
+                return InternalServerErrorResponseFromException(ex);
             }
         }
     }

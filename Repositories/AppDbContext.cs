@@ -10,30 +10,18 @@ namespace NokPortalAPI.Repositories
         }
 
         public DbSet<App> Apps { get; set; }
-        public DbSet<AppEnvironment> AppEnvironments { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Permission> Privileges { get; set; }
         public DbSet<RolePermission> RolePrivileges { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
-        public DbSet<AssignedUserAppRole> AssignedUserApps { get; set; }
+        public DbSet<UserAppRoleAssignment> UserAppRoleAssignments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<App>()
-                .HasMany(a => a.Environments)
-                .WithOne(e => e.App)
-                .HasForeignKey(ae => ae.AppId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             // Ensure that the app name is unique.
             modelBuilder.Entity<App>()
                 .HasIndex(a => a.Name)
-                .IsUnique();
-
-            // Ensure that the application environment is unique.
-            modelBuilder.Entity<AppEnvironment>()
-                .HasIndex(ae => new { ae.AppId, ae.EnvironmentType })
                 .IsUnique();
 
             modelBuilder.Entity<User>()
@@ -43,7 +31,7 @@ namespace NokPortalAPI.Repositories
                 .OnDelete(DeleteBehavior.Restrict); // Fix for multiple cascade paths
 
             // Ensure that the email is unique.
-            modelBuilder.Entity<Models.User>()
+            modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
@@ -59,13 +47,13 @@ namespace NokPortalAPI.Repositories
                 .IsUnique();
 
             modelBuilder.Entity<Role>()
-                .HasMany(r => r.RolePrivileges)
+                .HasMany(r => r.RolePermissions)
                 .WithOne()
                 .HasForeignKey(rp => rp.RoleId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Permission>()
-                .HasMany(p => p.RolePrivileges)
+                .HasMany(p => p.RolePermissions)
                 .WithOne()
                 .HasForeignKey(rp => rp.PermissionId)
                 .OnDelete(DeleteBehavior.Restrict);
@@ -84,35 +72,33 @@ namespace NokPortalAPI.Repositories
             // Configure the many-to-many relationship between the role and the privilege.
             modelBuilder.Entity<RolePermission>()
                 .HasOne(rp => rp.Role)
-                .WithMany(r => r.RolePrivileges)
+                .WithMany(r => r.RolePermissions)
                 .HasForeignKey(rp => rp.RoleId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Configure the many-to-many relationship between the privilege and the role.
             modelBuilder.Entity<RolePermission>()
                 .HasOne(rp => rp.Permission)
-                .WithMany(p => p.RolePrivileges)
+                .WithMany(p => p.RolePermissions)
                 .HasForeignKey(rp => rp.PermissionId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<AssignedUserAppRole>()
-                .HasKey(aua => new { aua.UserId, aua.AppId, aua.AppRoleId });
+            modelBuilder.Entity<UserAppRoleAssignment>()
+                .HasKey(aua => new { aua.UserId, aua.AppId, aua.RoleId });
 
             // Configure the one-to-many relationship between the application and the assigned user application.
-            modelBuilder.Entity<AssignedUserAppRole>()
+            modelBuilder.Entity<UserAppRoleAssignment>()
                 .HasOne(aua => aua.App)
                 .WithMany(a => a.AssignedApps)
                 .HasForeignKey(aua => aua.AppId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Configure the one-to-many relationship between the user and the assigned user application.
-            modelBuilder.Entity<AssignedUserAppRole>()
+            modelBuilder.Entity<UserAppRoleAssignment>()
                 .HasOne(aua => aua.User)
                 .WithMany(u => u.AssignedApps)
                 .HasForeignKey(aua => aua.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-
         }
 
     }

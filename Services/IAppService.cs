@@ -1,4 +1,5 @@
-﻿using NokPortalAPI.Models;
+﻿using NokCore.Api.JWT.Models;
+using NokPortalAPI.Models;
 
 namespace NokPortalAPI.Services
 {

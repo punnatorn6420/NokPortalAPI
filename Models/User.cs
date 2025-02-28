@@ -41,6 +41,6 @@ namespace NokPortalAPI.Models
         /// <summary>
         /// Navigation property for the assigned applications.
         /// </summary>
-        public IList<AssignedUserAppRole> AssignedApps { get; set; } = new List<AssignedUserAppRole>();
+        public IList<UserAppRoleAssignment> AssignedApps { get; set; } = new List<UserAppRoleAssignment>();
     }
 }

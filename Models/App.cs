@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Newtonsoft.Json;
+using NokPortalAPI.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace NokPortalAPI.Models
 {
@@ -21,14 +23,38 @@ namespace NokPortalAPI.Models
         [MaxLength(255)]
         public string Subheader { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the environment type.
+        /// </summary>
+        /// 
+        public EnvironmentType EnvironmentType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the base URL.
+        /// </summary>
         [MaxLength(255)]
-        public string Detail { get; set; } = string.Empty;
+        public string BaseURL { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the secret key for JWT.
+        /// </summary>
+        [JsonIgnore]
+        [MaxLength(255)]
+        public string SecretKey { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the JWT expiration hour. Default is 8 hours.
+        /// </summary>
+        public int JwtExpiryHours { get; set; } = 8;
+
+        [MaxLength(255)]
+        public string Remark { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the image URL.
         /// </summary>
         [MaxLength(255)]
-        public string Image { get; set; } = string.Empty;
+        public string ImageUrl { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the base URL.
@@ -51,14 +77,10 @@ namespace NokPortalAPI.Models
         /// </summary>
         public DateTime ModifiedAt { get; set; } = DateTime.Now;
 
-        /// <summary>
-        /// Gets or sets the application environments.
-        /// </summary>
-        public ICollection<AppEnvironment> Environments { get; set; } = new List<AppEnvironment>();
 
         /// <summary>
         /// Gets or sets the assigned user applications.
         /// </summary>
-        public ICollection<AssignedUserAppRole> AssignedApps { get; set; } = new List<AssignedUserAppRole>();
+        public ICollection<UserAppRoleAssignment> AssignedApps { get; set; } = new List<UserAppRoleAssignment>();
     }
 }

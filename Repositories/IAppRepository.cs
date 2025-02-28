@@ -29,14 +29,6 @@ namespace NokPortalAPI.Repositories
         Task<App?> GetAppByIdAsync(int id);
 
         /// <summary>
-        /// Gets an application environment by application ID and environment type.
-        /// </summary>
-        /// <param name="id">Application ID.</param>
-        /// <param name="env">Environment type.</param>
-        /// <returns>An application environment if found; otherwise, null.</returns>
-        Task<AppEnvironment?> GetAppEnvironmentByIdAndEnvAsync(int id, EnumEnvironmentType env);
-
-        /// <summary>
         /// Gets list of applications without environments by search criteria.
         /// </summary>
         /// <param name="searchCriteria">Search criteria.</param>

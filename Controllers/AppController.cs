@@ -1,33 +1,32 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NokCore.Api.Controllers;
-using NokCore.Errors;
+using NokCore.Api.Controllers.Internal;
+using NokCore.Api.Responses.Web;
 using NokCore.Exceptions;
+using NokPortalAPI.Enums;
 using NokPortalAPI.Models;
-using NokPortalAPI.Responses;
+using NokPortalAPI.Resources;
 using NokPortalAPI.Services;
 
 namespace NokPortalAPI.Controllers
 {
     [ApiController]
-    [Route("app")]
-    public class AppController : ControllerBase
+    [Route("v1/app")]
+    public class AppController : BaseController
     {
         private readonly IAppService appService;
-        private readonly ITargetAppService targetAppService;
+        private readonly IUserAppRoleAssignmentService userAppRoleAssignmentService;
         private readonly IUserService<User> userService;
-        private readonly ApiResponseFactory resFactory;
 
         public AppController(
             IAppService appService,
-            ITargetAppService targetAppService,
+            IUserAppRoleAssignmentService targetAppService,
             IUserService<User> userService,
-            ApiResponseFactory apiResponseFactory)
+            ApiResponseFactory<ApiResponseLocalize> apiResponseFactory) : base(apiResponseFactory)
         {
             this.appService = appService;
-            this.targetAppService = targetAppService;
+            this.userAppRoleAssignmentService = targetAppService;
             this.userService = userService;
-            this.resFactory = apiResponseFactory;
         }
 
         /// <summary>
@@ -40,7 +39,7 @@ namespace NokPortalAPI.Controllers
             // Check if the model state is valid
             if (!ModelState.IsValid)
             {
-                return BadRequest(resFactory.CreateErrorResponse("InvalidField", "", null));
+                return BadRequestResponseFromInvalidRequest();
             }
 
             try
@@ -48,18 +47,18 @@ namespace NokPortalAPI.Controllers
                 var addedApp = await appService.AddAppAsync(app);
                 if (addedApp != null)
                 {
-                    return Ok(resFactory.CreateSuccessResponse("Success", null));
+                    return OkSuccessResponse();
                 }
 
-                return Ok(resFactory.CreateErrorResponse("Create failed", "", null));
+                return InternalServerErrorResponseFromException(new Exception("Failed to add new application"));
             }
             catch (DataValidationException ex)
             {
-                return Ok(resFactory.CreateErrorResponse(ex.ErrorCode, ex.Message, null));
+                return BadRequestResponseFromErrorCode(ex.ErrorCode);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, resFactory.CreateInternalErrorResponse(ServiceError.UnexpectedErrorE999, ex.Message, null));
+                return InternalServerErrorResponseFromException(ex);
             }
         }
 
@@ -73,26 +72,21 @@ namespace NokPortalAPI.Controllers
             // Check if the model state is valid
             if (!ModelState.IsValid)
             {
-                return BadRequest(resFactory.CreateErrorResponse("InvalidField", "", null));
+                return BadRequestResponseFromInvalidRequest();
             }
 
             try
             {
-                bool chkSuccess = await appService.UpdateAppAsync(app);
-                if (chkSuccess)
-                {
-                    return Ok(resFactory.CreateSuccessResponse("Success", null));
-                }
-
-                return Ok(resFactory.CreateErrorResponse("Update failed", "", null));
+                await appService.UpdateAppAsync(app);
+                return OkSuccessResponse();
             }
             catch (DataValidationException ex)
             {
-                return Ok(resFactory.CreateErrorResponse(ex.ErrorCode, ex.Message, null));
+                return BadRequestResponseFromErrorCode(ex.ErrorCode);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, resFactory.CreateInternalErrorResponse(ServiceError.UnexpectedErrorE999, ex.Message, null));
+                return InternalServerErrorResponseFromException(ex);
             }
         }
 
@@ -101,16 +95,22 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpGet("search")]
         [Authorize(Policy = "Admin")]
-        public async Task<ActionResult> SearchAppAsync()
+        public async Task<ActionResult> SearchAppAsync([FromQuery] AppSearchCriteria searchCriteria)
         {
             try
             {
-                ICollection<App> apps = await appService.GetAppsByCriteriaAsync(new AppSearchCriteria());
-                return Ok(resFactory.CreateSuccessResponse(apps, null));
+                // Validate search criteria
+                if (!ModelState.IsValid)
+                {
+                    return BadRequestResponseFromInvalidRequest();
+                }
+
+                ICollection<App> apps = await appService.GetAppsByCriteriaAsync(searchCriteria);
+                return OkResponseWithResult(apps);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, resFactory.CreateInternalErrorResponse(ServiceError.UnexpectedErrorE999, ex.Message, null));
+                return InternalServerErrorResponseFromException(ex);
             }
         }
 
@@ -119,11 +119,11 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpGet("{id}")]
         [Authorize(Policy = "Admin")]
-        public async Task<ActionResult<ApiResponse<object, string>>> GetAppInfo(int id)
+        public async Task<ActionResult> GetAppInfo(int id)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(resFactory.CreateErrorResponse("InvalidField", "", null));
+                return BadRequestResponseFromInvalidRequest();
             }
 
             try
@@ -134,39 +134,38 @@ namespace NokPortalAPI.Controllers
                     return NoContent();
                 }
 
-                return Ok(resFactory.CreateSuccessResponse(app, null));
+                return OkResponseWithResult(app);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, resFactory.CreateInternalErrorResponse(ServiceError.UnexpectedErrorE999, ex.Message, null));
+                return InternalServerErrorResponseFromException(ex);
             }
         }
 
         /// <summary>
         /// This endpoint is used to assign a user to an app.
         /// </summary>
-        [HttpPost("{id}/assign-user")]
+        [HttpPost("{id}/assign-user-to-app")]
         [Authorize(Policy = "Admin")]
-        public async Task<ActionResult<ApiResponse<object, string>>> CreateUserApp(int id, RequestAddUserApp reqUserId)
+        public async Task<ActionResult> AssignUserToAppAsync(int id, UserAppAssignmentRequest req)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(FormatInvalidFieldResponse(GetFieldErrors()));
+                return BadRequestResponseFromInvalidRequest();
             }
 
             try
             {
-                await usersAppService.AddUserAppAsync(id, reqUserId);
-
-                return Ok(resFactory.CreateSuccessResponse("Success", null));
+                await userAppRoleAssignmentService.AssignUserToAppAsync(req);
+                return OkSuccessResponse();
             }
-            catch (ArgumentNullException ex)
+            catch (DataValidationException ex)
             {
-                return Ok(FormatDataErrorResponse(ex.Message, "ArgumentNullError"));
+                return BadRequestResponseFromMessage(ex.Message);
             }
             catch (Exception ex)
             {
-                return Ok(FormatInternalErrorReponse(ex.Message, null));
+                return InternalServerErrorResponseFromException(ex);
             }
         }
 
@@ -175,73 +174,60 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpGet("{id}/get-roles")]
         [Authorize(Policy = "Admin")]
-        public async Task<ActionResult<ApiResponse<object, string>>> GetRoles(int id, [FromQuery] EnumEnvironmentType env)
+        public async Task<ActionResult> GetRoles(int id, [FromQuery] EnvironmentType env)
         {
             try
             {
-                ICollection<Role> roles = await targetAppService.GetAppRolesByAppIdAndEnvAsync(id, env);
-                return Ok(resFactory.CreateSuccessResponse(roles, null));
+                ICollection<Role> roles = await userAppRoleAssignmentService.GetRolesByAppIdAsync(id);
+                return OkResponseWithResult(roles);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, resFactory.CreateInternalErrorResponse(ServiceError.UnexpectedErrorE999, ex.Message, null));
+                return InternalServerErrorResponseFromException(ex);
             }
         }
 
         /// <summary>
-        /// This endpoint is used to get the JWT token for the target app.
+        /// This endpoint is used to get the JWT token to access the target app for Admin.
         /// </summary>
-        /// TODO: Discuss with the team about the endpoint name.
-        [HttpGet("{id}/redirect-target-app")]
+        [HttpGet("{id}/jwt-token")]
         [Authorize(Policy = "Admin")]
-        public async Task<ActionResult<ApiResponse<object, string>>> GetJWTTokenForTargetApp(int id, [FromQuery] EnumEnvironmentType env)
+        public async Task<ActionResult> GetJwtTokenInfoAsync(int id)
         {
             try
             {
                 var userClaims = GetUserClaims();
                 if (!userClaims.IsValid)
                 {
-                    return Unauthorized(FormatInternalErrorReponse("User claims not found", null));
+                    return Unauthorized();
                 }
 
-                UserApps userApps = await userService.GetUserAppsAsync(userClaims.UserId, env);
-
-                var user = userApps?.User;
-                if (user == null)
-                {
-                    return BadRequest(new ApiResponse<object, string>
-                    {
-                        Data = null,
-                    });
-                }
-
-                var (appEnv, jwtTokenWithUser) = await usersAppService.GetJWTTokenTargetAppWithData(id, env, user, userApps?.App ?? []);
-
-                var app = userApps?.App.FirstOrDefault(a => a.AppId == id);
+                // Get app information
+                var app = await appService.GetAppByIdAsync(id);
                 if (app == null)
                 {
-                    return BadRequest(new ApiResponse<object, string>
-                    {
-                        Data = null,
-                    });
+                    throw new DataValidationException("Application not found. Please check the app.");
                 }
 
-                var response = new
+                var jwtTokenInfo = await userAppRoleAssignmentService.GetJwtTokenInfoByUserAppAsync(userClaims.UserId, id);
+
+                var res = new AppInfo()
                 {
-                    BaseURL = app.BaseUrl,
-                    appEnv.EnvironmentType,
-                    jwtTokenWithUser.Token,
-                    jwtTokenWithUser.ExpiresTime
+                    BaseUrl = app.BaseUrl,
+                    EnvironmentType = app.EnvironmentType,
+                    JwtToken = jwtTokenInfo.Token,
+                    JwtExpiryTime = jwtTokenInfo.ExpiryTime
                 };
 
-                return Ok(new ApiResponse<object, string>
-                {
-                    Data = response,
-                });
+                return OkResponseWithResult(res);
+            }
+            catch (DataValidationException ex)
+            {
+                return BadRequestResponseFromMessage(ex.Message);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, resFactory.CreateInternalErrorResponse(ServiceError.UnexpectedErrorE999, ex.Message, null));
+                return InternalServerErrorResponseFromException(ex);
             }
         }
     }

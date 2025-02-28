@@ -1,18 +1,22 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NokCore.Api.Controllers;
+using NokCore.Api.Controllers.Internal;
+using NokCore.Api.Responses.Web;
 using NokPortalAPI.Shareds;
 
 namespace NokPortalAPI.Controllers
 {
     [ApiController]
-    [Route("health-check")]
-    public class HealthCheckController : NokController<ControllerBase>
+    [Route("v1/health-check")]
+    public class HealthCheckController : BaseController
     {
         private readonly ReloadFileConfig reloadFileConfig;
         private readonly CorsPolicyReloader corsPolicyReloader;
 
-        public HealthCheckController(ReloadFileConfig reloadFileConfig, CorsPolicyReloader corsPolicyReloader)
+        public HealthCheckController(
+            ReloadFileConfig reloadFileConfig,
+            CorsPolicyReloader corsPolicyReloader,
+            IApiResponseFactory apiResponseFactory) : base(apiResponseFactory)
         {
             this.reloadFileConfig = reloadFileConfig;
             this.corsPolicyReloader = corsPolicyReloader;
@@ -20,21 +24,11 @@ namespace NokPortalAPI.Controllers
 
         [AllowAnonymous]
         [HttpGet("reload-config")]
-        public ActionResult<ApiResponse<object, string>> ReloadConfig()
+        public ActionResult ReloadConfig()
         {
             reloadFileConfig.ReloadConfiguration();
             corsPolicyReloader.ReloadCorsPolicy();
-            return Ok(FormatSuccessResponse("Success"));
+            return OkSuccessResponse();
         }
-
-        /*
-        [AllowAnonymous]
-        [HttpGet("current-config")]
-        public async Task<ActionResult<ApiResponse<object, string>>> CurrentConfig()
-        {
-            var config = reloadFileConfig.GetConfigurationJson();
-            return this.Ok(this.FormatSuccessResponse(config));
-        }
-        */
     }
 }

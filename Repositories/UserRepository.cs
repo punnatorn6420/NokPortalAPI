@@ -47,7 +47,7 @@ namespace NokPortalAPI.Repositories
         public async Task<ICollection<User>> GetUsersByAppIdAsync(int appId)
         {
             // Get users by application ID from AssignedUserApps table.
-            var query = from aua in context.AssignedUserApps
+            var query = from aua in context.UserAppRoleAssignments
                         join u in context.Users on aua.UserId equals u.Id
                         where aua.AppId == appId
                         select u;

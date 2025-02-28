@@ -2,6 +2,9 @@
 
 namespace NokPortalAPI.Models
 {
+    /// <summary>
+    /// Represents the Microsoft user information.
+    /// </summary>
     public class MicrosoftUserInfo
     {
         [JsonPropertyName("@odata.context")]

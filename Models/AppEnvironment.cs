@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NokPortalAPI.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace NokPortalAPI.Models
@@ -29,7 +30,7 @@ namespace NokPortalAPI.Models
         /// Gets or sets the environment type.
         /// </summary>
         /// 
-        public EnumEnvironmentType EnvironmentType { get; set; }
+        public EnvironmentType EnvironmentType { get; set; }
 
         /// <summary>
         /// Gets or sets the base URL.

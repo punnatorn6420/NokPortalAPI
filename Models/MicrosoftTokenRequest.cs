@@ -5,7 +5,7 @@ namespace NokPortalAPI.Models
     /// <summary>
     /// Represents a request for a Microsoft token.
     /// </summary>
-    public class RequestMicrosoftToken
+    public class MicrosoftTokenRequest
     {
         /// <summary>
         /// Gets or sets the token.
