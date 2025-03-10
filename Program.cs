@@ -84,12 +84,14 @@ namespace NokPortalAPI
 
             // Repositories
             builder.Services.AddScoped<IUserRepository<User>, UserRepository>();
+            builder.Services.AddScoped<IUserAppRoleAssignmentRepository, UserAppRoleAssignmentRepository>();
             builder.Services.AddScoped<IAppRepository, AppRepository>();
             builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 
             // Services
             builder.Services.AddSingleton<MsActiveDirectoryService>();
             builder.Services.AddScoped<IUserService<User>, UserService>();
+            builder.Services.AddScoped<IUserAppRoleAssignmentService, UserAppRoleAssignmentService>();
             builder.Services.AddScoped<IAppService, AppService>();
             builder.Services.AddScoped<IPermissionService, PermissionService>();
             builder.Services.AddSingleton<IJwtService, JwtService>();

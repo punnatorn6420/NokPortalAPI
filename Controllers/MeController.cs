@@ -31,13 +31,8 @@ namespace NokPortalAPI.Controllers
         /// Get user information based on the JWT token.
         /// </summary>
         [HttpGet("")]
-        public async Task<ActionResult> GetMeInfo([FromQuery] EnvironmentType env)
+        public async Task<ActionResult> GetMeInfo()
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequestResponseFromInvalidRequest();
-            }
-
             try
             {
                 // Get user claims from http context.
