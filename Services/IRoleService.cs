@@ -3,9 +3,9 @@
 namespace NokPortalAPI.Services
 {
     /// <summary>
-    /// Permission service interface.
+    /// Role service interface.
     /// </summary>
-    public interface IPermissionService : IBasePermissionService
+    public interface IRoleService : IBaseRoleService
     {
     }
 }
