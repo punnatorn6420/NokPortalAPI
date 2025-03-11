@@ -155,7 +155,7 @@ namespace NokPortalAPI.Controllers
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, "Unknown"),
+                    new Claim(ClaimTypes.Role, string.Join(",", user.UserRoles.Select(ur => ur.Role.Name).ToList())),
                 };
                 var token = jwtService.GetJwtTokenInfo(cliams!);
                 return OkResponseWithResult(token);

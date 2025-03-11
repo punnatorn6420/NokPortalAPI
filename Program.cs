@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NokCore.Api.JWT.Models;
 using NokCore.Api.JWT.Services;
-using NokCore.Api.Middlewares;
+using NokCore.Api.Middlewares.Internal;
 using NokCore.Api.Responses.Web;
 using NokPortalAPI.Models;
 using NokPortalAPI.Repositories;
@@ -84,16 +84,16 @@ namespace NokPortalAPI
 
             // Repositories
             builder.Services.AddScoped<IUserRepository<User>, UserRepository>();
+            builder.Services.AddScoped<IRoleRepository<Role>, RoleRepository>();
             builder.Services.AddScoped<IUserAppRoleAssignmentRepository, UserAppRoleAssignmentRepository>();
             builder.Services.AddScoped<IAppRepository, AppRepository>();
-            builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 
             // Services
             builder.Services.AddSingleton<MsActiveDirectoryService>();
             builder.Services.AddScoped<IUserService<User>, UserService>();
             builder.Services.AddScoped<IUserAppRoleAssignmentService, UserAppRoleAssignmentService>();
             builder.Services.AddScoped<IAppService, AppService>();
-            builder.Services.AddScoped<IPermissionService, PermissionService>();
+            builder.Services.AddScoped<IRoleService, RoleService>();
             builder.Services.AddSingleton<IJwtService, JwtService>();
 
             builder.Services.AddSingleton<ReloadFileConfig>();
@@ -101,10 +101,10 @@ namespace NokPortalAPI
 
             builder.Services.AddScoped<IApiResponseFactory, ApiResponseFactory<ApiResponseLocalize>>();
 
-            // Permission service
-            builder.Services.AddScoped<IAuthorizationHandler, NokCore.Api.Authorizations.PermissionHandler>();
-            builder.Services.AddScoped<IAuthorizationHandler, NokCore.Api.Authorizations.MultiPermissionHandler>();
-            builder.Services.AddScoped<NokCore.Identity.Services.IBasePermissionService, PermissionService>();
+            // Role service
+            builder.Services.AddScoped<IAuthorizationHandler, NokCore.Api.Authorizations.RoleAuthorizationHandler>();
+            builder.Services.AddScoped<IAuthorizationHandler, NokCore.Api.Authorizations.MultiRoleAuthorizationHandler>();
+            builder.Services.AddScoped<NokCore.Identity.Services.IBaseRoleService, RoleService>();
 
             // Add HttpClient
             builder.Services.AddHttpClient();
@@ -141,15 +141,16 @@ namespace NokPortalAPI
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
+                    var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-                        ValidAudience = builder.Configuration["JwtSettings:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"] ?? string.Empty))
+                        ValidIssuer = jwtSettings?.Issuer ?? "NokAir",
+                        ValidAudience = jwtSettings?.Audience ?? "NokAir",
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings?.SecretKey ?? string.Empty))
                     };
 
                     options.Events = new JwtBearerEvents
@@ -181,12 +182,13 @@ namespace NokPortalAPI
             // Register the permission handler.
             builder.Services.AddAuthorization(options =>
             {
+                // Iterate through the list of permissions and add them to the policy.
                 foreach (var permission in permissions)
                 {
-                    options.AddPolicy(permission, policy => policy.Requirements.Add(new NokCore.Api.Authorizations.PermissionRequirement(permission)));
+                    options.AddPolicy(permission, policy => policy.Requirements.Add(new NokCore.Api.Authorizations.RoleRequirement(permission)));
                 }
 
-                options.AddPolicy("CombinedPolicy", policy => policy.Requirements.Add(new NokCore.Api.Authorizations.MultiPermissionRequirement(new[] { "Admin", "EndUser" })));
+                options.AddPolicy("CombinedPolicy", policy => policy.Requirements.Add(new NokCore.Api.Authorizations.MultiRoleRequirement(new[] { "Admin", "EndUser" })));
             });
 
             builder.Services.AddEndpointsApiExplorer();
