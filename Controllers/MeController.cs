@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers.Internal;
 using NokCore.Api.Responses.Web;
 using NokCore.Exceptions;
@@ -31,6 +32,7 @@ namespace NokPortalAPI.Controllers
         /// Get user information based on the JWT token.
         /// </summary>
         [HttpGet("")]
+        [Authorize(Policy = "AllRole")]
         public async Task<ActionResult> GetMeInfo()
         {
             try
@@ -67,6 +69,7 @@ namespace NokPortalAPI.Controllers
         /// This endpoint is used to get the JWT token for the target app.
         /// </summary>
         [HttpGet("get-jwt-token")]
+        [Authorize(Policy = "AllRole")]
         public async Task<ActionResult> GetJwtTokenInfoAsync([FromQuery] int appId)
         {
             try

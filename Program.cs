@@ -32,6 +32,7 @@ namespace NokPortalAPI
 
             // Read the environment setting from base configuration
             var environment = baseConfig["Environment"] ?? "Production";
+            var dbInitialize = bool.Parse(baseConfig["DbInitialize"] ?? "false");
 
             // Get the host name
             var hostName = Dns.GetHostName();
@@ -177,7 +178,7 @@ namespace NokPortalAPI
                 });
 
             // Set the list of permissions that will be used in the application.
-            var permissions = new List<string> { "Admin", "EndUser" };
+            var permissions = new List<string> { "Root", "Admin", "EndUser" };
 
             // Register the permission handler.
             builder.Services.AddAuthorization(options =>
@@ -188,7 +189,8 @@ namespace NokPortalAPI
                     options.AddPolicy(permission, policy => policy.Requirements.Add(new NokCore.Api.Authorizations.RoleRequirement(permission)));
                 }
 
-                options.AddPolicy("CombinedPolicy", policy => policy.Requirements.Add(new NokCore.Api.Authorizations.MultiRoleRequirement(new[] { "Admin", "EndUser" })));
+                options.AddPolicy("RootOrAdmin", policy => policy.Requirements.Add(new NokCore.Api.Authorizations.MultiRoleRequirement(new[] { "Root", "Admin" })));
+                options.AddPolicy("AllRole", policy => policy.Requirements.Add(new NokCore.Api.Authorizations.MultiRoleRequirement(new[] { "Root", "Admin", "EndUser" })));
             });
 
             builder.Services.AddEndpointsApiExplorer();
@@ -197,11 +199,23 @@ namespace NokPortalAPI
 
             var app = builder.Build();
 
+            // Initialize the database with seed data
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var context = services.GetRequiredService<AppDbContext>();
+                DbInitializer.Initialize(context);
+            }
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            // Register JWT middleware to check for JWT token in the request header.
+            // For endpoints that not require JWT token, add [AllowAnonymous] attribute.
+            app.UseMiddleware<JWTmiddleware>();
 
             app.UseHttpsRedirection();
 
@@ -209,10 +223,6 @@ namespace NokPortalAPI
 
             app.UseAuthentication();
             app.UseAuthorization();
-
-            // Register JWT middleware to check for JWT token in the request header.
-            // For endpoints that not require JWT token, add [AllowAnonymous] attribute.
-            app.UseMiddleware<JWTmiddleware>();
 
             app.MapControllers();
 

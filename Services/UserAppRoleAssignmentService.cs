@@ -124,8 +124,8 @@ namespace NokPortalAPI.Services
                     throw new DataValidationException("Application not found");
                 }
 
-                JwtTokenInfo jwtToken = jwtService.GenerateJwtTokenInfo(null);
-                string appUrl = app.BaseURL += "/roles";
+                JwtTokenInfo jwtToken = jwtService.GenerateJwtTokenInfo((JwtUserClaims?)null);
+                string appUrl = app.BaseUrl += "/roles";
 
                 var request = new HttpRequestMessage(HttpMethod.Get, appUrl);
                 request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", $" {jwtToken.Token}");

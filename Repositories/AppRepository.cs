@@ -1,5 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using NokCore.Exceptions;
 using NokPortalAPI.Models;
+using NokPortalAPI.Shareds;
 using System.Linq.Dynamic.Core;
 
 namespace NokPortalAPI.Repositories
@@ -16,6 +19,13 @@ namespace NokPortalAPI.Repositories
         /// <inheritdoc/>
         public async Task<App> AddAppAsync(App app)
         {
+            // Ensure that the app name is unique.
+            var existingApp = await context.Apps.FirstOrDefaultAsync(a => a.Name == app.Name.Trim());
+            if (existingApp != null)
+            {
+                throw new DataValidationException(ErrorCode.E2001AppNameAlreadyExists, string.Empty);
+            }
+
             var result =await context.Apps.AddAsync(app);
             await context.SaveChangesAsync();
             return result.Entity;
@@ -43,24 +53,24 @@ namespace NokPortalAPI.Repositories
         /// <inheritdoc/>
         public async Task<IList<App>> GetAppsByCriteriaAsync(AppSearchCriteria searchCriteria)
         {
-            IQueryable<App> query = context.Apps;
+            var sortField = !string.IsNullOrEmpty(searchCriteria.SortField) ? searchCriteria.SortField : "Id";
+            var sortDirection = searchCriteria.Ascending ? "ASC" : "DESC";
+            var sqlQuery = $@"
+                SELECT * FROM (
+                    SELECT *, ROW_NUMBER() OVER (ORDER BY {sortField} {sortDirection}) AS RowNum
+                    FROM Apps
+                    WHERE Name LIKE @keyword OR Header LIKE @keyword
+                ) AS Result
+                WHERE RowNum BETWEEN @startRow AND @endRow";
 
-            if (!string.IsNullOrEmpty(searchCriteria.Keyword))
-            {
-                query = query.Where(a => a.Name.Contains(searchCriteria.Keyword) || a.Header.Contains(searchCriteria.Keyword));
-            }
+            var keywordParam = new SqlParameter("@keyword", $"%{searchCriteria.Keyword}%");
+            var startRowParam = new SqlParameter("@startRow", (searchCriteria.PageNumber - 1) * searchCriteria.PageSize + 1);
+            var endRowParam = new SqlParameter("@endRow", searchCriteria.PageNumber * searchCriteria.PageSize);
 
-            if (!string.IsNullOrEmpty(searchCriteria.SortField))
-            {
-                var sortDirection = searchCriteria.Ascending ? "ascending" : "descending";
-                query = query.OrderBy($"{searchCriteria.SortField} {sortDirection}");
-            }
-
-            return await query
-                .Skip((searchCriteria.PageNumber - 1) * searchCriteria.PageSize)
-                .Take(searchCriteria.PageSize)
-                .ToListAsync();
+            return await context.Apps.FromSqlRaw(sqlQuery, keywordParam, startRowParam, endRowParam).ToListAsync();
         }
+
+
 
         /// <inheritdoc/>
         public async Task<IList<App>> GetAppsByUserIdAsync(int userId)

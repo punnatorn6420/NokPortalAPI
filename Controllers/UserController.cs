@@ -4,26 +4,25 @@ using NokCore.Api.Controllers.Internal;
 using NokCore.Api.Responses.Web;
 using NokCore.Identity.Models;
 using NokPortalAPI.Models;
-using NokPortalAPI.Resources;
 using NokPortalAPI.Services;
 
 namespace NokPortalAPI.Controllers
 {
     [ApiController]
-    [Route("v1/user")]
+    [Route("v1/users")]
     public class UserController : BaseController
     {
         private readonly IUserService<User> userService;
 
         public UserController(
             IUserService<User> userService,
-            ApiResponseFactory<ApiResponseLocalize> apiResponseFactory) : base(apiResponseFactory)
+            IApiResponseFactory apiResponseFactory) : base(apiResponseFactory)
         {
             this.userService = userService;
         }
 
-        [HttpGet("all")]
-        [Authorize(Policy = "Admin")]
+        [HttpGet("search")]
+        [Authorize(Policy = "RootOrAdmin")]
         public async Task<ActionResult> SearchUsersAsync([FromQuery] UserSearchCriteria searchCriteria)
         {
             if (!ModelState.IsValid)

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using NokCore.Identity.Models;
 using NokPortalAPI.Models;
 using System.Linq.Dynamic.Core;
@@ -58,24 +59,27 @@ namespace NokPortalAPI.Repositories
         /// <inheritdoc />
         public async Task<ICollection<User>> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria)
         {
-            IQueryable<User> query = context.Users;
+            var sortField = !string.IsNullOrEmpty(searchCriteria.SortField) ? searchCriteria.SortField : "Id";
+            var sortDirection = searchCriteria.Ascending ? "ASC" : "DESC";
+            var sqlQuery = $@"
+                SELECT * FROM (
+                    SELECT *, ROW_NUMBER() OVER (ORDER BY {sortField} {sortDirection}) AS RowNum
+                    FROM Users
+                    WHERE
+                        FirstName LIKE @keyword
+                        OR LastName LIKE @keyword
+                        OR Email LIKE @keyword
+                ) AS Result
+                WHERE RowNum BETWEEN @startRow AND @endRow";
 
-            if (!string.IsNullOrEmpty(searchCriteria.Keyword))
-            {
-                query = query.Where(a => a.FirstName.Contains(searchCriteria.Keyword) || a.LastName.Contains(searchCriteria.Keyword));
-            }
+            var keywordParam = new SqlParameter("@keyword", $"%{searchCriteria.Keyword}%");
+            var startRowParam = new SqlParameter("@startRow", (searchCriteria.PageNumber - 1) * searchCriteria.PageSize + 1);
+            var endRowParam = new SqlParameter("@endRow", searchCriteria.PageNumber * searchCriteria.PageSize);
 
-            if (!string.IsNullOrEmpty(searchCriteria.SortField))
-            {
-                var sortDirection = searchCriteria.Ascending ? "ascending" : "descending";
-                query = query.OrderBy($"{searchCriteria.SortField} {sortDirection}");
-            }
-
-            return await query
-                .Skip((searchCriteria.PageNumber - 1) * searchCriteria.PageSize)
-                .Take(searchCriteria.PageSize)
-                .ToListAsync();
+            return await context.Users.FromSqlRaw(sqlQuery, keywordParam, startRowParam, endRowParam).ToListAsync();
         }
+
+
 
         /// <inheritdoc />
         public async Task<int> UpdateUserAsync(User user)

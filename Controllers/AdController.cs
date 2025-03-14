@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NokCore.Api.Controllers.Internal;
-using NokCore.Api.JWT.Models;
 using NokCore.Api.JWT.Services;
 using NokCore.Api.Responses.Web;
 using NokCore.Exceptions;
 using NokPortalAPI.Models;
 using NokPortalAPI.Services;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace NokPortalAPI.Controllers
@@ -33,7 +33,7 @@ namespace NokPortalAPI.Controllers
         /// <summary>
         /// This endpoint is used to request a link for signing up with Microsoft Graph.
         /// </summary>
-        [HttpGet("authorization-link-signup")]
+        [HttpGet("get-signup-link")]
         [AllowAnonymous]
         public async Task<ActionResult> GetAuthorizationLinkSignUpAsync()
         {
@@ -106,7 +106,7 @@ namespace NokPortalAPI.Controllers
         /// <summary>
         /// This endpoint is used to request a link for signing in with Microsoft Graph.
         /// </summary>
-        [HttpGet("authorization-link-signin")]
+        [HttpGet("get-signin-link")]
         [AllowAnonymous]
         public async Task<ActionResult> GetAuthorizationLinkSignInAsync()
         {
@@ -114,6 +114,41 @@ namespace NokPortalAPI.Controllers
             {
                 var authorizationUrl = await msActiveDirectoryService.GenerateAuthorizationUrlSignInAsync();
                 return await Task.FromResult(OkResponseWithResult(new { link = authorizationUrl }));
+            }
+            catch (Exception ex)
+            {
+                return InternalServerErrorResponseFromException(ex);
+            }
+        }
+
+        /// <summary>
+        /// This endpoint is used to get the JWT token to access the target app for Admin.
+        /// </summary>
+        [HttpGet("shortlive-token")]
+        [AllowAnonymous]
+        public async Task<ActionResult> GetShortliveJwtTokenInfoAsync([FromQuery] int userId)
+        {
+            try
+            {
+                // Get user info
+                var user = await userService.GetUserByIdAsync(userId);
+                if (user == null)
+                {
+                    throw new DataValidationException("User not found. Please check the user.");
+                }
+
+                var cliams = new[]
+                {
+                    new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                    new Claim("roles", string.Join(",", user.UserRoles.Select(ur => ur.Role.Name).ToList())),
+                };
+                var token = jwtService.GenerateJwtTokenInfo(cliams!);
+                return OkResponseWithResult(token);
+            }
+            catch (DataValidationException ex)
+            {
+                return BadRequestResponseFromMessage(ex.Message);
             }
             catch (Exception ex)
             {
@@ -147,17 +182,13 @@ namespace NokPortalAPI.Controllers
                     return NoContent();
                 }
 
-                var jwtData = new JwtUserClaims
-                {
-                    UserId = user.Id,
-                };
                 var cliams = new []
                 {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, string.Join(",", user.UserRoles.Select(ur => ur.Role.Name).ToList())),
+                    new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                    new Claim("roles", string.Join(",", user.UserRoles.Select(ur => ur.Role.Name).ToList())),
                 };
-                var token = jwtService.GetJwtTokenInfo(cliams!);
+                var token = jwtService.GenerateJwtTokenInfo(cliams!);
                 return OkResponseWithResult(token);
             }
             catch (Exception ex)
