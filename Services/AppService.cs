@@ -1,4 +1,5 @@
-﻿using NokPortalAPI.Models;
+﻿using NokCore.Exceptions;
+using NokPortalAPI.Models;
 using NokPortalAPI.Repositories;
 
 namespace NokPortalAPI.Services
@@ -26,6 +27,11 @@ namespace NokPortalAPI.Services
                 await appRepository.AddAppAsync(app);
                 await transaction.CommitAsync();
                 return app;
+            }
+            catch (DataValidationException)
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
             catch (Exception)
             {

@@ -41,25 +41,36 @@ namespace NokPortalAPI.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Detail")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                    b.Property<int>("EnvironmentType")
+                        .HasColumnType("int");
 
                     b.Property<string>("Header")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("Image")
+                    b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("JwtExpiryHours")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Remark")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("SecretKey")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
@@ -77,81 +88,19 @@ namespace NokPortalAPI.Migrations
                     b.ToTable("Apps");
                 });
 
-            modelBuilder.Entity("NokPortalAPI.Models.AppEnvironment", b =>
+            modelBuilder.Entity("NokPortalAPI.Models.Permission", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
 
-                    b.Property<int>("AppId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("BaseURL")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("EnvironmentType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("JwtExpirationHour")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("SecretKey")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppId", "EnvironmentType")
-                        .IsUnique();
-
-                    b.ToTable("AppEnvironments");
-                });
-
-            modelBuilder.Entity("NokPortalAPI.Models.AssignedUserAppRole", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("AppId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("AppRoleId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("AssignedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.HasKey("UserId", "AppId", "AppRoleId");
-
-                    b.HasIndex("AppId");
-
-                    b.ToTable("AssignedUserApps");
-                });
-
-            modelBuilder.Entity("NokPortalAPI.Models.Permission", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -163,16 +112,13 @@ namespace NokPortalAPI.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Privileges");
+                    b.ToTable("Permissions");
                 });
 
             modelBuilder.Entity("NokPortalAPI.Models.Role", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
@@ -208,7 +154,7 @@ namespace NokPortalAPI.Migrations
 
                     b.HasIndex("PermissionId");
 
-                    b.ToTable("RolePrivileges");
+                    b.ToTable("Role_Permission", (string)null);
                 });
 
             modelBuilder.Entity("NokPortalAPI.Models.User", b =>
@@ -266,6 +212,30 @@ namespace NokPortalAPI.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("NokPortalAPI.Models.UserAppRoleAssignment", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AppId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AssignedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "AppId", "RoleId");
+
+                    b.HasIndex("AppId");
+
+                    b.ToTable("User_App_Role_Assignment", (string)null);
+                });
+
             modelBuilder.Entity("NokPortalAPI.Models.UserRole", b =>
                 {
                     b.Property<int>("UserId")
@@ -278,21 +248,29 @@ namespace NokPortalAPI.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("UserRoles");
+                    b.ToTable("User_Role", (string)null);
                 });
 
-            modelBuilder.Entity("NokPortalAPI.Models.AppEnvironment", b =>
+            modelBuilder.Entity("NokPortalAPI.Models.RolePermission", b =>
                 {
-                    b.HasOne("NokPortalAPI.Models.App", "App")
-                        .WithMany("Environments")
-                        .HasForeignKey("AppId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("NokPortalAPI.Models.Permission", "Permission")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("App");
+                    b.HasOne("NokPortalAPI.Models.Role", "Role")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("NokPortalAPI.Models.AssignedUserAppRole", b =>
+            modelBuilder.Entity("NokPortalAPI.Models.UserAppRoleAssignment", b =>
                 {
                     b.HasOne("NokPortalAPI.Models.App", "App")
                         .WithMany("AssignedApps")
@@ -309,25 +287,6 @@ namespace NokPortalAPI.Migrations
                     b.Navigation("App");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("NokPortalAPI.Models.RolePermission", b =>
-                {
-                    b.HasOne("NokPortalAPI.Models.Permission", "Permission")
-                        .WithMany("RolePrivileges")
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("NokPortalAPI.Models.Role", "Role")
-                        .WithMany("RolePrivileges")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Permission");
-
-                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("NokPortalAPI.Models.UserRole", b =>
@@ -352,18 +311,16 @@ namespace NokPortalAPI.Migrations
             modelBuilder.Entity("NokPortalAPI.Models.App", b =>
                 {
                     b.Navigation("AssignedApps");
-
-                    b.Navigation("Environments");
                 });
 
             modelBuilder.Entity("NokPortalAPI.Models.Permission", b =>
                 {
-                    b.Navigation("RolePrivileges");
+                    b.Navigation("RolePermissions");
                 });
 
             modelBuilder.Entity("NokPortalAPI.Models.Role", b =>
                 {
-                    b.Navigation("RolePrivileges");
+                    b.Navigation("RolePermissions");
 
                     b.Navigation("UserRoles");
                 });

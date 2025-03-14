@@ -5,13 +5,12 @@ using NokCore.Api.Responses.Web;
 using NokCore.Exceptions;
 using NokPortalAPI.Enums;
 using NokPortalAPI.Models;
-using NokPortalAPI.Resources;
 using NokPortalAPI.Services;
 
 namespace NokPortalAPI.Controllers
 {
     [ApiController]
-    [Route("v1/app")]
+    [Route("v1/apps")]
     public class AppController : BaseController
     {
         private readonly IAppService appService;
@@ -22,7 +21,7 @@ namespace NokPortalAPI.Controllers
             IAppService appService,
             IUserAppRoleAssignmentService targetAppService,
             IUserService<User> userService,
-            ApiResponseFactory<ApiResponseLocalize> apiResponseFactory) : base(apiResponseFactory)
+            IApiResponseFactory apiResponseFactory) : base(apiResponseFactory)
         {
             this.appService = appService;
             this.userAppRoleAssignmentService = targetAppService;
@@ -33,7 +32,7 @@ namespace NokPortalAPI.Controllers
         /// This endpoint is used to create a new app.
         /// </summary>
         [HttpPost("")]
-        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "RootOrAdmin")]
         public async Task<ActionResult> AddNewAppAsync(App app)
         {
             // Check if the model state is valid
@@ -63,13 +62,12 @@ namespace NokPortalAPI.Controllers
         }
 
         /// <summary>
-        /// This endpoint is used to update an existing app.
+        /// This endpoint is used to assign a user to an app.
         /// </summary>
-        [HttpPut("")]
-        [Authorize(Policy = "Admin")]
-        public async Task<ActionResult> UpdateAppAsync(App app)
+        [HttpPost("{id}/assign-user-to-app")]
+        [Authorize(Policy = "RootOrAdmin")]
+        public async Task<ActionResult> AssignUserToAppAsync(int id, UserAppAssignmentRequest req)
         {
-            // Check if the model state is valid
             if (!ModelState.IsValid)
             {
                 return BadRequestResponseFromInvalidRequest();
@@ -77,36 +75,12 @@ namespace NokPortalAPI.Controllers
 
             try
             {
-                await appService.UpdateAppAsync(app);
+                await userAppRoleAssignmentService.AssignUserToAppAsync(req);
                 return OkSuccessResponse();
             }
             catch (DataValidationException ex)
             {
-                return BadRequestResponseFromErrorCode(ex.ErrorCode);
-            }
-            catch (Exception ex)
-            {
-                return InternalServerErrorResponseFromException(ex);
-            }
-        }
-
-        /// <summary>
-        /// This endpoint is used to get all apps.
-        /// </summary>
-        [HttpGet("search")]
-        [Authorize(Policy = "Admin")]
-        public async Task<ActionResult> SearchAppAsync([FromQuery] AppSearchCriteria searchCriteria)
-        {
-            try
-            {
-                // Validate search criteria
-                if (!ModelState.IsValid)
-                {
-                    return BadRequestResponseFromInvalidRequest();
-                }
-
-                ICollection<App> apps = await appService.GetAppsByCriteriaAsync(searchCriteria);
-                return OkResponseWithResult(apps);
+                return BadRequestResponseFromMessage(ex.Message);
             }
             catch (Exception ex)
             {
@@ -118,7 +92,7 @@ namespace NokPortalAPI.Controllers
         /// This endpoint is used to get the app info by app id.
         /// </summary>
         [HttpGet("{id}")]
-        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "RootOrAdmin")]
         public async Task<ActionResult> GetAppInfo(int id)
         {
             if (!ModelState.IsValid)
@@ -143,37 +117,10 @@ namespace NokPortalAPI.Controllers
         }
 
         /// <summary>
-        /// This endpoint is used to assign a user to an app.
-        /// </summary>
-        [HttpPost("{id}/assign-user-to-app")]
-        [Authorize(Policy = "Admin")]
-        public async Task<ActionResult> AssignUserToAppAsync(int id, UserAppAssignmentRequest req)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequestResponseFromInvalidRequest();
-            }
-
-            try
-            {
-                await userAppRoleAssignmentService.AssignUserToAppAsync(req);
-                return OkSuccessResponse();
-            }
-            catch (DataValidationException ex)
-            {
-                return BadRequestResponseFromMessage(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return InternalServerErrorResponseFromException(ex);
-            }
-        }
-
-        /// <summary>
         /// This endpoint is used to get the list of roles for a specific app.
         /// </summary>
         [HttpGet("{id}/get-roles")]
-        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "RootOrAdmin")]
         public async Task<ActionResult> GetRoles(int id, [FromQuery] EnvironmentType env)
         {
             try
@@ -191,7 +138,7 @@ namespace NokPortalAPI.Controllers
         /// This endpoint is used to get the JWT token to access the target app for Admin.
         /// </summary>
         [HttpGet("{id}/jwt-token")]
-        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "RootOrAdmin")]
         public async Task<ActionResult> GetJwtTokenInfoAsync(int id)
         {
             try
@@ -224,6 +171,58 @@ namespace NokPortalAPI.Controllers
             catch (DataValidationException ex)
             {
                 return BadRequestResponseFromMessage(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerErrorResponseFromException(ex);
+            }
+        }
+
+        /// <summary>
+        /// This endpoint is used to get all apps.
+        /// </summary>
+        [HttpGet("search")]
+        [Authorize(Policy = "RootOrAdmin")]
+        public async Task<ActionResult> SearchAppAsync([FromQuery] AppSearchCriteria searchCriteria)
+        {
+            try
+            {
+                // Validate search criteria
+                if (!ModelState.IsValid)
+                {
+                    return BadRequestResponseFromInvalidRequest();
+                }
+
+                ICollection<App> apps = await appService.GetAppsByCriteriaAsync(searchCriteria);
+                return OkResponseWithResult(apps);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerErrorResponseFromException(ex);
+            }
+        }
+
+        /// <summary>
+        /// This endpoint is used to update an existing app.
+        /// </summary>
+        [HttpPut("")]
+        [Authorize(Policy = "RootOrAdmin")]
+        public async Task<ActionResult> UpdateAppAsync(App app)
+        {
+            // Check if the model state is valid
+            if (!ModelState.IsValid)
+            {
+                return BadRequestResponseFromInvalidRequest();
+            }
+
+            try
+            {
+                await appService.UpdateAppAsync(app);
+                return OkSuccessResponse();
+            }
+            catch (DataValidationException ex)
+            {
+                return BadRequestResponseFromErrorCode(ex.ErrorCode);
             }
             catch (Exception ex)
             {
