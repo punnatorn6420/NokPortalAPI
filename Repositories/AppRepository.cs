@@ -53,21 +53,26 @@ namespace NokPortalAPI.Repositories
         /// <inheritdoc/>
         public async Task<IList<App>> GetAppsByCriteriaAsync(AppSearchCriteria searchCriteria)
         {
-            var sortField = !string.IsNullOrEmpty(searchCriteria.SortField) ? searchCriteria.SortField : "Id";
-            var sortDirection = searchCriteria.Ascending ? "ASC" : "DESC";
-            var sqlQuery = $@"
-                SELECT * FROM (
-                    SELECT *, ROW_NUMBER() OVER (ORDER BY {sortField} {sortDirection}) AS RowNum
-                    FROM Apps
-                    WHERE Name LIKE @keyword OR Header LIKE @keyword
-                ) AS Result
-                WHERE RowNum BETWEEN @startRow AND @endRow";
+            IQueryable<App> query = context.Apps;
 
-            var keywordParam = new SqlParameter("@keyword", $"%{searchCriteria.Keyword}%");
-            var startRowParam = new SqlParameter("@startRow", (searchCriteria.PageNumber - 1) * searchCriteria.PageSize + 1);
-            var endRowParam = new SqlParameter("@endRow", searchCriteria.PageNumber * searchCriteria.PageSize);
+            var keyword = searchCriteria.Keyword?.Trim();
+            if (!string.IsNullOrEmpty(keyword))
+                if (!string.IsNullOrEmpty(keyword))
+            {
+                query = query.Where(a => a.Name.Contains(keyword) || a.Header.Contains(keyword));
+            }
 
-            return await context.Apps.FromSqlRaw(sqlQuery, keywordParam, startRowParam, endRowParam).ToListAsync();
+            var sortField = !string.IsNullOrEmpty(searchCriteria.SortField) ? searchCriteria.SortField.Trim() : "Id";
+            if (!string.IsNullOrEmpty(sortField))
+            {
+                var sortDirection = searchCriteria.Ascending ? "ascending" : "descending";
+                query = query.OrderBy($"{sortField} {sortDirection}");
+            }
+
+            return await query
+                .Skip((searchCriteria.PageNumber - 1) * searchCriteria.PageSize)
+                .Take(searchCriteria.PageSize)
+                .ToListAsync();
         }
 
 

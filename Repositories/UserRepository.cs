@@ -59,24 +59,29 @@ namespace NokPortalAPI.Repositories
         /// <inheritdoc />
         public async Task<ICollection<User>> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria)
         {
-            var sortField = !string.IsNullOrEmpty(searchCriteria.SortField) ? searchCriteria.SortField : "Id";
-            var sortDirection = searchCriteria.Ascending ? "ASC" : "DESC";
-            var sqlQuery = $@"
-                SELECT * FROM (
-                    SELECT *, ROW_NUMBER() OVER (ORDER BY {sortField} {sortDirection}) AS RowNum
-                    FROM Users
-                    WHERE
-                        FirstName LIKE @keyword
-                        OR LastName LIKE @keyword
-                        OR Email LIKE @keyword
-                ) AS Result
-                WHERE RowNum BETWEEN @startRow AND @endRow";
+            IQueryable<User> query = context.Users;
 
-            var keywordParam = new SqlParameter("@keyword", $"%{searchCriteria.Keyword}%");
-            var startRowParam = new SqlParameter("@startRow", (searchCriteria.PageNumber - 1) * searchCriteria.PageSize + 1);
-            var endRowParam = new SqlParameter("@endRow", searchCriteria.PageNumber * searchCriteria.PageSize);
+            var keyword = searchCriteria.Keyword?.Trim();
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                query = query.Where(a => a.FirstName.Contains(keyword) ||
+                    a.LastName.Contains(keyword) ||
+                    a.Email.Equals(keyword));
+            }
 
-            return await context.Users.FromSqlRaw(sqlQuery, keywordParam, startRowParam, endRowParam).ToListAsync();
+            var sortField = !string.IsNullOrEmpty(searchCriteria.SortField) ? searchCriteria.SortField.Trim() : "Id";
+            if (!string.IsNullOrEmpty(sortField))
+            {
+                var sortDirection = searchCriteria.Ascending ? "ascending" : "descending";
+                query = query.OrderBy($"{sortField} {sortDirection}");
+            }
+
+            return await query
+                .Skip((searchCriteria.PageNumber - 1) * searchCriteria.PageSize)
+                .Take(searchCriteria.PageSize)
+                .ToListAsync();
+
+
         }
 
 
