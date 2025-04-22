@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "properties": {
+    "Bearer": {
+      "type": "string",
+      "example": "Bearer"
+    },
+    "token": {
+      "type": "string",
+      "example": "1234567890"
+    },
+    "expiryTime": {
+      "type": "string",
+      "format": "date-time",
+      "example": "2022-12-31T23:59:59Z"
+    }
+  }
+}
