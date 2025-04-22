@@ -21,7 +21,7 @@ namespace NokPortalAPI.Models
         /// Gets or sets the user. This is a navigation property.
         /// </summary>
         [JsonIgnore]
-        public User User { get; set; } = new User();
+        public User? User { get; set; }
 
         /// <summary>
         /// Gets or sets the application ID.
@@ -31,8 +31,7 @@ namespace NokPortalAPI.Models
         /// <summary>
         /// Gets or sets application. This is a navigation property.
         /// </summary>
-        [JsonIgnore]
-        public App App { get; set; } = new App();
+        public App? App { get; set; }
 
         /// <summary>
         /// Gets or sets the application's role ID.

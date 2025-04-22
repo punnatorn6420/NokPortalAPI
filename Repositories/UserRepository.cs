@@ -41,6 +41,8 @@ namespace NokPortalAPI.Repositories
             return await context.Users
                 .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
+                .Include(u => u.AssignedApps)
+                    .ThenInclude(ua => ua.App)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
 

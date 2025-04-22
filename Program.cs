@@ -131,6 +131,7 @@ namespace NokPortalAPI
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 })
                 .ConfigureApiBehaviorOptions(options =>
                 {
