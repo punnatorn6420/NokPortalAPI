@@ -1,0 +1,199 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Nok Portal API",
+    "description": "Active Directory API for Nok Portal",
+    "contact": {
+      "name": "Supot Sukvaree",
+      "email": "supot.suk@nokair.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "/v1",
+      "description": "Production server"
+    },
+    {
+      "url": "/v1",
+      "description": "Staging server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Requires Bearer Token"
+      }
+    }
+  },
+  "paths": {
+    "/ad/get-signin-link": {
+      "get": {
+        "summary": "Retrieve sign-in link",
+        "description": "Retrieve sign-in link for existing user",
+        "operationId": "GetAuthorizationLinkSignInAsync",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "correlationId": {
+                      "type": "string",
+                      "example": "ABCD1234-1234-1234-1234-1234567890AB"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "Success"
+                    },
+                    "data": {
+                      "$ref": "./components/responses/JwtTokenInfo.json"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "correlationId": "ABCD1234-1234-1234-1234-1234567890AB",
+                  "error": {
+                    "code": "E0001",
+                    "userMessage": "Please contact support",
+                    "developerMessage": "An unexpected error occurred"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ad/get-signup-link": {
+      "get": {
+        "summary": "Retrieve sign-up link",
+        "description": "Retrieve sign-up link for new user",
+        "operationId": "GetAuthorizationLinkSignUpAsync",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "correlationId": {
+                      "type": "string",
+                      "example": "ABCD1234-1234-1234-1234-1234567890AB"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "Success"
+                    },
+                    "data": {
+                      "link": "https://portal.nokair.com/signup?token=1234567890"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "correlationId": "ABCD1234-1234-1234-1234-1234567890AB",
+                  "error": {
+                    "code": "E0001",
+                    "userMessage": "Please contact support",
+                    "developerMessage": "An unexpected error occurred"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ad/signin": {
+      "post": {
+        "summary": "Sign-in",
+        "description": "Sign-in with email and password",
+        "operationId": "SignInAsync",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./components/requests/MicrosoftTokenRequest.json"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sing-in success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "correlationId": "ABCD1234-1234-1234-1234-1234567890AB",
+                  "status": "Success",
+                  "data": "The member has been successfully enrolled"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "message": "Email address is required"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "correlationId": "ABCD1234-1234-1234-1234-1234567890AB",
+                  "error": {
+                    "code": "E0001",
+                    "userMessage": "Please contact support",
+                    "developerMessage": "An unexpected error occurred"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
