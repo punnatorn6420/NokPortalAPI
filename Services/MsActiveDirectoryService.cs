@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Protocols.Configuration;
 using Newtonsoft.Json;
-using NokCore.Exceptions;
 using NokPortalAPI.Models;
 
 namespace NokPortalAPI.Services

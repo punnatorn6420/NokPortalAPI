@@ -1,4 +1,4 @@
-﻿using NokCore.Api.JWT.Models;
+﻿using NokAir.Shared.Security.InHouse.Models;
 using NokPortalAPI.Models;
 
 namespace NokPortalAPI.Services

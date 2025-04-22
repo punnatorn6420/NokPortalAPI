@@ -10,9 +10,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NokCore", "..\NokCore\NokCore.csproj", "{48D6AEE2-8CCA-444F-AAE4-7FA02D5A3A00}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NokConnectPoint", "..\NokConnectPoint\NokConnectPoint.csproj", "{0F1B6EDA-2F71-4822-BD2B-35087A1DEAFA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NokAir.Core", "..\NokAirSolution\NokAir.Core\NokAir.Core.csproj", "{D11AE000-D301-F01A-AAC1-A89A7A3B6F45}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NokAir.Shared", "..\NokAirSolution\NokAir.Shared\NokAir.Shared.csproj", "{1A276E1C-193F-179D-0243-CFB89B861CF5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,14 +26,18 @@ Global
 		{BFB5DA65-BC86-4D1F-9341-E9CAA8B8087E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BFB5DA65-BC86-4D1F-9341-E9CAA8B8087E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BFB5DA65-BC86-4D1F-9341-E9CAA8B8087E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{48D6AEE2-8CCA-444F-AAE4-7FA02D5A3A00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{48D6AEE2-8CCA-444F-AAE4-7FA02D5A3A00}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{48D6AEE2-8CCA-444F-AAE4-7FA02D5A3A00}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{48D6AEE2-8CCA-444F-AAE4-7FA02D5A3A00}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0F1B6EDA-2F71-4822-BD2B-35087A1DEAFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0F1B6EDA-2F71-4822-BD2B-35087A1DEAFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F1B6EDA-2F71-4822-BD2B-35087A1DEAFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F1B6EDA-2F71-4822-BD2B-35087A1DEAFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D11AE000-D301-F01A-AAC1-A89A7A3B6F45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D11AE000-D301-F01A-AAC1-A89A7A3B6F45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D11AE000-D301-F01A-AAC1-A89A7A3B6F45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D11AE000-D301-F01A-AAC1-A89A7A3B6F45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A276E1C-193F-179D-0243-CFB89B861CF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A276E1C-193F-179D-0243-CFB89B861CF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A276E1C-193F-179D-0243-CFB89B861CF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A276E1C-193F-179D-0243-CFB89B861CF5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -3,10 +3,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using NokCore.Api.JWT.Models;
-using NokCore.Api.JWT.Services;
-using NokCore.Api.Middlewares.Internal;
-using NokCore.Api.Responses.Web;
+using NokAir.Core.Interfaces.Rbac.Services;
+using NokAir.Shared.Api.Responses.Factories;
+using NokAir.Shared.Api.Responses.Factories.InHouse;
+using NokAir.Shared.Middlewares.InHouse;
+using NokAir.Shared.Security.AuthorizationHandlers;
+using NokAir.Shared.Security.Common.Models;
+using NokAir.Shared.Security.InHouse.Services;
 using NokPortalAPI.Models;
 using NokPortalAPI.Repositories;
 using NokPortalAPI.Resources;
@@ -91,21 +94,21 @@ namespace NokPortalAPI
 
             // Services
             builder.Services.AddSingleton<MsActiveDirectoryService>();
-            builder.Services.AddScoped<IUserService<User>, UserService>();
+            builder.Services.AddScoped<IUserServiceBase<User>, UserService>();
             builder.Services.AddScoped<IUserAppRoleAssignmentService, UserAppRoleAssignmentService>();
             builder.Services.AddScoped<IAppService, AppService>();
-            builder.Services.AddScoped<IRoleService, RoleService>();
+            builder.Services.AddScoped<IRoleServiceBase, RoleService>();
             builder.Services.AddSingleton<IJwtService, JwtService>();
 
             builder.Services.AddSingleton<ReloadFileConfig>();
             builder.Services.AddSingleton<CorsPolicyReloader>();
 
-            builder.Services.AddScoped<IApiResponseFactory, ApiResponseFactory<ApiResponseLocalize>>();
+            builder.Services.AddScoped<IResponseFactory, ResponseFactory<ApiResponseLocalize>>();
 
             // Role service
-            builder.Services.AddScoped<IAuthorizationHandler, NokCore.Api.Authorizations.RoleAuthorizationHandler>();
-            builder.Services.AddScoped<IAuthorizationHandler, NokCore.Api.Authorizations.MultiRoleAuthorizationHandler>();
-            builder.Services.AddScoped<NokCore.Identity.Services.IBaseRoleService, RoleService>();
+            builder.Services.AddScoped<IAuthorizationHandler, RoleAuthorizationHandler>();
+            builder.Services.AddScoped<IAuthorizationHandler, MultiRoleAuthorizationHandler>();
+            builder.Services.AddScoped<IRoleService, RoleService>();
 
             // Add HttpClient
             builder.Services.AddHttpClient();
@@ -187,11 +190,11 @@ namespace NokPortalAPI
                 // Iterate through the list of permissions and add them to the policy.
                 foreach (var permission in permissions)
                 {
-                    options.AddPolicy(permission, policy => policy.Requirements.Add(new NokCore.Api.Authorizations.RoleRequirement(permission)));
+                    options.AddPolicy(permission, policy => policy.Requirements.Add(new RoleRequirement(permission)));
                 }
 
-                options.AddPolicy("RootOrAdmin", policy => policy.Requirements.Add(new NokCore.Api.Authorizations.MultiRoleRequirement(new[] { "Root", "Admin" })));
-                options.AddPolicy("AllRole", policy => policy.Requirements.Add(new NokCore.Api.Authorizations.MultiRoleRequirement(new[] { "Root", "Admin", "EndUser" })));
+                options.AddPolicy("RootOrAdmin", policy => policy.Requirements.Add(new MultiRoleRequirement(new[] { "Root", "Admin" })));
+                options.AddPolicy("AllRole", policy => policy.Requirements.Add(new MultiRoleRequirement(new[] { "Root", "Admin", "EndUser" })));
             });
 
             builder.Services.AddEndpointsApiExplorer();
@@ -200,12 +203,16 @@ namespace NokPortalAPI
 
             var app = builder.Build();
 
-            // Initialize the database with seed data
-            using (var scope = app.Services.CreateScope())
+
+            if (dbInitialize)
             {
-                var services = scope.ServiceProvider;
-                var context = services.GetRequiredService<AppDbContext>();
-                DbInitializer.Initialize(context);
+                // Initialize the database with seed data
+                using (var scope = app.Services.CreateScope())
+                {
+                    var services = scope.ServiceProvider;
+                    var context = services.GetRequiredService<AppDbContext>();
+                    DbInitializer.Initialize(context);
+                }
             }
 
             if (app.Environment.IsDevelopment())
@@ -216,7 +223,7 @@ namespace NokPortalAPI
 
             // Register JWT middleware to check for JWT token in the request header.
             // For endpoints that not require JWT token, add [AllowAnonymous] attribute.
-            app.UseMiddleware<JWTmiddleware>();
+            app.UseMiddleware<Jwtmiddleware>();
 
             app.UseHttpsRedirection();
 

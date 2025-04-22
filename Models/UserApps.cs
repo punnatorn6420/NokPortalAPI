@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using NokCore.Identity.Models;
+using NokAir.Core.Interfaces.Rbac.Entities;
 
 namespace NokPortalAPI.Models
 {

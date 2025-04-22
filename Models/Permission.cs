@@ -1,4 +1,4 @@
-﻿using NokCore.Identity.Models;
+﻿using NokAir.Core.Interfaces.Rbac.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace NokPortalAPI.Models

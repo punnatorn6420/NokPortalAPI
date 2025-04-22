@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NokCore.Api.Controllers.Internal;
-using NokCore.Api.Responses.Web;
-using NokCore.Identity.Models;
+using NokAir.Core.Interfaces.Rbac.Entities;
+using NokAir.Shared.Api.Responses.Factories;
+using NokAir.Shared.Controllers;
 using NokPortalAPI.Models;
 using NokPortalAPI.Services;
 
@@ -10,20 +10,20 @@ namespace NokPortalAPI.Controllers
 {
     [ApiController]
     [Route("v1/users")]
-    public class UserController : BaseController
+    public class UserController : InHouseControllerBase
     {
         private readonly IUserService<User> userService;
 
         public UserController(
             IUserService<User> userService,
-            IApiResponseFactory apiResponseFactory) : base(apiResponseFactory)
+            IResponseFactory resFactory) : base(resFactory)
         {
             this.userService = userService;
         }
 
         [HttpGet("search")]
         [Authorize(Policy = "RootOrAdmin")]
-        public async Task<ActionResult> SearchUsersAsync([FromQuery] UserSearchCriteria searchCriteria)
+        public async Task<ActionResult> SearchUsersAsync([FromQuery] IUserSearchCriteria searchCriteria)
         {
             if (!ModelState.IsValid)
             {
@@ -32,7 +32,7 @@ namespace NokPortalAPI.Controllers
 
             try
             {
-                IEnumerable<IUser> user = await userService.GetUsersByCriteriaAsync(searchCriteria);
+                IEnumerable<User> user = await userService.GetUsersByCriteriaAsync(searchCriteria);
                 return OkResponseWithResult(user);
             }
             catch (Exception ex)

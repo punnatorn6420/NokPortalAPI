@@ -2,9 +2,9 @@
 {
     using System.Data;
     using Microsoft.Data.SqlClient;
-    using NokCore.Db;
+    using NokAir.Shared.Infrastructures;
 
-    public class DbConnectionFactory : BaseDbConnectionFactory
+    public class DbConnectionFactory : DbConnectionFactoryBase
     {
         public DbConnectionFactory(IConfiguration configuration)
             : base(configuration)

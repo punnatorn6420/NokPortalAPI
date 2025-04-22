@@ -1,11 +1,11 @@
-﻿using NokCore.Identity.Services;
+﻿using NokAir.Core.Interfaces.Rbac.Services;
 
 namespace NokPortalAPI.Services
 {
     /// <summary>
     /// Interface for user service.
     /// </summary>
-    public interface IUserService<T> : IBaseUserService<T>
+    public interface IUserService<T> : IUserServiceBase<T> where T : class
     {
         /// <summary>
         /// Gets list of users by application ID.

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using NokCore.Identity.Models;
+using NokAir.Core.Interfaces.Rbac.Entities;
 using NokPortalAPI.Models;
 using System.Linq.Dynamic.Core;
 
@@ -43,7 +43,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<ICollection<Role>> GetRolesByCriteriaAsync(RoleSearchCriteria searchCriteria)
+        public async Task<ICollection<Role>> GetRolesByCriteriaAsync(IRoleSearchCriteria searchCriteria)
         {
             IQueryable<Role> query = context.Roles;
             if (!string.IsNullOrEmpty(searchCriteria.Keyword))

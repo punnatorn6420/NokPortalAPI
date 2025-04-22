@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NokCore.Api.Controllers.Internal;
-using NokCore.Api.JWT.Services;
-using NokCore.Api.Responses.Web;
-using NokCore.Exceptions;
+using NokAir.Core.Exceptions;
+using NokAir.Shared.Api.Responses.Factories;
+using NokAir.Shared.Controllers;
+using NokAir.Shared.Security.InHouse.Services;
 using NokPortalAPI.Models;
 using NokPortalAPI.Services;
 using System.IdentityModel.Tokens.Jwt;
@@ -13,7 +13,7 @@ namespace NokPortalAPI.Controllers
 {
     [ApiController]
     [Route("v1/ad")]
-    public class AdController : BaseController
+    public class AdController : InHouseControllerBase
     {
         private readonly MsActiveDirectoryService msActiveDirectoryService;
         private readonly IUserService<User> userService;
@@ -23,7 +23,7 @@ namespace NokPortalAPI.Controllers
             MsActiveDirectoryService msActiveDirectoryService,
             IUserService<User> userService,
             IJwtService jwtService,
-            IApiResponseFactory resFactory) : base(resFactory)
+            IResponseFactory resFactory) : base(resFactory)
         {
             this.msActiveDirectoryService = msActiveDirectoryService;
             this.userService = userService;

@@ -1,6 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using NokCore.Identity.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using NokAir.Core.Interfaces.Rbac.Entities;
 using NokPortalAPI.Models;
 using System.Linq.Dynamic.Core;
 
@@ -59,7 +58,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<ICollection<User>> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria)
+        public async Task<ICollection<User>> GetUsersByCriteriaAsync(IUserSearchCriteria searchCriteria)
         {
             IQueryable<User> query = context.Users;
 

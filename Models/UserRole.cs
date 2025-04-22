@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using NokCore.Identity.Models;
+using NokAir.Core.Interfaces.Rbac.Entities;
 
 namespace NokPortalAPI.Models
 {

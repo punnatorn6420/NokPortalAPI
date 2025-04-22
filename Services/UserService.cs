@@ -1,5 +1,4 @@
-﻿using NokCore.Api.JWT.Services;
-using NokCore.Identity.Models;
+﻿using NokAir.Core.Interfaces.Rbac.Entities;
 using NokPortalAPI.Models;
 using NokPortalAPI.Repositories;
 
@@ -56,7 +55,7 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc />
-        public async Task<ICollection<User>> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria)
+        public async Task<ICollection<User>> GetUsersByCriteriaAsync(IUserSearchCriteria searchCriteria)
         {
             return await userRepository.GetUsersByCriteriaAsync(searchCriteria);
         }

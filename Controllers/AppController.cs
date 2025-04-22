@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NokCore.Api.Controllers.Internal;
-using NokCore.Api.Responses.Web;
-using NokCore.Exceptions;
+using NokAir.Core.Exceptions;
+using NokAir.Shared.Api.Responses.Factories;
+using NokAir.Shared.Controllers;
 using NokPortalAPI.Enums;
 using NokPortalAPI.Models;
 using NokPortalAPI.Services;
@@ -11,7 +11,7 @@ namespace NokPortalAPI.Controllers
 {
     [ApiController]
     [Route("v1/apps")]
-    public class AppController : BaseController
+    public class AppController : InHouseControllerBase
     {
         private readonly IAppService appService;
         private readonly IUserAppRoleAssignmentService userAppRoleAssignmentService;
@@ -21,7 +21,7 @@ namespace NokPortalAPI.Controllers
             IAppService appService,
             IUserAppRoleAssignmentService targetAppService,
             IUserService<User> userService,
-            IApiResponseFactory apiResponseFactory) : base(apiResponseFactory)
+            IResponseFactory apiResponseFactory) : base(apiResponseFactory)
         {
             this.appService = appService;
             this.userAppRoleAssignmentService = targetAppService;

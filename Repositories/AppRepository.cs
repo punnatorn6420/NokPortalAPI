@@ -1,6 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using NokCore.Exceptions;
+﻿using Microsoft.EntityFrameworkCore;
+using NokAir.Core.Exceptions;
 using NokPortalAPI.Models;
 using NokPortalAPI.Shareds;
 using System.Linq.Dynamic.Core;

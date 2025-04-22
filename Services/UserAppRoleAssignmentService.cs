@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
-using NokCore.Api.JWT.Models;
-using NokCore.Api.JWT.Services;
-using NokCore.CoreModels.ApiResponses;
-using NokCore.Exceptions;
+using NokAir.Core.Exceptions;
+using NokAir.Shared.Api.Responses.Dtos.InHouse;
+using NokAir.Shared.Security.InHouse.Models;
+using NokAir.Shared.Security.InHouse.Services;
 using NokPortalAPI.Models;
 using NokPortalAPI.Repositories;
 
@@ -134,7 +134,7 @@ namespace NokPortalAPI.Services
                 string responseContent = await response.Content.ReadAsStringAsync();
                 if (response.IsSuccessStatusCode)
                 {
-                    var res = JsonConvert.DeserializeObject<BaseSuccessResponse<IList<Role>>>(responseContent) ?? throw new DataValidationException("Empty roles data");
+                    var res = JsonConvert.DeserializeObject<SuccessResponseDto<IList<Role>>>(responseContent) ?? throw new DataValidationException("Empty roles data");
                     return res.Data ?? throw new DataValidationException("Empty roles data");
                 }
                 else

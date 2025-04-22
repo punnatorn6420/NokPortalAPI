@@ -1,4 +1,4 @@
-﻿using NokCore.Exceptions;
+﻿using NokAir.Core.Exceptions;
 using NokPortalAPI.Models;
 using NokPortalAPI.Repositories;
 

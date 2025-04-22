@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NokCore.Api.Controllers.Internal;
-using NokCore.Api.Responses.Web;
+using NokAir.Shared.Api.Responses.Factories;
+using NokAir.Shared.Controllers;
 using NokPortalAPI.Shareds;
 
 namespace NokPortalAPI.Controllers
 {
     [ApiController]
     [Route("v1/health-check")]
-    public class HealthCheckController : BaseController
+    public class HealthCheckController : InHouseControllerBase
     {
         private readonly ReloadFileConfig reloadFileConfig;
         private readonly CorsPolicyReloader corsPolicyReloader;
@@ -16,7 +16,7 @@ namespace NokPortalAPI.Controllers
         public HealthCheckController(
             ReloadFileConfig reloadFileConfig,
             CorsPolicyReloader corsPolicyReloader,
-            IApiResponseFactory apiResponseFactory) : base(apiResponseFactory)
+            IResponseFactory resFactory) : base(resFactory)
         {
             this.reloadFileConfig = reloadFileConfig;
             this.corsPolicyReloader = corsPolicyReloader;
