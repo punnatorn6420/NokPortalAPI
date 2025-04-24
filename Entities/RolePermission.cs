@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using NokAir.Core.Interfaces.Rbac.Entities;
 
-namespace NokPortalAPI.Models
+namespace NokPortalAPI.Entities
 {
     public class RolePermission : IRolePermission
     {

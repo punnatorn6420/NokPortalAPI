@@ -1,7 +1,7 @@
 ﻿using NokAir.Core.Interfaces.Rbac.Entities;
 using System.ComponentModel.DataAnnotations;
 
-namespace NokPortalAPI.Models
+namespace NokPortalAPI.Entities
 {
     /// <summary>
     /// Represents a role in the system.

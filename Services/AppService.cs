@@ -1,5 +1,6 @@
 ﻿using NokAir.Core.Exceptions;
-using NokPortalAPI.Models;
+using NokPortalAPI.Extensions;
+using NokPortalAPI.Dtos;
 using NokPortalAPI.Repositories;
 
 namespace NokPortalAPI.Services
@@ -19,14 +20,15 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc />
-        public async Task<App> AddAppAsync(App app)
+        public async Task<AppDto> AddAppAsync(AppDto appDto)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
+                var app = appDto.ToEntity();
                 await appRepository.AddAppAsync(app);
                 await transaction.CommitAsync();
-                return app;
+                return app.ToDto();
             }
             catch (DataValidationException)
             {
@@ -63,28 +65,32 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc />
-        public async Task<App?> GetAppByIdAsync(int id)
+        public async Task<AppDto?> GetAppByIdAsync(int id)
         {
-           return await appRepository.GetAppByIdAsync(id);
+           var app = await appRepository.GetAppByIdAsync(id);
+           return app?.ToDto();
         }
 
         /// <inheritdoc />
-        public async Task<IList<App>> GetAppsByCriteriaAsync(AppSearchCriteria searchCriteria)
+        public async Task<IList<AppDto>> GetAppsByCriteriaAsync(AppSearchDto searchCriteria)
         {
-            return await appRepository.GetAppsByCriteriaAsync(searchCriteria);
+            var apps = await appRepository.GetAppsByCriteriaAsync(searchCriteria);
+            return apps.Select(app => app.ToDto()).ToList();
         }
 
         /// <inheritdoc />
-        public async Task<bool> UpdateAppAsync(App app)
+        public async Task<bool> UpdateAppAsync(AppDto appDto)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                var existingApp = await appRepository.GetAppByIdAsync(app.Id);
+                var existingApp = await appRepository.GetAppByIdAsync(appDto.Id);
                 if (existingApp == null)
                 {
                     return false;
                 }
+
+                var app = appDto.ToEntity();
                 await appRepository.UpdateAppAsync(app);
                 await transaction.CommitAsync();
                 return true;

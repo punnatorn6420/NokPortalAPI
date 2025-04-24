@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace NokPortalAPI.Models
+namespace NokPortalAPI.Entities
 {
     /// <summary>
     /// Represents the association between a user to an application with a role.

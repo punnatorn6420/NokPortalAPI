@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NokAir.Core.Exceptions;
-using NokPortalAPI.Models;
+using NokPortalAPI.Dtos;
+using NokPortalAPI.Entities;
 using NokPortalAPI.Shareds;
 using System.Linq.Dynamic.Core;
 
@@ -50,7 +51,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<IList<App>> GetAppsByCriteriaAsync(AppSearchCriteria searchCriteria)
+        public async Task<IList<App>> GetAppsByCriteriaAsync(AppSearchDto searchCriteria)
         {
             IQueryable<App> query = context.Apps;
 

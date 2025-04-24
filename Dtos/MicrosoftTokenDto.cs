@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace NokPortalAPI.Models
+namespace NokPortalAPI.Dtos
 {
     /// <summary>
     /// Represents a request for a Microsoft token.
     /// </summary>
-    public class MicrosoftTokenRequest
+    public class MicrosoftTokenDto
     {
         /// <summary>
         /// Gets or sets the token.

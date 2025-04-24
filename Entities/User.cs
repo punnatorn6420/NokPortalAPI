@@ -2,7 +2,7 @@
 using NokAir.Core.Interfaces.Rbac.Entities;
 using System.ComponentModel.DataAnnotations;
 
-namespace NokPortalAPI.Models
+namespace NokPortalAPI.Entities
 {
     public class User : IUser
     {
