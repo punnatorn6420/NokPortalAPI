@@ -1,4 +1,4 @@
-﻿namespace NokPortalAPI.Models
+﻿namespace NokPortalAPI.Entities
 {
     /// <summary>
     /// Represents the association between a user and an application role.

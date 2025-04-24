@@ -1,4 +1,5 @@
 ﻿using NokAir.Core.Interfaces.Rbac.Repositories;
+using NokPortalAPI.Entities;
 
 namespace NokPortalAPI.Repositories
 {
@@ -13,5 +14,12 @@ namespace NokPortalAPI.Repositories
         /// <param name="appId">Application ID.</param>
         /// <returns>List of users.</returns>
         Task<ICollection<T>> GetUsersByAppIdAsync(int appId);
+
+        /// <summary>
+        /// Gets list of users by search criteria.
+        /// </summary>
+        /// <param name="searchCriteria">User search criteria.</param>
+        /// <returns>List of users.</returns>
+        Task<ICollection<User>> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria);
     }
 }

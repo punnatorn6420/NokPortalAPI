@@ -1,14 +1,10 @@
-﻿using System.Text.Json.Serialization;
-using NokPortalAPI.Enums;
+﻿using NokPortalAPI.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
-namespace NokPortalAPI.Models
+namespace NokPortalAPI.Dtos
 {
-    /// <summary>
-    /// Represents the application.
-    /// </summary>
-    public class App
+    public class AppDto
     {
         [Required]
         public int Id { get; set; }
@@ -56,13 +52,6 @@ namespace NokPortalAPI.Models
         public string Remark { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the image URL.
-        /// </summary>
-        [AllowNull]
-        [MaxLength(255)]
-        public string ImageUrl { get; set; } = string.Empty;
-
-        /// <summary>
         /// Gets or sets a value indicating whether the user is active.
         /// </summary>
         public bool Active { get; set; } = false;
@@ -76,12 +65,5 @@ namespace NokPortalAPI.Models
         /// Gets or sets the date and time when the user was last modified.
         /// </summary>
         public DateTime ModifiedAt { get; set; } = DateTime.Now;
-
-
-        /// <summary>
-        /// Gets or sets the assigned user applications.
-        /// </summary>
-        [JsonIgnore]
-        public ICollection<UserAppRoleAssignment> AssignedApps { get; set; } = new List<UserAppRoleAssignment>();
     }
 }

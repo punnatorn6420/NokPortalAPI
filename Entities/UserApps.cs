@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using NokAir.Core.Interfaces.Rbac.Entities;
 
-namespace NokPortalAPI.Models
+namespace NokPortalAPI.Entities
 {
     /// <summary>
     /// Represents the user and the apps that the user has access to.

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using NokPortalAPI.Models;
+using NokPortalAPI.Entities;
 
 namespace NokPortalAPI.Repositories
 {

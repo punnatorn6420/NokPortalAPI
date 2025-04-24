@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using NokAir.Core.Interfaces.Rbac.Entities;
-using NokPortalAPI.Models;
+using NokPortalAPI.Entities;
 using System.Linq.Dynamic.Core;
 
 namespace NokPortalAPI.Repositories

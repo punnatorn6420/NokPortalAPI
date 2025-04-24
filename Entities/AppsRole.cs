@@ -1,4 +1,4 @@
-﻿namespace NokPortalAPI.Models
+﻿namespace NokPortalAPI.Entities
 {
     public class AppsRole
     {

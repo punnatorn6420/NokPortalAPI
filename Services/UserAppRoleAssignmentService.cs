@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json;
 using NokAir.Core.Exceptions;
 using NokAir.Shared.Api.Responses.Dtos.InHouse;
-using NokAir.Shared.Security.InHouse.Models;
-using NokAir.Shared.Security.InHouse.Services;
-using NokPortalAPI.Models;
+using NokAir.Shared.Security.Models.Common;
+using NokAir.Shared.Security.Models.InHouse;
+using NokAir.Shared.Security.Services.InHouse;
+using NokPortalAPI.Dtos;
+using NokPortalAPI.Entities;
 using NokPortalAPI.Repositories;
 
 namespace NokPortalAPI.Services
@@ -90,7 +92,7 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc />
-        public async Task<JwtTokenInfo> GetJwtTokenInfoByUserAppAsync(int userId, int appId)
+        public async Task<JwtInfoModel> GetJwtTokenInfoByUserAppAsync(int userId, int appId)
         {
             // Verify if the user has been assigned to the app
             var isUserAssignedToApp = await userAppRoleAssignmentRepository.IsUserAssignedToAppAsync(userId, appId);
@@ -106,7 +108,7 @@ namespace NokPortalAPI.Services
                 throw new DataValidationException("Application not found. Please check the app.");
             }
 
-            var jwtUserClaims = new JwtUserClaims()
+            var jwtUserClaims = new UserClaimsModel()
             {
                 UserId = userId
             };
@@ -124,7 +126,7 @@ namespace NokPortalAPI.Services
                     throw new DataValidationException("Application not found");
                 }
 
-                JwtTokenInfo jwtToken = jwtService.GenerateJwtTokenInfo((JwtUserClaims?)null);
+                JwtInfoModel jwtToken = jwtService.GenerateJwtTokenInfo((UserClaimsModel?)null);
                 string appUrl = app.BaseUrl += "/roles";
 
                 var request = new HttpRequestMessage(HttpMethod.Get, appUrl);

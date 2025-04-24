@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using NokAir.Core.Exceptions;
 using NokAir.Shared.Api.Responses.Factories;
 using NokAir.Shared.Controllers;
+using NokPortalAPI.Dtos;
+using NokPortalAPI.Entities;
 using NokPortalAPI.Enums;
-using NokPortalAPI.Models;
 using NokPortalAPI.Services;
 
 namespace NokPortalAPI.Controllers
@@ -15,12 +16,12 @@ namespace NokPortalAPI.Controllers
     {
         private readonly IAppService appService;
         private readonly IUserAppRoleAssignmentService userAppRoleAssignmentService;
-        private readonly IUserService<User> userService;
+        private readonly IUserService<UserDto> userService;
 
         public AppController(
             IAppService appService,
             IUserAppRoleAssignmentService targetAppService,
-            IUserService<User> userService,
+            IUserService<UserDto> userService,
             IResponseFactory apiResponseFactory) : base(apiResponseFactory)
         {
             this.appService = appService;
@@ -33,7 +34,7 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpPost("")]
         [Authorize(Policy = "RootOrAdmin")]
-        public async Task<ActionResult> AddNewAppAsync(App app)
+        public async Task<ActionResult> AddNewAppAsync(AppDto app)
         {
             // Check if the model state is valid
             if (!ModelState.IsValid)
@@ -102,7 +103,7 @@ namespace NokPortalAPI.Controllers
 
             try
             {
-                App? app = await appService.GetAppByIdAsync(id);
+                AppDto? app = await appService.GetAppByIdAsync(id);
                 if (app == null)
                 {
                     return NoContent();
@@ -183,7 +184,7 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpGet("search")]
         [Authorize(Policy = "RootOrAdmin")]
-        public async Task<ActionResult> SearchAppAsync([FromQuery] AppSearchCriteria searchCriteria)
+        public async Task<ActionResult> SearchAppAsync([FromQuery] AppSearchDto searchCriteria)
         {
             try
             {
@@ -193,7 +194,7 @@ namespace NokPortalAPI.Controllers
                     return BadRequestResponseFromInvalidRequest();
                 }
 
-                ICollection<App> apps = await appService.GetAppsByCriteriaAsync(searchCriteria);
+                ICollection<AppDto> apps = await appService.GetAppsByCriteriaAsync(searchCriteria);
                 return OkResponseWithResult(apps);
             }
             catch (Exception ex)
@@ -207,7 +208,7 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpPut("")]
         [Authorize(Policy = "RootOrAdmin")]
-        public async Task<ActionResult> UpdateAppAsync(App app)
+        public async Task<ActionResult> UpdateAppAsync(AppDto app)
         {
             // Check if the model state is valid
             if (!ModelState.IsValid)

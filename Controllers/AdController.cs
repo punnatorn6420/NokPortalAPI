@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using NokAir.Core.Exceptions;
 using NokAir.Shared.Api.Responses.Factories;
 using NokAir.Shared.Controllers;
-using NokAir.Shared.Security.InHouse.Services;
-using NokPortalAPI.Models;
+using NokAir.Shared.Security.Services.InHouse;
+using NokPortalAPI.Dtos;
+using NokPortalAPI.Entities;
 using NokPortalAPI.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -16,12 +17,12 @@ namespace NokPortalAPI.Controllers
     public class AdController : InHouseControllerBase
     {
         private readonly MsActiveDirectoryService msActiveDirectoryService;
-        private readonly IUserService<User> userService;
+        private readonly IUserService<UserDto> userService;
         private readonly IJwtService jwtService;
 
         public AdController(
             MsActiveDirectoryService msActiveDirectoryService,
-            IUserService<User> userService,
+            IUserService<UserDto> userService,
             IJwtService jwtService,
             IResponseFactory resFactory) : base(resFactory)
         {
@@ -53,7 +54,7 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpPost("signup")]
         [AllowAnonymous]
-        public async Task<ActionResult> SignUpAsync(MicrosoftTokenRequest req)
+        public async Task<ActionResult> SignUpAsync(MicrosoftTokenDto req)
         {
             try
             {
@@ -70,7 +71,7 @@ namespace NokPortalAPI.Controllers
                     return BadRequestResponseFromMessage("Failed to get user info");
                 }
 
-                User user = new User
+                UserDto user = new UserDto
                 {
                     FirstName = msUserInfo.GivenName,
                     LastName = msUserInfo.Surname,
@@ -141,7 +142,7 @@ namespace NokPortalAPI.Controllers
                 {
                     new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                    new Claim("roles", string.Join(",", user.UserRoles.Select(ur => ur.Role.Name).ToList())),
+                    new Claim("roles", string.Join(",", user.Roles.Select(r => r.Name).ToList())),
                 };
                 var token = jwtService.GenerateJwtTokenInfo(cliams!);
                 return OkResponseWithResult(token);
@@ -161,7 +162,7 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpPost("signin")]
         [AllowAnonymous]
-        public async Task<ActionResult> SigInAsync(MicrosoftTokenRequest req)
+        public async Task<ActionResult> SigInAsync(MicrosoftTokenDto req)
         {
             if (!ModelState.IsValid)
             {
@@ -186,7 +187,8 @@ namespace NokPortalAPI.Controllers
                 {
                     new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                    new Claim("roles", string.Join(",", user.UserRoles.Select(ur => ur.Role.Name).ToList())),
+                    new Claim(JwtRegisteredClaimNames.UniqueName, string.Format("{0} {1}", user.FirstName, user.LastName)),
+                    new Claim("roles", string.Join(",", user.Roles.Select(r => r.Name).ToList())),
                 };
                 var token = jwtService.GenerateJwtTokenInfo(cliams!);
                 return OkResponseWithResult(token);

@@ -1,8 +1,8 @@
-﻿using NokAir.Core.Interfaces.Common;
+﻿using NokAir.Shared.Interfaces.Common;
 
-namespace NokPortalAPI.Models
+namespace NokPortalAPI.Dtos
 {
-    public class AppSearchCriteria : ISearchCriteria
+    public class UserSearchCriteriaDto : ISearchCriteriaDto
     {
         public string Keyword { get; set; } = string.Empty;
         public int PageNumber { get; set; } = 1;

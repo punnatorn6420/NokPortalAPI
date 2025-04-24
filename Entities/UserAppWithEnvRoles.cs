@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace NokPortalAPI.Models
+namespace NokPortalAPI.Entities
 {
     public class UserAppWithEnvRoles
     {

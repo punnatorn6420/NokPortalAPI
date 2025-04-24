@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using NokAir.Core.Exceptions;
 using NokAir.Shared.Api.Responses.Factories;
 using NokAir.Shared.Controllers;
-using NokPortalAPI.Models;
+using NokPortalAPI.Dtos;
+using NokPortalAPI.Entities;
 using NokPortalAPI.Services;
 
 namespace NokPortalAPI.Controllers
@@ -14,12 +15,12 @@ namespace NokPortalAPI.Controllers
     {
         private readonly IAppService appService;
         private readonly IUserAppRoleAssignmentService userAppRoleAssignmentService;
-        private readonly IUserService<User> userService;
+        private readonly IUserService<UserDto> userService;
 
         public MeController(
             IAppService appService,
             IUserAppRoleAssignmentService userAppRoleAssignmentService,
-            IUserService<User> userService,
+            IUserService<UserDto> userService,
             IResponseFactory resFactory) : base(resFactory)
         {
             this.appService = appService;
@@ -43,7 +44,7 @@ namespace NokPortalAPI.Controllers
                     return Unauthorized("User claims not found");
                 }
 
-                User? user = await userService.GetUserByIdAsync(userClaims.UserId);
+                UserDto? user = await userService.GetUserByIdAsync(userClaims.UserId);
                 if (user == null)
                 {
                     return NotFound("User not found");

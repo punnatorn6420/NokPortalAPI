@@ -1,5 +1,5 @@
 ﻿
-using NokPortalAPI.Models;
+using NokPortalAPI.Entities;
 using NokPortalAPI.Repositories;
 
 namespace NokPortalAPI.Services

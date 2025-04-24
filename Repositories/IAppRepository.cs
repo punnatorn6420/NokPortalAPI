@@ -1,4 +1,5 @@
-﻿using NokPortalAPI.Models;
+﻿using NokPortalAPI.Dtos;
+using NokPortalAPI.Entities;
 
 namespace NokPortalAPI.Repositories
 {
@@ -33,7 +34,7 @@ namespace NokPortalAPI.Repositories
         /// </summary>
         /// <param name="searchCriteria">Search criteria.</param>
         /// <returns>List of applications.</returns>
-        Task<IList<App>> GetAppsByCriteriaAsync(AppSearchCriteria searchCriteria);
+        Task<IList<App>> GetAppsByCriteriaAsync(AppSearchDto searchCriteria);
 
         /// <summary>
         /// Gets list of applications with all the environments by user ID.

@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using NokAir.Core.Interfaces.Rbac.Entities;
 using NokAir.Shared.Api.Responses.Factories;
 using NokAir.Shared.Controllers;
-using NokPortalAPI.Models;
+using NokPortalAPI.Dtos;
+using NokPortalAPI.Entities;
 using NokPortalAPI.Services;
 
 namespace NokPortalAPI.Controllers
@@ -12,10 +13,10 @@ namespace NokPortalAPI.Controllers
     [Route("v1/users")]
     public class UserController : InHouseControllerBase
     {
-        private readonly IUserService<User> userService;
+        private readonly IUserService<UserDto> userService;
 
         public UserController(
-            IUserService<User> userService,
+            IUserService<UserDto> userService,
             IResponseFactory resFactory) : base(resFactory)
         {
             this.userService = userService;
@@ -23,7 +24,7 @@ namespace NokPortalAPI.Controllers
 
         [HttpGet("search")]
         [Authorize(Policy = "RootOrAdmin")]
-        public async Task<ActionResult> SearchUsersAsync([FromQuery] IUserSearchCriteria searchCriteria)
+        public async Task<ActionResult> SearchUsersAsync([FromQuery] UserSearchCriteriaDto searchCriteriaDto)
         {
             if (!ModelState.IsValid)
             {
@@ -32,7 +33,7 @@ namespace NokPortalAPI.Controllers
 
             try
             {
-                IEnumerable<User> user = await userService.GetUsersByCriteriaAsync(searchCriteria);
+                IEnumerable<UserDto> user = await userService.GetUsersByCriteriaAsync(searchCriteriaDto);
                 return OkResponseWithResult(user);
             }
             catch (Exception ex)

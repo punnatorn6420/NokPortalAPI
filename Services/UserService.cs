@@ -1,5 +1,7 @@
-﻿using NokAir.Core.Interfaces.Rbac.Entities;
-using NokPortalAPI.Models;
+﻿using NokAir.Core.Interfaces.Rbac.Services;
+using NokPortalAPI.Dtos;
+using NokPortalAPI.Entities;
+using NokPortalAPI.Extensions;
 using NokPortalAPI.Repositories;
 
 namespace NokPortalAPI.Services
@@ -7,7 +9,7 @@ namespace NokPortalAPI.Services
     /// <summary>
     /// User service.
     /// </summary>
-    public class UserService : IUserService<User>
+    public class UserService : IUserService<UserDto>
     {
         private readonly AppDbContext context;
         private readonly IUserRepository<User> userRepository;
@@ -20,14 +22,15 @@ namespace NokPortalAPI.Services
 
 
         /// <inheritdoc />
-        public async Task<User> AddUserAsync(User user)
+        public async Task<UserDto> AddUserAsync(UserDto userDto)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
+                var user = userDto.ToEntity();
                 await userRepository.AddUserAsync(user);
                 await transaction.CommitAsync();
-                return user;
+                return user.ToDto();
             }
             catch (Exception)
             {
@@ -43,29 +46,34 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc />
-        public async Task<User?> GetUserByIdAsync(int id)
+        public async Task<UserDto?> GetUserByIdAsync(int id)
         {
-            return await userRepository.GetUserByIdAsync(id);
+            var user = await userRepository.GetUserByIdAsync(id);
+            return user?.ToDto();
         }
 
         /// <inheritdoc />
-        public async Task<ICollection<User>> GetUsersByAppIdAsync(int appId)
+        public async Task<ICollection<UserDto>> GetUsersByAppIdAsync(int appId)
         {
-            return await userRepository.GetUsersByAppIdAsync(appId);
+            var users = await userRepository.GetUsersByAppIdAsync(appId);
+            return users.Select(u => u.ToDto()).ToList();
         }
 
         /// <inheritdoc />
-        public async Task<ICollection<User>> GetUsersByCriteriaAsync(IUserSearchCriteria searchCriteria)
+        public async Task<ICollection<UserDto>> GetUsersByCriteriaAsync(UserSearchCriteriaDto searchCriteriaDto)
         {
-            return await userRepository.GetUsersByCriteriaAsync(searchCriteria);
+            var searchCriteria = searchCriteriaDto.ToEntity();
+            var users = await userRepository.GetUsersByCriteriaAsync(searchCriteria);
+            return users.Select(u => u.ToDto()).ToList();
         }
 
         /// <inheritdoc />
-        public async Task<bool> UpdateUserAsync(User user)
+        public async Task<bool> UpdateUserAsync(UserDto userDto)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
+                var user = userDto.ToEntity();
                 var rowsAffected = await userRepository.UpdateUserAsync(user);
                 await transaction.CommitAsync();
                 return rowsAffected > 0;
@@ -75,6 +83,11 @@ namespace NokPortalAPI.Services
                 await transaction.RollbackAsync();
                 throw;
             }
+        }
+
+        Task<UserDto?> IUserServiceBase<UserDto>.GetUserByEmailAsync(string email)
+        {
+            throw new NotImplementedException();
         }
     }
 }

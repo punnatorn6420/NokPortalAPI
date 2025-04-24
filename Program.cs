@@ -6,11 +6,12 @@ using Microsoft.IdentityModel.Tokens;
 using NokAir.Core.Interfaces.Rbac.Services;
 using NokAir.Shared.Api.Responses.Factories;
 using NokAir.Shared.Api.Responses.Factories.InHouse;
-using NokAir.Shared.Middlewares.InHouse;
+using NokAir.Shared.Middlewares.InHouse.Common;
 using NokAir.Shared.Security.AuthorizationHandlers;
-using NokAir.Shared.Security.Common.Models;
-using NokAir.Shared.Security.InHouse.Services;
-using NokPortalAPI.Models;
+using NokAir.Shared.Security.Models.Common;
+using NokAir.Shared.Security.Services.InHouse;
+using NokPortalAPI.Dtos;
+using NokPortalAPI.Entities;
 using NokPortalAPI.Repositories;
 using NokPortalAPI.Resources;
 using NokPortalAPI.Services;
@@ -81,7 +82,7 @@ namespace NokPortalAPI
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("NokPortalDB")));
             builder.Services.Configure<ServiceSettings>(builder.Configuration.GetSection("ServiceSettings"));
-            builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+            builder.Services.Configure<JwtSettingsModel>(builder.Configuration.GetSection("JwtSettings"));
 
             // Register IHttpContextAccessor
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -94,10 +95,10 @@ namespace NokPortalAPI
 
             // Services
             builder.Services.AddSingleton<MsActiveDirectoryService>();
-            builder.Services.AddScoped<IUserServiceBase<User>, UserService>();
+            builder.Services.AddScoped<IUserService<UserDto>, UserService>();
             builder.Services.AddScoped<IUserAppRoleAssignmentService, UserAppRoleAssignmentService>();
             builder.Services.AddScoped<IAppService, AppService>();
-            builder.Services.AddScoped<IRoleServiceBase, RoleService>();
+            builder.Services.AddScoped<IRoleService, RoleService>();
             builder.Services.AddSingleton<IJwtService, JwtService>();
 
             builder.Services.AddSingleton<ReloadFileConfig>();
@@ -108,7 +109,7 @@ namespace NokPortalAPI
             // Role service
             builder.Services.AddScoped<IAuthorizationHandler, RoleAuthorizationHandler>();
             builder.Services.AddScoped<IAuthorizationHandler, MultiRoleAuthorizationHandler>();
-            builder.Services.AddScoped<IRoleService, RoleService>();
+            builder.Services.AddScoped<IRoleServiceBase, RoleService>();
 
             // Add HttpClient
             builder.Services.AddHttpClient();
@@ -146,7 +147,7 @@ namespace NokPortalAPI
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+                    var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettingsModel>();
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
@@ -190,11 +191,11 @@ namespace NokPortalAPI
                 // Iterate through the list of permissions and add them to the policy.
                 foreach (var permission in permissions)
                 {
-                    options.AddPolicy(permission, policy => policy.Requirements.Add(new RoleRequirement(permission)));
+                    options.AddPolicy(permission, policy => policy.Requirements.Add(new RoleRequirementModel(permission)));
                 }
 
-                options.AddPolicy("RootOrAdmin", policy => policy.Requirements.Add(new MultiRoleRequirement(new[] { "Root", "Admin" })));
-                options.AddPolicy("AllRole", policy => policy.Requirements.Add(new MultiRoleRequirement(new[] { "Root", "Admin", "EndUser" })));
+                options.AddPolicy("RootOrAdmin", policy => policy.Requirements.Add(new MultiRoleRequirementModel(new[] { "Root", "Admin" })));
+                options.AddPolicy("AllRole", policy => policy.Requirements.Add(new MultiRoleRequirementModel(new[] { "Root", "Admin", "EndUser" })));
             });
 
             builder.Services.AddEndpointsApiExplorer();
@@ -223,7 +224,7 @@ namespace NokPortalAPI
 
             // Register JWT middleware to check for JWT token in the request header.
             // For endpoints that not require JWT token, add [AllowAnonymous] attribute.
-            app.UseMiddleware<Jwtmiddleware>();
+            app.UseMiddleware<JwtMiddleware>();
 
             app.UseHttpsRedirection();
 

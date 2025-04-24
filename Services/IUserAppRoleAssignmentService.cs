@@ -1,5 +1,5 @@
-﻿using NokAir.Shared.Security.InHouse.Models;
-using NokPortalAPI.Models;
+﻿using NokAir.Shared.Security.Models.Common;
+using NokPortalAPI.Entities;
 
 namespace NokPortalAPI.Services
 {
@@ -21,7 +21,7 @@ namespace NokPortalAPI.Services
         /// <param name="userId">User ID.</param>
         /// <param name="appId">Application ID.</param>
         /// <returns>JWT token info.</returns>
-        Task<JwtTokenInfo> GetJwtTokenInfoByUserAppAsync(int userId, int appId);
+        Task<JwtInfoModel> GetJwtTokenInfoByUserAppAsync(int userId, int appId);
 
         /// <summary>
         /// Gets list of roles the environment of the target app.
