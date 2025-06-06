@@ -142,7 +142,7 @@ namespace NokPortalAPI.Controllers
                 {
                     new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                    new Claim("roles", string.Join(",", user.Roles.Select(r => r.Name).ToList())),
+                    // new Claim("roles", string.Join(",", user.Roles.Select(r => r.Name).ToList())),
                 };
                 var token = jwtService.GenerateJwtTokenInfo(cliams!);
                 return OkResponseWithResult(token);
@@ -183,12 +183,12 @@ namespace NokPortalAPI.Controllers
                     return NoContent();
                 }
 
-                var cliams = new []
+                var cliams = new[]
                 {
                     new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
                     new Claim(JwtRegisteredClaimNames.UniqueName, string.Format("{0} {1}", user.FirstName, user.LastName)),
-                    new Claim("roles", string.Join(",", user.Roles.Select(r => r.Name).ToList())),
+                    // new Claim("roles", string.Join(",", user.Roles.Select(r => r.Name).ToList())),
                 };
                 var token = jwtService.GenerateJwtTokenInfo(cliams!);
                 return OkResponseWithResult(token);

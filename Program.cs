@@ -114,6 +114,8 @@ namespace NokPortalAPI
             // Add HttpClient
             builder.Services.AddHttpClient();
 
+
+
             // Add CORS policy
             var corsOrigins = builder.Configuration.GetSection("CorsAllowedOrigins").Get<string[]>() ?? throw new ArgumentNullException("Cors:AllowedOrigins configuration is missing");
             builder.Services.AddCors(options =>
@@ -124,6 +126,8 @@ namespace NokPortalAPI
                         .AllowAnyHeader()
                         .AllowAnyMethod());
             });
+
+
 
             //builder.Services.AddFluentValidationAutoValidation();
             //builder.Services.AddFluentValidationClientsideAdapters();
@@ -201,6 +205,7 @@ namespace NokPortalAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.WebHost.UseUrls("https://localhost:7036", "http://localhost:5258");
 
             var app = builder.Build();
 

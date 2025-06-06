@@ -44,7 +44,7 @@ namespace NokPortalAPI.Controllers
                     return Unauthorized("User claims not found");
                 }
 
-                UserDto? user = await userService.GetUserByIdAsync(userClaims.UserId);
+                MyProfileDto? user = await userService.GetMyProfileAsync(userClaims.UserId);
                 if (user == null)
                 {
                     return NotFound("User not found");
@@ -91,7 +91,7 @@ namespace NokPortalAPI.Controllers
 
                 var res = new AppInfo()
                 {
-                    BaseUrl = app.BaseUrl,
+                    ClientUrl = app.ClientUrl,
                     EnvironmentType = app.EnvironmentType,
                     JwtToken = jwtTokenInfo.Token,
                     JwtExpiryTime = jwtTokenInfo.ExpiryTime

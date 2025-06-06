@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging.Console;
 using NokAir.Core.Exceptions;
 using NokAir.Shared.Api.Responses.Factories;
 using NokAir.Shared.Controllers;
@@ -34,7 +35,7 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpPost("")]
         [Authorize(Policy = "RootOrAdmin")]
-        public async Task<ActionResult> AddNewAppAsync(AppDto app)
+        public async Task<ActionResult> AddNewAppAsync(CreateAppRequestDto request)
         {
             // Check if the model state is valid
             if (!ModelState.IsValid)
@@ -44,9 +45,26 @@ namespace NokPortalAPI.Controllers
 
             try
             {
-                var addedApp = await appService.AddAppAsync(app);
-                if (addedApp != null)
+                // var addedApp = await appService.AddAppAsync(app);
+                var appDto = new AppDto
                 {
+                    Name = request.Name,
+                    Header = request.Header,
+                    Subheader = request.Subheader,
+                    EnvironmentType = request.EnvironmentType,
+                    ClientUrl = request.ClientUrl,
+                    BackendUrl = request.BackendUrl,
+                    ImageUrl = request.ImageUrl,
+                    SecretKey = request.SecretKey,
+                    JwtExpiryHours = request.JwtExpiryHours,
+                    Remark = request.Remark,
+                    CreatedAt = DateTime.UtcNow,
+                    ModifiedAt = DateTime.UtcNow,
+                    Active = true
+                };
+                if (appDto != null)
+                {
+                    var addedApp = await appService.AddAppAsync(appDto);
                     return OkSuccessResponse();
                 }
 
@@ -65,10 +83,12 @@ namespace NokPortalAPI.Controllers
         /// <summary>
         /// This endpoint is used to assign a user to an app.
         /// </summary>
-        [HttpPost("{id}/assign-user-to-app")]
+        [HttpPost("assign-user-to-app")]
         [Authorize(Policy = "RootOrAdmin")]
-        public async Task<ActionResult> AssignUserToAppAsync(int id, UserAppAssignmentRequest req)
+        public async Task<ActionResult> AssignUserToAppAsync(UserAppAssignmentRequest req)
         {
+
+            Console.WriteLine("AssignUserToAppAsync called with request: " + System.Text.Json.JsonSerializer.Serialize(req));
             if (!ModelState.IsValid)
             {
                 return BadRequestResponseFromInvalidRequest();
@@ -76,6 +96,7 @@ namespace NokPortalAPI.Controllers
 
             try
             {
+                Console.WriteLine("AssignUserToAppAsync: ModelState is valid, proceeding with assignment.");
                 await userAppRoleAssignmentService.AssignUserToAppAsync(req);
                 return OkSuccessResponse();
             }
@@ -126,7 +147,7 @@ namespace NokPortalAPI.Controllers
         {
             try
             {
-                ICollection<Role> roles = await userAppRoleAssignmentService.GetRolesByAppIdAsync(id);
+                ICollection<RoleDto> roles = await userAppRoleAssignmentService.GetRolesByAppIdAsync(id);
                 return OkResponseWithResult(roles);
             }
             catch (Exception ex)
@@ -161,7 +182,7 @@ namespace NokPortalAPI.Controllers
 
                 var res = new AppInfo()
                 {
-                    BaseUrl = app.BaseUrl,
+                    ClientUrl = app.ClientUrl,
                     EnvironmentType = app.EnvironmentType,
                     JwtToken = jwtTokenInfo.Token,
                     JwtExpiryTime = jwtTokenInfo.ExpiryTime
@@ -206,9 +227,9 @@ namespace NokPortalAPI.Controllers
         /// <summary>
         /// This endpoint is used to update an existing app.
         /// </summary>
-        [HttpPut("")]
+        [HttpPut("{id}")]
         [Authorize(Policy = "RootOrAdmin")]
-        public async Task<ActionResult> UpdateAppAsync(AppDto app)
+        public async Task<ActionResult> UpdateAppAsync(int id, [FromBody] AppDto app)
         {
             // Check if the model state is valid
             if (!ModelState.IsValid)

@@ -3,6 +3,9 @@ using NokPortalAPI.Dtos;
 using NokPortalAPI.Entities;
 using NokPortalAPI.Extensions;
 using NokPortalAPI.Repositories;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
+
 
 namespace NokPortalAPI.Services
 {
@@ -52,6 +55,11 @@ namespace NokPortalAPI.Services
             return user?.ToDto();
         }
 
+        public async Task<MyProfileDto?> GetMyProfileAsync(int userId)
+        {
+            return await userRepository.GetMyProfileAsync(userId);
+        }
+
         /// <inheritdoc />
         public async Task<ICollection<UserDto>> GetUsersByAppIdAsync(int appId)
         {
@@ -85,9 +93,10 @@ namespace NokPortalAPI.Services
             }
         }
 
-        Task<UserDto?> IUserServiceBase<UserDto>.GetUserByEmailAsync(string email)
+        async Task<UserDto?> IUserServiceBase<UserDto>.GetUserByEmailAsync(string email)
         {
-            throw new NotImplementedException();
+            var user = await userRepository.GetUserByEmailAsync(email);
+            return user?.ToDto();
         }
     }
 }

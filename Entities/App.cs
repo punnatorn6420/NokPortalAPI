@@ -34,9 +34,14 @@ namespace NokPortalAPI.Entities
         /// <summary>
         /// Gets or sets the base URL.
         /// </summary>
+        /// 
         [Required]
         [MaxLength(255)]
-        public string BaseUrl { get; set; } = string.Empty;
+        public string ClientUrl { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(255)]
+        public string BackendUrl { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the secret key for JWT.

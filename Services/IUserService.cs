@@ -21,5 +21,8 @@ namespace NokPortalAPI.Services
         /// <param name="searchCriteriaDto">User search criteria.</param>
         /// <returns>List of users.</returns>
         Task<ICollection<UserDto>> GetUsersByCriteriaAsync(UserSearchCriteriaDto searchCriteriaDto);
+
+
+        Task<MyProfileDto?> GetMyProfileAsync(int userId);
     }
 }

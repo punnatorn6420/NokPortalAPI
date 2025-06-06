@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace NokPortalAPI.Dtos
 {
-    public class UserDto
+    public class MyProfileDto
     {
         public int Id { get; set; } = 0;
 
@@ -27,9 +27,10 @@ namespace NokPortalAPI.Dtos
 
         [MaxLength(255)]
 
-        public string Role { get; set; } = string.Empty;
+        public int Role { get; set; } = 0;
 
-        // public List<RoleDto> Roles { get; set; } = new List<RoleDto>();
+        public List<AppSummaryDto> Apps { get; set; } = new List<AppSummaryDto>();
+
         public bool Active { get; set; } = false;
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
