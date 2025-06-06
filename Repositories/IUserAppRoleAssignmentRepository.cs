@@ -44,5 +44,8 @@ namespace NokPortalAPI.Repositories
         /// <param name="appId">App ID to check.</param>
         /// <returns>True if the user is assigned to the app; otherwise, false.</returns>
         Task<bool> IsUserAssignedToAppAsync(int userId, int appId);
+
+
+        Task<List<int>> GetUserRoleIdsForAppAsync(int userId, int appId);
     }
 }

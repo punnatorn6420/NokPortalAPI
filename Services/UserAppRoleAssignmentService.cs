@@ -7,6 +7,9 @@ using NokAir.Shared.Security.Services.InHouse;
 using NokPortalAPI.Dtos;
 using NokPortalAPI.Entities;
 using NokPortalAPI.Repositories;
+using System.Security.Claims;
+using System.Text;
+
 
 namespace NokPortalAPI.Services
 {
@@ -45,44 +48,30 @@ namespace NokPortalAPI.Services
         /// <inheritdoc />
         public async Task<bool> AssignUserToAppAsync(UserAppAssignmentRequest userAppAssignmentReq)
         {
-            var app = await appRepository.GetAppByIdAsync(userAppAssignmentReq.AppId);
-            if (app == null)
-            {
-                throw new DataValidationException("Application not found. Please check the app.");
-            }
+            var app = await appRepository.GetAppByIdAsync(userAppAssignmentReq.AppId)
+                ?? throw new DataValidationException("Application not found. Please check the app.");
 
-            var user = await userRepository.GetUserByIdAsync(userAppAssignmentReq.UserId);
-            if (user == null)
-            {
-                throw new DataValidationException("User not found. Please check the user.");
-            }
+            var user = await userRepository.GetUserByIdAsync(userAppAssignmentReq.UserId)
+                ?? throw new DataValidationException("User not found. Please check the user.");
 
             if (userAppAssignmentReq.Roles == null || !userAppAssignmentReq.Roles.Any())
-            {
                 throw new DataValidationException("At least one role must be assigned.");
-            }
 
             var duplicatedRoles = new List<int>();
             foreach (var roleId in userAppAssignmentReq.Roles)
             {
-                var exists = await userAppRoleAssignmentRepository
-                    .IsUserAppRoleExistAsync(userAppAssignmentReq.UserId, userAppAssignmentReq.AppId, roleId);
-
-                if (exists)
+                if (await userAppRoleAssignmentRepository.IsUserAppRoleExistAsync(userAppAssignmentReq.UserId, userAppAssignmentReq.AppId, roleId))
                 {
                     duplicatedRoles.Add(roleId);
                 }
             }
-            if (duplicatedRoles.Count != 0)
+            if (duplicatedRoles.Any())
             {
-                Console.WriteLine($"User {userAppAssignmentReq.UserId} is already assigned to these roles in the app {userAppAssignmentReq.AppId}: {string.Join(", ", duplicatedRoles)}");
                 var rolesText = string.Join(", ", duplicatedRoles);
                 throw new DataValidationException($"User is already assigned to these role(s) in the app: {rolesText}. Please re-check your selection.");
             }
 
-            // Begin transaction
-            using var transaction = context.Database.BeginTransaction();
-
+            using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
                 foreach (var roleId in userAppAssignmentReq.Roles)
@@ -95,6 +84,48 @@ namespace NokPortalAPI.Services
                     });
                 }
 
+                await context.SaveChangesAsync();
+
+                var claims = new List<Claim>
+                {
+                    new("objectId", user.ObjectId),
+                    new("firstName", user.FirstName),
+                    new("lastName", user.LastName),
+                    new("email", user.Email),
+                    new("jobTitle", user.JobTitle),
+                    new("department", user.Department),
+                    new("active", user.Active.ToString().ToLowerInvariant()),
+                    new("roles", JsonConvert.SerializeObject(userAppAssignmentReq.Roles))
+                };
+                var jwtSettings = new JwtSettingsModel
+                {
+                    SecretKey = app.SecretKey,
+                    ExpiryInHours = app.JwtExpiryHours,
+                    Issuer = string.Empty,
+                    Audience = string.Empty
+                };
+
+                var jwtInfo = jwtService.GenerateJwtTokenInfo(claims.ToArray(), jwtSettings);
+
+                using var httpClient = new HttpClient();
+                httpClient.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwtInfo.Token);
+
+                var backendUrl = app.BackendUrl.TrimEnd('/');
+                var content = new StringContent("{}", Encoding.UTF8, "application/json");
+                try
+                {
+                    var response = await httpClient.PostAsync($"{backendUrl}/flight-irop/v1/flight-irop/assignUser", content);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        throw new DataValidationException($"Failed to sync user with app: {errorContent}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new DataValidationException($"Failed to sync user with app: {ex.Message}");
+                }
                 await transaction.CommitAsync();
                 return true;
             }
@@ -104,6 +135,7 @@ namespace NokPortalAPI.Services
                 throw;
             }
         }
+
 
         /// <inheritdoc />
         public async Task<JwtInfoModel> GetJwtTokenInfoByUserAppAsync(int userId, int appId)
@@ -115,18 +147,48 @@ namespace NokPortalAPI.Services
                 throw new DataValidationException("User is not assigned to the app. Please check the assignment.");
             }
 
-            // Get app information
+            var user = await userRepository.GetUserByIdAsync(userId);
+
+            var roleIds = await userAppRoleAssignmentRepository.GetUserRoleIdsForAppAsync(userId, appId);
+
             var app = await appRepository.GetAppByIdAsync(appId);
+
             if (app == null)
             {
                 throw new DataValidationException("Application not found. Please check the app.");
             }
 
-            var jwtUserClaims = new UserClaimsModel()
+            if (user == null)
             {
-                UserId = userId
+                throw new DataValidationException("User not found. Please check the user.");
+            }
+
+            if (roleIds == null || !roleIds.Any())
+            {
+                throw new DataValidationException("User has no roles assigned in the app. Please check the assignment.");
+            }
+
+            var claims = new List<Claim>
+            {
+                new Claim("objectId", user.ObjectId),
+                new Claim("firstName", user.FirstName),
+                new Claim("lastName", user.LastName),
+                new Claim("email", user.Email),
+                new Claim("jobTitle", user.JobTitle),
+                new Claim("department", user.Department),
+                new Claim("active", user.Active.ToString()),
+                new Claim("roles", JsonConvert.SerializeObject(roleIds))
             };
-            return jwtService.GenerateJwtTokenInfo(jwtUserClaims);
+
+            var jwtSettings = new JwtSettingsModel
+            {
+                SecretKey = app.SecretKey,
+                ExpiryInHours = app.JwtExpiryHours,
+                Issuer = string.Empty,
+                Audience = string.Empty
+            };
+
+            return jwtService.GenerateJwtTokenInfo(claims.ToArray(), jwtSettings);
         }
 
         /// <inheritdoc />

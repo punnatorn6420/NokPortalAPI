@@ -46,6 +46,15 @@ namespace NokPortalAPI.Repositories
                 .AnyAsync(x => x.UserId == userId && x.AppId == appId && x.RoleId == roleId);
         }
 
+        public Task<List<int>> GetUserRoleIdsForAppAsync(int userId, int appId)
+        {
+            return context.UserAppRoleAssignments
+                .Where(x => x.UserId == userId && x.AppId == appId)
+                .Select(x => x.RoleId)
+                .ToListAsync();
+        }
+
+
         /// <inheritdoc/>
         public async Task<bool> IsUserAssignedToAppAsync(int userId, int appId)
         {
