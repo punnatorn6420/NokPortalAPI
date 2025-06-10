@@ -27,7 +27,7 @@ namespace NokPortalAPI.Dtos
 
         [MaxLength(255)]
 
-        public int Role { get; set; } = 0;
+        public string Role { get; set; } = string.Empty;
 
         public List<AppSummaryDto> Apps { get; set; } = new List<AppSummaryDto>();
 

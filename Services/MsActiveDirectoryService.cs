@@ -26,8 +26,7 @@ namespace NokPortalAPI.Services
             var responseType = serviceSettings.OAuth2.ResponseType ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
             var redirectUri = serviceSettings.OAuth2.RedirectUriSignIn ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
             var scope = serviceSettings.OAuth2.Scope ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
-            var state = serviceSettings.OAuth2.State ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
-            // var state = "signin" ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
+            var state = "signin" ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
             var tenantId = serviceSettings.OAuth2.TenantId ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
             var authorizationEndpoint = $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize";
             var authorizationUrl = $"{authorizationEndpoint}?client_id={Uri.EscapeDataString(clientId)}&response_type={Uri.EscapeDataString(responseType)}&redirect_uri={Uri.EscapeDataString(redirectUri)}&scope={Uri.EscapeDataString(scope)}&state={Uri.EscapeDataString(state)}";
@@ -45,8 +44,7 @@ namespace NokPortalAPI.Services
             var responseType = serviceSettings.OAuth2.ResponseType ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
             var redirectUri = serviceSettings.OAuth2.RedirectUriSignUp ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
             var scope = serviceSettings.OAuth2.Scope ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
-            var state = serviceSettings.OAuth2.State ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
-            // var state = "signup" ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
+            var state = "signup" ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
             var tenantId = serviceSettings.OAuth2.TenantId ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
             var authorizationEndpoint = $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize";
             var authorizationUrl = $"{authorizationEndpoint}?client_id={Uri.EscapeDataString(clientId)}&response_type={Uri.EscapeDataString(responseType)}&redirect_uri={Uri.EscapeDataString(redirectUri)}&scope={Uri.EscapeDataString(scope)}&state={Uri.EscapeDataString(state)}";

@@ -84,21 +84,13 @@ namespace NokPortalAPI.Services
                     });
                 }
 
-                Console.WriteLine($"Assigning user {user.Id} to app {app.Id} with roles: {string.Join(", ", userAppAssignmentReq.Roles)}");
-
                 await context.SaveChangesAsync();
 
-                var claims = new List<Claim>
+                var claims = new UserClaimsModel
                 {
-                    new("id", user.Id.ToString()),
-                    new("objectId", user.ObjectId),
-                    new("firstName", user.FirstName),
-                    new("lastName", user.LastName),
-                    new("email", user.Email),
-                    new("jobTitle", user.JobTitle),
-                    new("department", user.Department),
-                    new("active", user.Active.ToString().ToLowerInvariant()),
-                    new("roles", JsonConvert.SerializeObject(userAppAssignmentReq.Roles))
+                    UserId = user.Id,
+                    Email = user.Email,
+                    Roles = userAppAssignmentReq.Roles.Select(r => r.ToString()).ToList()
                 };
                 var jwtSettings = new JwtSettingsModel
                 {
@@ -107,26 +99,30 @@ namespace NokPortalAPI.Services
                     Issuer = string.Empty,
                     Audience = string.Empty
                 };
-
-                Console.WriteLine(claims);
-                Console.WriteLine(jwtSettings);
-
-
-                var jwtInfo = jwtService.GenerateJwtTokenInfo(claims.ToArray(), jwtSettings);
+                var payload = new
+                {
+                    id = user.Id,
+                    objectId = user.ObjectId,
+                    firstName = user.FirstName,
+                    lastName = user.LastName,
+                    email = user.Email,
+                    jobTitle = user.JobTitle,
+                    department = user.Department,
+                    active = user.Active,
+                    roles = userAppAssignmentReq.Roles
+                };
+                var jwtInfo = jwtService.GenerateJwtTokenInfo(claims, jwtSettings);
 
                 using var httpClient = new HttpClient();
                 httpClient.DefaultRequestHeaders.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwtInfo.Token);
 
                 var backendUrl = app.BackendUrl.TrimEnd('/');
-                var content = new StringContent("{}", Encoding.UTF8, "application/json");
+                var json = JsonConvert.SerializeObject(payload, Formatting.None);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
                 try
                 {
-                    Console.WriteLine($"Sending request to {backendUrl}/flight-irop/v1/flight-irop/assignUser");
-                    Console.WriteLine($"Request content: {content}");
-                    Console.WriteLine($"Request headers: {httpClient.DefaultRequestHeaders}");
                     var response = await httpClient.PostAsync($"{backendUrl}/flight-irop/v1/flight-irop/assignUser", content);
-                    Console.WriteLine($"Response : serialized response: {response}");
                     if (!response.IsSuccessStatusCode)
                     {
                         var errorContent = await response.Content.ReadAsStringAsync();
@@ -178,18 +174,11 @@ namespace NokPortalAPI.Services
             {
                 throw new DataValidationException("User has no roles assigned in the app. Please check the assignment.");
             }
-
-            var claims = new List<Claim>
+            var claims = new UserClaimsModel
             {
-                new Claim("id", user.Id.ToString()),
-                new Claim("objectId", user.ObjectId),
-                new Claim("firstName", user.FirstName),
-                new Claim("lastName", user.LastName),
-                new Claim("email", user.Email),
-                new Claim("jobTitle", user.JobTitle),
-                new Claim("department", user.Department),
-                new Claim("active", user.Active.ToString()),
-                new Claim("roles", JsonConvert.SerializeObject(roleIds))
+                UserId = user.Id,
+                Email = user.Email,
+                Roles = roleIds.Select(r => r.ToString()).ToList()
             };
 
             var jwtSettings = new JwtSettingsModel
@@ -200,7 +189,7 @@ namespace NokPortalAPI.Services
                 Audience = string.Empty
             };
 
-            return jwtService.GenerateJwtTokenInfo(claims.ToArray(), jwtSettings);
+            return jwtService.GenerateJwtTokenInfo(claims, jwtSettings);
         }
 
         /// <inheritdoc />

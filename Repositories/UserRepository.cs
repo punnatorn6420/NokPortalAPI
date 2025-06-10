@@ -58,7 +58,7 @@ namespace NokPortalAPI.Repositories
 
             var roleId = user.UserRoles
                 .Select(ur => ur.Role!.Id)
-                .FirstOrDefault();
+                .FirstOrDefault().ToString() ?? string.Empty;
 
             var result = new MyProfileDto
             {
@@ -111,7 +111,8 @@ namespace NokPortalAPI.Repositories
         /// <inheritdoc />
         public async Task<ICollection<User>> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria)
         {
-            IQueryable<User> query = context.Users;
+            IQueryable<User> query = context.Users
+                    .Include(u => u.UserRoles);
 
             var keyword = searchCriteria.Keyword?.Trim();
             if (!string.IsNullOrEmpty(keyword))
