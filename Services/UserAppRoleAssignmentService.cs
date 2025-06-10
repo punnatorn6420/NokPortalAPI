@@ -90,6 +90,7 @@ namespace NokPortalAPI.Services
                 {
                     UserId = user.Id,
                     Email = user.Email,
+                    UserName = user.FirstName + " " + user.LastName,
                 };
                 var jwtSettings = new JwtSettingsModel
                 {
@@ -177,6 +178,7 @@ namespace NokPortalAPI.Services
             {
                 UserId = user.Id,
                 Email = user.Email,
+                UserName = user.FirstName + " " + user.LastName,
             };
 
             var jwtSettings = new JwtSettingsModel
