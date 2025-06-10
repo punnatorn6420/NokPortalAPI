@@ -57,7 +57,7 @@ namespace NokPortalAPI.Repositories
                 .ToList();
 
             var roleId = user.UserRoles
-                .Select(ur => ur.Role.Id)
+                .Select(ur => ur.Role!.Id)
                 .FirstOrDefault();
 
             var result = new MyProfileDto

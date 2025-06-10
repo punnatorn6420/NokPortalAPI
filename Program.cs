@@ -197,7 +197,7 @@ namespace NokPortalAPI
                 {
                     options.AddPolicy(permission, policy => policy.Requirements.Add(new RoleRequirementModel(permission)));
                 }
-
+                options.AddPolicy("RootOnly", policy => policy.Requirements.Add(new MultiRoleRequirementModel(new[] { "Root", })));
                 options.AddPolicy("RootOrAdmin", policy => policy.Requirements.Add(new MultiRoleRequirementModel(new[] { "Root", "Admin" })));
                 options.AddPolicy("AllRole", policy => policy.Requirements.Add(new MultiRoleRequirementModel(new[] { "Root", "Admin", "EndUser" })));
             });

@@ -90,8 +90,6 @@ namespace NokPortalAPI.Services
                     return false;
                 }
 
-                // var app = appDto.ToEntity();
-                Console.WriteLine($"Updating {System.Text.Json.JsonSerializer.Serialize(appDto)}");
                 existingApp.Name = appDto.Name;
                 existingApp.Header = appDto.Header;
                 existingApp.Subheader = appDto.Subheader;

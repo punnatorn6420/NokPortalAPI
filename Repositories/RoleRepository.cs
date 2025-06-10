@@ -67,7 +67,7 @@ namespace NokPortalAPI.Repositories
         public async Task<bool> IsUserInRoleAsync(int userId, string requiredRole)
         {
             return await context.UserRoles
-                .AnyAsync(ur => ur.UserId == userId && ur.Role.Name == requiredRole);
+                .AnyAsync(ur => ur.UserId == userId && ur.Role!.Name == requiredRole);
         }
 
         /// <inheritdoc/>
@@ -93,5 +93,35 @@ namespace NokPortalAPI.Repositories
             context.Roles.Update(role);
             return await context.SaveChangesAsync();
         }
+
+        public async Task AssignDefaultRoleAsync(int userId, int defaultRoleId = 3)
+        {
+
+            if (defaultRoleId <= 0)
+                throw new ArgumentException("Invalid default role ID");
+
+            var exists = await context.Roles.AnyAsync(r => r.Id == defaultRoleId);
+            if (!exists)
+                throw new Exception($"Role ID {defaultRoleId} does not exist");
+
+            var userRole = new UserRole
+            {
+                UserId = userId,
+                RoleId = defaultRoleId,
+                Role = null,
+                User = null
+            };
+            await context.UserRoles.AddAsync(userRole);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<IRole>> GetAllRolesAsync()
+        {
+            return await context.Roles
+                .AsNoTracking()
+                .Cast<IRole>()
+                .ToListAsync();
+        }
+
     }
 }

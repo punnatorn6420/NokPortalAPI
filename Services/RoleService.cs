@@ -1,4 +1,5 @@
 ﻿
+using NokAir.Core.Interfaces.Rbac.Entities;
 using NokPortalAPI.Entities;
 using NokPortalAPI.Repositories;
 
@@ -28,6 +29,11 @@ namespace NokPortalAPI.Services
         public async Task<bool> IsUserInRolesAsync(int userId, string[] permissions)
         {
             return await roleRepository.IsUserInRolesAsync(userId, permissions);
+        }
+
+        public async Task<IEnumerable<IRole>> GetAllRolesAsync()
+        {
+            return await roleRepository.GetAllRolesAsync();
         }
     }
 }

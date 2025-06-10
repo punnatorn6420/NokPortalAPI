@@ -5,6 +5,7 @@ using NokPortalAPI.Extensions;
 using NokPortalAPI.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
+using NokAir.Core.Exceptions;
 
 
 namespace NokPortalAPI.Services
@@ -16,11 +17,14 @@ namespace NokPortalAPI.Services
     {
         private readonly AppDbContext context;
         private readonly IUserRepository<User> userRepository;
+        private readonly IRoleRepository<Role> roleRepository;
 
-        public UserService(AppDbContext context, IUserRepository<User> userRepository)
+        public UserService(AppDbContext context, IUserRepository<User> userRepository,
+            IRoleRepository<Role> roleRepository)
         {
             this.context = context;
             this.userRepository = userRepository;
+            this.roleRepository = roleRepository;
         }
 
 
@@ -31,7 +35,8 @@ namespace NokPortalAPI.Services
             try
             {
                 var user = userDto.ToEntity();
-                await userRepository.AddUserAsync(user);
+                var createdUser = await userRepository.AddUserAsync(user);
+                await roleRepository.AssignDefaultRoleAsync(createdUser.Id, 3);
                 await transaction.CommitAsync();
                 return user.ToDto();
             }
@@ -97,6 +102,44 @@ namespace NokPortalAPI.Services
         {
             var user = await userRepository.GetUserByEmailAsync(email);
             return user?.ToDto();
+        }
+
+
+
+        public async Task UpdateUserRoleAsync(int userId, int roleId)
+        {
+            using var transaction = await context.Database.BeginTransactionAsync();
+
+            var user = await userRepository.GetUserByIdAsync(userId);
+            if (user == null)
+                throw new DataValidationException("User not found.");
+
+            var roleExists = await context.Roles.AnyAsync(r => r.Id == roleId);
+            if (!roleExists)
+                throw new DataValidationException("Role does not exist.");
+
+            // Remove all existing roles assigned to this user
+            // This is safe only if each user is supposed to have a single role
+            var existingRoles = await context.UserRoles
+            .Where(ur => ur.UserId == userId)
+            .ToListAsync();
+
+            if (existingRoles.Count != 0)
+            {
+                context.UserRoles.RemoveRange(existingRoles);
+            }
+
+            var newUserRole = new UserRole
+            {
+                UserId = userId,
+                RoleId = roleId,
+                User = null,
+                Role = null
+            };
+            await context.UserRoles.AddAsync(newUserRole);
+
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
         }
     }
 }

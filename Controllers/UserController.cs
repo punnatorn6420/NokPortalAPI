@@ -41,5 +41,20 @@ namespace NokPortalAPI.Controllers
                 return InternalServerErrorResponseFromException(ex);
             }
         }
+
+        [HttpPut("{userId}/role")]
+        [Authorize(Policy = "RootOnly")]
+        public async Task<IActionResult> UpdateUserRoleAsync(int userId, [FromBody] UpdateUserRoleDto dto)
+        {
+            try
+            {
+                await userService.UpdateUserRoleAsync(userId, dto.RoleId);
+                return OkSuccessResponse();
+            }
+            catch (Exception ex)
+            {
+                return InternalServerErrorResponseFromException(ex);
+            }
+        }
     }
 }

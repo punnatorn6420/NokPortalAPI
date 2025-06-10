@@ -24,5 +24,9 @@ namespace NokPortalAPI.Services
 
 
         Task<MyProfileDto?> GetMyProfileAsync(int userId);
+
+
+        Task UpdateUserRoleAsync(int userId, int roleId);
+
     }
 }

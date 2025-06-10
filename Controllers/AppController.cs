@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging.Console;
 using NokAir.Core.Exceptions;
 using NokAir.Shared.Api.Responses.Factories;
 using NokAir.Shared.Controllers;
@@ -88,7 +87,6 @@ namespace NokPortalAPI.Controllers
         public async Task<ActionResult> AssignUserToAppAsync(UserAppAssignmentRequest req)
         {
 
-            Console.WriteLine("AssignUserToAppAsync called with request: " + System.Text.Json.JsonSerializer.Serialize(req));
             if (!ModelState.IsValid)
             {
                 return BadRequestResponseFromInvalidRequest();
@@ -96,7 +94,6 @@ namespace NokPortalAPI.Controllers
 
             try
             {
-                Console.WriteLine("AssignUserToAppAsync: ModelState is valid, proceeding with assignment.");
                 await userAppRoleAssignmentService.AssignUserToAppAsync(req);
                 return OkSuccessResponse();
             }

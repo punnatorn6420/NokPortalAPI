@@ -1,4 +1,5 @@
-﻿using NokAir.Core.Interfaces.Rbac.Services;
+﻿using NokAir.Core.Interfaces.Rbac.Entities;
+using NokAir.Core.Interfaces.Rbac.Services;
 
 namespace NokPortalAPI.Services
 {
@@ -7,5 +8,7 @@ namespace NokPortalAPI.Services
     /// </summary>
     public interface IRoleService : IRoleServiceBase
     {
+        Task<IEnumerable<IRole>> GetAllRolesAsync();
     }
+
 }

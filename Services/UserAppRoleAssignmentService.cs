@@ -84,10 +84,13 @@ namespace NokPortalAPI.Services
                     });
                 }
 
+                Console.WriteLine($"Assigning user {user.Id} to app {app.Id} with roles: {string.Join(", ", userAppAssignmentReq.Roles)}");
+
                 await context.SaveChangesAsync();
 
                 var claims = new List<Claim>
                 {
+                    new("id", user.Id.ToString()),
                     new("objectId", user.ObjectId),
                     new("firstName", user.FirstName),
                     new("lastName", user.LastName),
@@ -105,6 +108,10 @@ namespace NokPortalAPI.Services
                     Audience = string.Empty
                 };
 
+                Console.WriteLine(claims);
+                Console.WriteLine(jwtSettings);
+
+
                 var jwtInfo = jwtService.GenerateJwtTokenInfo(claims.ToArray(), jwtSettings);
 
                 using var httpClient = new HttpClient();
@@ -115,7 +122,11 @@ namespace NokPortalAPI.Services
                 var content = new StringContent("{}", Encoding.UTF8, "application/json");
                 try
                 {
+                    Console.WriteLine($"Sending request to {backendUrl}/flight-irop/v1/flight-irop/assignUser");
+                    Console.WriteLine($"Request content: {content}");
+                    Console.WriteLine($"Request headers: {httpClient.DefaultRequestHeaders}");
                     var response = await httpClient.PostAsync($"{backendUrl}/flight-irop/v1/flight-irop/assignUser", content);
+                    Console.WriteLine($"Response : serialized response: {response}");
                     if (!response.IsSuccessStatusCode)
                     {
                         var errorContent = await response.Content.ReadAsStringAsync();
@@ -170,6 +181,7 @@ namespace NokPortalAPI.Services
 
             var claims = new List<Claim>
             {
+                new Claim("id", user.Id.ToString()),
                 new Claim("objectId", user.ObjectId),
                 new Claim("firstName", user.FirstName),
                 new Claim("lastName", user.LastName),
