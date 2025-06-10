@@ -90,7 +90,6 @@ namespace NokPortalAPI.Services
                 {
                     UserId = user.Id,
                     Email = user.Email,
-                    Roles = userAppAssignmentReq.Roles.Select(r => r.ToString()).ToList()
                 };
                 var jwtSettings = new JwtSettingsModel
                 {
@@ -178,7 +177,6 @@ namespace NokPortalAPI.Services
             {
                 UserId = user.Id,
                 Email = user.Email,
-                Roles = roleIds.Select(r => r.ToString()).ToList()
             };
 
             var jwtSettings = new JwtSettingsModel
