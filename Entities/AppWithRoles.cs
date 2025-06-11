@@ -23,8 +23,11 @@ namespace NokPortalAPI.Entities
         [JsonPropertyName("image")]
         public string Image { get; set; } = string.Empty;
 
-        [JsonPropertyName("baseUrl")]
-        public string BaseUrl { get; set; } = string.Empty;
+        [JsonPropertyName("clientUrl")]
+        public string ClientUrl { get; set; } = string.Empty;
+
+        [JsonPropertyName("backendUrl")]
+        public string BackendUrl { get; set; } = string.Empty;
 
         [JsonPropertyName("roles")]
         public List<int> Roles { get; set; } = new List<int>();

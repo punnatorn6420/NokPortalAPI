@@ -12,9 +12,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NokConnectPoint", "..\NokConnectPoint\NokConnectPoint.csproj", "{0F1B6EDA-2F71-4822-BD2B-35087A1DEAFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NokAir.Core", "..\NokAirSolution\NokAir.Core\NokAir.Core.csproj", "{D11AE000-D301-F01A-AAC1-A89A7A3B6F45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NokAir.Core", "..\NokAir.Core\NokAir.Core.csproj", "{E42E2760-EE26-4CA9-BEBD-E9409D4A8CED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NokAir.Shared", "..\NokAirSolution\NokAir.Shared\NokAir.Shared.csproj", "{1A276E1C-193F-179D-0243-CFB89B861CF5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NokAir.Shared", "..\NokAir.Shared\NokAir.Shared.csproj", "{C5403555-FE98-4F2C-99E6-EA5FCDCD849C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,14 +30,14 @@ Global
 		{0F1B6EDA-2F71-4822-BD2B-35087A1DEAFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F1B6EDA-2F71-4822-BD2B-35087A1DEAFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F1B6EDA-2F71-4822-BD2B-35087A1DEAFA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D11AE000-D301-F01A-AAC1-A89A7A3B6F45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D11AE000-D301-F01A-AAC1-A89A7A3B6F45}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D11AE000-D301-F01A-AAC1-A89A7A3B6F45}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D11AE000-D301-F01A-AAC1-A89A7A3B6F45}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1A276E1C-193F-179D-0243-CFB89B861CF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1A276E1C-193F-179D-0243-CFB89B861CF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1A276E1C-193F-179D-0243-CFB89B861CF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1A276E1C-193F-179D-0243-CFB89B861CF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E42E2760-EE26-4CA9-BEBD-E9409D4A8CED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E42E2760-EE26-4CA9-BEBD-E9409D4A8CED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E42E2760-EE26-4CA9-BEBD-E9409D4A8CED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E42E2760-EE26-4CA9-BEBD-E9409D4A8CED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5403555-FE98-4F2C-99E6-EA5FCDCD849C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5403555-FE98-4F2C-99E6-EA5FCDCD849C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5403555-FE98-4F2C-99E6-EA5FCDCD849C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5403555-FE98-4F2C-99E6-EA5FCDCD849C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NokPortalAPI.Dtos;
 using NokPortalAPI.Entities;
 using System.Linq.Dynamic.Core;
 
@@ -24,6 +25,58 @@ namespace NokPortalAPI.Repositories
             return result.Entity;
         }
 
+        public async Task<MyProfileDto?> GetMyProfileAsync(int userId)
+        {
+            var user = await context.Users
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .Include(u => u.AssignedApps)
+                    .ThenInclude(ua => ua.App)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null) return null;
+
+            var apps = user.AssignedApps
+                .Where(ua => ua.App != null)
+                .Select(ua => ua.App!)
+                .DistinctBy(a => a.Id)
+                .Select(app => new AppSummaryDto
+                {
+                    Id = app.Id,
+                    Name = app.Name,
+                    Header = app.Header,
+                    Subheader = app.Subheader,
+                    ClientUrl = app.ClientUrl,
+                    BackendUrl = app.BackendUrl,
+                    ImageUrl = app.ImageUrl,
+                    Remark = app.Remark,
+                    JwtExpiryHours = app.JwtExpiryHours,
+                    EnvironmentType = app.EnvironmentType,
+                    Active = app.Active
+                })
+                .ToList();
+
+            var roleId = user.UserRoles
+                .Select(ur => ur.Role!.Id)
+                .FirstOrDefault().ToString() ?? string.Empty;
+
+            var result = new MyProfileDto
+            {
+                Id = user.Id,
+                ObjectId = user.ObjectId,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                JobTitle = user.JobTitle,
+                Department = user.Department,
+                Role = roleId,
+                Active = user.Active,
+                Apps = apps
+            };
+
+            return result;
+        }
+
         /// <inheritdoc />
         public async Task<User?> GetUserByEmailAsync(string email)
         {
@@ -43,7 +96,6 @@ namespace NokPortalAPI.Repositories
                     .ThenInclude(ua => ua.App)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
-
         /// <inheritdoc />
         public async Task<ICollection<User>> GetUsersByAppIdAsync(int appId)
         {
@@ -59,7 +111,8 @@ namespace NokPortalAPI.Repositories
         /// <inheritdoc />
         public async Task<ICollection<User>> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria)
         {
-            IQueryable<User> query = context.Users;
+            IQueryable<User> query = context.Users
+                    .Include(u => u.UserRoles);
 
             var keyword = searchCriteria.Keyword?.Trim();
             if (!string.IsNullOrEmpty(keyword))
@@ -83,8 +136,6 @@ namespace NokPortalAPI.Repositories
 
 
         }
-
-
 
         /// <inheritdoc />
         public async Task<int> UpdateUserAsync(User user)

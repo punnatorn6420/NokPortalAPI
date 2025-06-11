@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NokAirSolution\NokAir.Core\NokAir.Core.csproj" />
-    <ProjectReference Include="..\NokAirSolution\NokAir.Shared\NokAir.Shared.csproj" />
+    <ProjectReference Include="../NokAir.Core/NokAir.Core.csproj" />
+    <ProjectReference Include="../NokAir.Shared/NokAir.Shared.csproj" />
   </ItemGroup>
 </Project>

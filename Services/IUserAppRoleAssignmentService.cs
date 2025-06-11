@@ -1,4 +1,5 @@
 ﻿using NokAir.Shared.Security.Models.Common;
+using NokPortalAPI.Dtos;
 using NokPortalAPI.Entities;
 
 namespace NokPortalAPI.Services
@@ -28,6 +29,15 @@ namespace NokPortalAPI.Services
         /// </summary>
         /// <param name="appId">Application ID.</param>
         /// <returns>List of roles.</returns>
-        Task<IList<Role>> GetRolesByAppIdAsync(int appId);
+        Task<IList<RoleDto>> GetRolesByAppIdAsync(int appId);
+
+
+        /// <summary>
+        /// Gets user assigned role IDs for a specific app.
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="appId">The application ID.</param>
+        /// <returns>User app role information.</returns>
+        Task<UserAppRoleDto> GetUserAppRoleAsync(int userId, int appId);
     }
 }

@@ -67,8 +67,8 @@ namespace NokPortalAPI.Services
         /// <inheritdoc />
         public async Task<AppDto?> GetAppByIdAsync(int id)
         {
-           var app = await appRepository.GetAppByIdAsync(id);
-           return app?.ToDto();
+            var app = await appRepository.GetAppByIdAsync(id);
+            return app?.ToDto();
         }
 
         /// <inheritdoc />
@@ -90,8 +90,20 @@ namespace NokPortalAPI.Services
                     return false;
                 }
 
-                var app = appDto.ToEntity();
-                await appRepository.UpdateAppAsync(app);
+                existingApp.Name = appDto.Name;
+                existingApp.Header = appDto.Header;
+                existingApp.Subheader = appDto.Subheader;
+                existingApp.EnvironmentType = appDto.EnvironmentType;
+                existingApp.ClientUrl = appDto.ClientUrl;
+                existingApp.BackendUrl = appDto.BackendUrl;
+                existingApp.ImageUrl = appDto.ImageUrl;
+                existingApp.SecretKey = appDto.SecretKey;
+                existingApp.JwtExpiryHours = appDto.JwtExpiryHours;
+                existingApp.Remark = appDto.Remark;
+                existingApp.Active = appDto.Active;
+                existingApp.ModifiedAt = DateTime.UtcNow;
+
+                await appRepository.UpdateAppAsync(existingApp);
                 await transaction.CommitAsync();
                 return true;
             }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using NokAir.Core.Exceptions;
 using NokAir.Shared.Api.Responses.Factories;
 using NokAir.Shared.Controllers;
@@ -73,16 +74,17 @@ namespace NokPortalAPI.Controllers
 
                 UserDto user = new UserDto
                 {
-                    FirstName = msUserInfo.GivenName,
-                    LastName = msUserInfo.Surname,
-                    Email = msUserInfo.UserPrincipalName,
-                    JobTitle = msUserInfo.JobTitle,
-                    ObjectId = msUserInfo.Id,
-                    Department = msUserInfo.OfficeLocation,
+                    FirstName = msUserInfo.GivenName ?? string.Empty,
+                    LastName = msUserInfo.Surname ?? string.Empty,
+                    Email = msUserInfo.UserPrincipalName ?? string.Empty,
+                    JobTitle = msUserInfo.JobTitle ?? string.Empty,
+                    ObjectId = msUserInfo.Id ?? string.Empty,
+                    Department = msUserInfo.OfficeLocation ?? string.Empty,
                     CreatedAt = DateTime.Now,
                     ModifiedAt = DateTime.Now,
                     Active = true,
                 };
+
                 await userService.AddUserAsync(user);
 
                 return OkSuccessResponse();
@@ -142,7 +144,7 @@ namespace NokPortalAPI.Controllers
                 {
                     new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                    new Claim("roles", string.Join(",", user.Roles.Select(r => r.Name).ToList())),
+                    new Claim("role", string.Join(",", user.Role)),
                 };
                 var token = jwtService.GenerateJwtTokenInfo(cliams!);
                 return OkResponseWithResult(token);
@@ -183,12 +185,12 @@ namespace NokPortalAPI.Controllers
                     return NoContent();
                 }
 
-                var cliams = new []
+                var cliams = new[]
                 {
                     new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
                     new Claim(JwtRegisteredClaimNames.UniqueName, string.Format("{0} {1}", user.FirstName, user.LastName)),
-                    new Claim("roles", string.Join(",", user.Roles.Select(r => r.Name).ToList())),
+                    // new Claim("roles", string.Join(",", user.Roles.Select(r => r.Name).ToList())),
                 };
                 var token = jwtService.GenerateJwtTokenInfo(cliams!);
                 return OkResponseWithResult(token);

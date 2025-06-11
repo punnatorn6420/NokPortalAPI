@@ -59,7 +59,8 @@ namespace NokPortalAPI.Extensions
                 Department = user.Department,
                 Active = user.Active,
                 CreatedAt = user.CreatedAt,
-                ModifiedAt = user.ModifiedAt
+                ModifiedAt = user.ModifiedAt,
+                Role = user.UserRoles.FirstOrDefault()?.RoleId.ToString() ?? string.Empty,
             };
         }
     }

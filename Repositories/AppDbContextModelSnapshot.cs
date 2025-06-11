@@ -17,12 +17,12 @@ namespace NokPortalAPI.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.2")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("NokPortalAPI.Models.App", b =>
+            modelBuilder.Entity("NokPortalAPI.Entities.App", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,7 +33,12 @@ namespace NokPortalAPI.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
 
-                    b.Property<string>("BaseUrl")
+                    b.Property<string>("BackendUrl")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ClientUrl")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
@@ -88,7 +93,7 @@ namespace NokPortalAPI.Migrations
                     b.ToTable("Apps");
                 });
 
-            modelBuilder.Entity("NokPortalAPI.Models.Permission", b =>
+            modelBuilder.Entity("NokPortalAPI.Entities.Permission", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("int");
@@ -115,7 +120,7 @@ namespace NokPortalAPI.Migrations
                     b.ToTable("Permissions");
                 });
 
-            modelBuilder.Entity("NokPortalAPI.Models.Role", b =>
+            modelBuilder.Entity("NokPortalAPI.Entities.Role", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("int");
@@ -142,7 +147,7 @@ namespace NokPortalAPI.Migrations
                     b.ToTable("Roles");
                 });
 
-            modelBuilder.Entity("NokPortalAPI.Models.RolePermission", b =>
+            modelBuilder.Entity("NokPortalAPI.Entities.RolePermission", b =>
                 {
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
@@ -157,7 +162,7 @@ namespace NokPortalAPI.Migrations
                     b.ToTable("Role_Permission", (string)null);
                 });
 
-            modelBuilder.Entity("NokPortalAPI.Models.User", b =>
+            modelBuilder.Entity("NokPortalAPI.Entities.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -212,7 +217,7 @@ namespace NokPortalAPI.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("NokPortalAPI.Models.UserAppRoleAssignment", b =>
+            modelBuilder.Entity("NokPortalAPI.Entities.UserAppRoleAssignment", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -236,7 +241,7 @@ namespace NokPortalAPI.Migrations
                     b.ToTable("User_App_Role_Assignment", (string)null);
                 });
 
-            modelBuilder.Entity("NokPortalAPI.Models.UserRole", b =>
+            modelBuilder.Entity("NokPortalAPI.Entities.UserRole", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -251,15 +256,15 @@ namespace NokPortalAPI.Migrations
                     b.ToTable("User_Role", (string)null);
                 });
 
-            modelBuilder.Entity("NokPortalAPI.Models.RolePermission", b =>
+            modelBuilder.Entity("NokPortalAPI.Entities.RolePermission", b =>
                 {
-                    b.HasOne("NokPortalAPI.Models.Permission", "Permission")
+                    b.HasOne("NokPortalAPI.Entities.Permission", "Permission")
                         .WithMany("RolePermissions")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("NokPortalAPI.Models.Role", "Role")
+                    b.HasOne("NokPortalAPI.Entities.Role", "Role")
                         .WithMany("RolePermissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -270,15 +275,15 @@ namespace NokPortalAPI.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("NokPortalAPI.Models.UserAppRoleAssignment", b =>
+            modelBuilder.Entity("NokPortalAPI.Entities.UserAppRoleAssignment", b =>
                 {
-                    b.HasOne("NokPortalAPI.Models.App", "App")
+                    b.HasOne("NokPortalAPI.Entities.App", "App")
                         .WithMany("AssignedApps")
                         .HasForeignKey("AppId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("NokPortalAPI.Models.User", "User")
+                    b.HasOne("NokPortalAPI.Entities.User", "User")
                         .WithMany("AssignedApps")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -289,15 +294,15 @@ namespace NokPortalAPI.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("NokPortalAPI.Models.UserRole", b =>
+            modelBuilder.Entity("NokPortalAPI.Entities.UserRole", b =>
                 {
-                    b.HasOne("NokPortalAPI.Models.Role", "Role")
+                    b.HasOne("NokPortalAPI.Entities.Role", "Role")
                         .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("NokPortalAPI.Models.User", "User")
+                    b.HasOne("NokPortalAPI.Entities.User", "User")
                         .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -308,24 +313,24 @@ namespace NokPortalAPI.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("NokPortalAPI.Models.App", b =>
+            modelBuilder.Entity("NokPortalAPI.Entities.App", b =>
                 {
                     b.Navigation("AssignedApps");
                 });
 
-            modelBuilder.Entity("NokPortalAPI.Models.Permission", b =>
+            modelBuilder.Entity("NokPortalAPI.Entities.Permission", b =>
                 {
                     b.Navigation("RolePermissions");
                 });
 
-            modelBuilder.Entity("NokPortalAPI.Models.Role", b =>
+            modelBuilder.Entity("NokPortalAPI.Entities.Role", b =>
                 {
                     b.Navigation("RolePermissions");
 
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("NokPortalAPI.Models.User", b =>
+            modelBuilder.Entity("NokPortalAPI.Entities.User", b =>
                 {
                     b.Navigation("AssignedApps");
 

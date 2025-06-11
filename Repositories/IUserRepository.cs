@@ -1,4 +1,5 @@
 ﻿using NokAir.Core.Interfaces.Rbac.Repositories;
+using NokPortalAPI.Dtos;
 using NokPortalAPI.Entities;
 
 namespace NokPortalAPI.Repositories
@@ -21,5 +22,8 @@ namespace NokPortalAPI.Repositories
         /// <param name="searchCriteria">User search criteria.</param>
         /// <returns>List of users.</returns>
         Task<ICollection<User>> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria);
+
+
+        Task<MyProfileDto?> GetMyProfileAsync(int userId);
     }
 }

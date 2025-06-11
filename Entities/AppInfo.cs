@@ -4,7 +4,7 @@ namespace NokPortalAPI.Entities
 {
     public class AppInfo
     {
-        public string BaseUrl { get; set; } = string.Empty;
+        public string ClientUrl { get; set; } = string.Empty;
 
         public EnvironmentType EnvironmentType { get; set; } = EnvironmentType.Dev;
 
