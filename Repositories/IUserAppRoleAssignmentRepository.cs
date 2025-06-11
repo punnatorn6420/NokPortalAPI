@@ -46,6 +46,28 @@ namespace NokPortalAPI.Repositories
         Task<bool> IsUserAssignedToAppAsync(int userId, int appId);
 
 
+        /// <summary>
+        ///  Gets user role IDs for a specific app asynchronously.
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="appId">The application ID.</param>
+        /// <returns>A list of role IDs.</returns>
         Task<List<int>> GetUserRoleIdsForAppAsync(int userId, int appId);
+
+        /// <summary>
+        /// Gets user role IDs by user ID and app ID.
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="appId">The application ID.</param>
+        /// <returns>A list of role IDs.</returns>
+        Task<IList<int>> GetUserRoleIdsByUserAndAppAsync(int userId, int appId);
+
+        /// <summary>
+        /// Deletes all user app role assignments for a specific user and app.
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="appId">The application ID.</param>
+        /// <returns>Number of deleted records.</returns>
+        Task<int> DeleteAllUserAppRoleAssignmentsByUserAndAppAsync(int userId, int appId);
     }
 }

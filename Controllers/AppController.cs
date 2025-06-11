@@ -153,6 +153,21 @@ namespace NokPortalAPI.Controllers
             }
         }
 
+        [HttpGet("{appId}/user/{userId}/roles")]
+        [Authorize(Policy = "RootOrAdmin")]
+        public async Task<ActionResult> GetUserRolesByApp(int userId, int appId, [FromQuery] EnvironmentType env)
+        {
+            try
+            {
+                var userAppRole = await userAppRoleAssignmentService.GetUserAppRoleAsync(userId, appId);
+                return OkResponseWithResult(userAppRole);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerErrorResponseFromException(ex);
+            }
+        }
+
         /// <summary>
         /// This endpoint is used to get the JWT token to access the target app for Admin.
         /// </summary>

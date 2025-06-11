@@ -30,5 +30,14 @@ namespace NokPortalAPI.Services
         /// <param name="appId">Application ID.</param>
         /// <returns>List of roles.</returns>
         Task<IList<RoleDto>> GetRolesByAppIdAsync(int appId);
+
+
+        /// <summary>
+        /// Gets user assigned role IDs for a specific app.
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="appId">The application ID.</param>
+        /// <returns>User app role information.</returns>
+        Task<UserAppRoleDto> GetUserAppRoleAsync(int userId, int appId);
     }
 }

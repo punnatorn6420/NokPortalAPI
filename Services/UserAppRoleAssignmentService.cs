@@ -57,23 +57,15 @@ namespace NokPortalAPI.Services
             if (userAppAssignmentReq.Roles == null || !userAppAssignmentReq.Roles.Any())
                 throw new DataValidationException("At least one role must be assigned.");
 
-            var duplicatedRoles = new List<int>();
-            foreach (var roleId in userAppAssignmentReq.Roles)
-            {
-                if (await userAppRoleAssignmentRepository.IsUserAppRoleExistAsync(userAppAssignmentReq.UserId, userAppAssignmentReq.AppId, roleId))
-                {
-                    duplicatedRoles.Add(roleId);
-                }
-            }
-            if (duplicatedRoles.Any())
-            {
-                var rolesText = string.Join(", ", duplicatedRoles);
-                throw new DataValidationException($"User is already assigned to these role(s) in the app: {rolesText}. Please re-check your selection.");
-            }
-
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
+
+                var deletedCount = await userAppRoleAssignmentRepository.DeleteAllUserAppRoleAssignmentsByUserAndAppAsync(
+                    userAppAssignmentReq.UserId,
+                    userAppAssignmentReq.AppId
+                );
+
                 foreach (var roleId in userAppAssignmentReq.Roles)
                 {
                     await userAppRoleAssignmentRepository.AddUserAppRoleAssignmentAsync(new UserAppRoleAssignment
@@ -113,7 +105,6 @@ namespace NokPortalAPI.Services
                     roles = userAppAssignmentReq.Roles
                 };
                 var jwtInfo = jwtService.GenerateJwtTokenInfo(claims, jwtSettings);
-                Console.WriteLine($"Generated JWT Token: {jwtInfo.Token}");
                 using var httpClient = new HttpClient();
                 httpClient.DefaultRequestHeaders.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwtInfo.Token);
@@ -219,6 +210,38 @@ namespace NokPortalAPI.Services
                 {
                     throw new Exception($"Error: {responseContent}");
                 }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<UserAppRoleDto> GetUserAppRoleAsync(int userId, int appId)
+        {
+            try
+            {
+                var user = await userRepository.GetUserByIdAsync(userId);
+                if (user == null)
+                {
+                    throw new DataValidationException("User not found. Please check the user ID.");
+                }
+
+                var app = await appRepository.GetAppByIdAsync(appId);
+                if (app == null)
+                {
+                    throw new DataValidationException("Application not found. Please check the app ID.");
+                }
+
+                var roleIds = await userAppRoleAssignmentRepository.GetUserRoleIdsByUserAndAppAsync(userId, appId);
+
+                return new UserAppRoleDto
+                {
+                    UserId = userId,
+                    AppId = appId,
+                    AssignedRoleIds = roleIds.OrderBy(x => x).ToList()
+                };
             }
             catch (Exception)
             {
