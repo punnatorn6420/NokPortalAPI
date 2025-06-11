@@ -91,6 +91,7 @@ namespace NokPortalAPI.Services
                     UserId = user.Id,
                     Email = user.Email,
                     UserName = user.FirstName + " " + user.LastName,
+                    Roles = []
                 };
                 var jwtSettings = new JwtSettingsModel
                 {
@@ -112,7 +113,7 @@ namespace NokPortalAPI.Services
                     roles = userAppAssignmentReq.Roles
                 };
                 var jwtInfo = jwtService.GenerateJwtTokenInfo(claims, jwtSettings);
-
+                Console.WriteLine($"Generated JWT Token: {jwtInfo.Token}");
                 using var httpClient = new HttpClient();
                 httpClient.DefaultRequestHeaders.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwtInfo.Token);
@@ -179,6 +180,7 @@ namespace NokPortalAPI.Services
                 UserId = user.Id,
                 Email = user.Email,
                 UserName = user.FirstName + " " + user.LastName,
+                Roles = []
             };
 
             var jwtSettings = new JwtSettingsModel
