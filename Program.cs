@@ -205,10 +205,7 @@ namespace NokPortalAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.WebHost.UseUrls("https://localhost:7036", "http://localhost:5258");
-
             var app = builder.Build();
-
 
             if (dbInitialize)
             {
