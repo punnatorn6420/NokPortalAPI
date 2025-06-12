@@ -105,7 +105,6 @@ namespace NokPortalAPI.Services
                     roles = userAppAssignmentReq.Roles
                 };
                 var jwtInfo = jwtService.GenerateJwtTokenInfo(claims, jwtSettings);
-                using var httpClient = new HttpClient();
                 httpClient.DefaultRequestHeaders.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwtInfo.Token);
 
