@@ -63,13 +63,17 @@ namespace NokPortalAPI.Controllers
                 {
                     return BadRequestResponseFromInvalidRequest();
                 }
-
-                // Retrieve the Microsoft user info using the token.
                 var msUserInfo = await msActiveDirectoryService.GetMicrosoftUserInfoByTokenAsync(req.Token);
 
                 if (msUserInfo == null)
                 {
                     return BadRequestResponseFromMessage("Failed to get user info");
+                }
+
+                var existingUserByEmail = await userService.GetUserByEmailAsync(msUserInfo.UserPrincipalName);
+                if (existingUserByEmail != null)
+                {
+                    return BadRequestResponseFromMessage($"User with email {msUserInfo.UserPrincipalName} already exists.");
                 }
 
                 UserDto user = new UserDto

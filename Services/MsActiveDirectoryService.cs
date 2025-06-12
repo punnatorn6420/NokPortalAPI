@@ -20,6 +20,14 @@ namespace NokPortalAPI.Services
         /// </summary>
         /// <returns>The authorization URL.</returns>
         /// <exception cref="InvalidConfigurationException"></exception>
+        /// <remarks>
+        /// The generated URL includes the following parameters:
+        /// - client_id: The application's registered client ID in Azure AD
+        /// - response_type: Set to "token" for implicit flow (returns access token directly)
+        /// - redirect_uri: Where Microsoft will redirect after authentication (must match registered URI)
+        /// - scope: Permissions requested (e.g., "User.Read" for basic profile access)
+        /// - state: Custom parameter to maintain state between request and callback (set to "signin")
+        /// - prompt: Set to "select_account" to force account selection dialog
         public async Task<string> GenerateAuthorizationUrlSignInAsync()
         {
             var clientId = serviceSettings.OAuth2.ClientId ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
@@ -29,7 +37,7 @@ namespace NokPortalAPI.Services
             var state = "signin" ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
             var tenantId = serviceSettings.OAuth2.TenantId ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
             var authorizationEndpoint = $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize";
-            var authorizationUrl = $"{authorizationEndpoint}?client_id={Uri.EscapeDataString(clientId)}&response_type={Uri.EscapeDataString(responseType)}&redirect_uri={Uri.EscapeDataString(redirectUri)}&scope={Uri.EscapeDataString(scope)}&state={Uri.EscapeDataString(state)}";
+            var authorizationUrl = $"{authorizationEndpoint}?client_id={Uri.EscapeDataString(clientId)}&response_type={Uri.EscapeDataString(responseType)}&redirect_uri={Uri.EscapeDataString(redirectUri)}&scope={Uri.EscapeDataString(scope)}&state={Uri.EscapeDataString(state)}&prompt=select_account";
             return await Task.FromResult(authorizationUrl);
         }
 
@@ -38,6 +46,14 @@ namespace NokPortalAPI.Services
         /// </summary>
         /// <returns>The authorization URL.</returns>
         /// <exception cref="InvalidConfigurationException"></exception>
+        /// <remarks>
+        /// The generated URL includes the following parameters:
+        /// - client_id: The application's registered client ID in Azure AD
+        /// - response_type: Set to "token" for implicit flow (returns access token directly)
+        /// - redirect_uri: Where Microsoft will redirect after authentication (must match registered URI)
+        /// - scope: Permissions requested (e.g., "User.Read" for basic profile access)
+        /// - state: Custom parameter to maintain state between request and callback (set to "signup")
+        /// - prompt: Set to "select_account" to force account selection dialog
         public async Task<string> GenerateAuthorizationUrlSignUpAsync()
         {
             var clientId = serviceSettings.OAuth2.ClientId ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
@@ -47,7 +63,7 @@ namespace NokPortalAPI.Services
             var state = "signup" ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
             var tenantId = serviceSettings.OAuth2.TenantId ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
             var authorizationEndpoint = $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize";
-            var authorizationUrl = $"{authorizationEndpoint}?client_id={Uri.EscapeDataString(clientId)}&response_type={Uri.EscapeDataString(responseType)}&redirect_uri={Uri.EscapeDataString(redirectUri)}&scope={Uri.EscapeDataString(scope)}&state={Uri.EscapeDataString(state)}";
+            var authorizationUrl = $"{authorizationEndpoint}?client_id={Uri.EscapeDataString(clientId)}&response_type={Uri.EscapeDataString(responseType)}&redirect_uri={Uri.EscapeDataString(redirectUri)}&scope={Uri.EscapeDataString(scope)}&state={Uri.EscapeDataString(state)}&prompt=select_account";
             return await Task.FromResult(authorizationUrl);
         }
 
