@@ -4,7 +4,6 @@ using NokAir.Core.Exceptions;
 using NokAir.Shared.Api.Responses.Factories;
 using NokAir.Shared.Controllers;
 using NokPortalAPI.Dtos;
-using NokPortalAPI.Entities;
 using NokPortalAPI.Enums;
 using NokPortalAPI.Services;
 

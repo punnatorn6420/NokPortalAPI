@@ -7,40 +7,13 @@ namespace NokPortalAPI.Entities
     /// </summary>
     public class UserAppRoleAssignment
     {
-        /// <summary>
-        /// Surrogate key for the assigned user application.
-        /// </summary>
-        public int Id { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user ID.
-        /// </summary>
         public int UserId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user. This is a navigation property.
-        /// </summary>
-        [JsonIgnore]
-        public User? User { get; set; }
-
-        /// <summary>
-        /// Gets or sets the application ID.
-        /// </summary>
         public int AppId { get; set; }
-
-        /// <summary>
-        /// Gets or sets application. This is a navigation property.
-        /// </summary>
-        public App? App { get; set; }
-
-        /// <summary>
-        /// Gets or sets the application's role ID.
-        /// </summary>
         public int RoleId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the date and time when the user was assigned to the application role.
-        /// </summary>
-        public DateTime AssignedDate { get; set; } = DateTime.Now;
+        // Navigation properties
+        public User? User { get; set; }
+        public App? App { get; set; }
+        public Role? Role { get; set; }
     }
 }

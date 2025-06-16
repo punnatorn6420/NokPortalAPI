@@ -1,6 +1,6 @@
 ﻿using NokPortalAPI.Enums;
 
-namespace NokPortalAPI.Entities
+namespace NokPortalAPI.Dtos
 {
     public class AppInfo
     {

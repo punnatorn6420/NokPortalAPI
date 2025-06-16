@@ -10,7 +10,6 @@ namespace NokPortalAPI.Entities
     {
         public int Id { get; set; } = 0;
 
-        [MaxLength(255)]
         public string Name { get; set; } = string.Empty;
 
         public bool Active { get; set; } = false;
@@ -19,9 +18,7 @@ namespace NokPortalAPI.Entities
 
         public DateTime ModifiedAt { get; set; } = DateTime.Now;
 
-        /// <summary>
-        /// Gets or sets the collection of role privileges.
-        /// </summary>
+        // Navigation properties
         public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
     }
 }

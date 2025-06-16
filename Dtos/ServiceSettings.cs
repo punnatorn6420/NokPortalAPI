@@ -1,4 +1,4 @@
-namespace NokPortalAPI.Entities
+namespace NokPortalAPI.Dtos
 {
     public class ServiceSettings
     {

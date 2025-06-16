@@ -1,7 +1,6 @@
-﻿using NokAir.Core.Interfaces.Common;
-using NokAir.Core.Interfaces.Rbac.Entities;
+﻿using NokAir.Core.Interfaces.Rbac.Entities;
 
-namespace NokPortalAPI.Entities
+namespace NokPortalAPI.Dtos
 {
     public class UserSearchCriteria : IUserSearchCriteria
     {

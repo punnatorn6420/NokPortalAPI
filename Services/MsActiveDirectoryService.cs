@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.Configuration;
 using Newtonsoft.Json;
-using NokPortalAPI.Entities;
+using NokPortalAPI.Dtos;
 
 namespace NokPortalAPI.Services
 {

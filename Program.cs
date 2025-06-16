@@ -80,7 +80,7 @@ namespace NokPortalAPI
             });
 
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("NokPortalDB")));
+                options.UseNpgsql(builder.Configuration.GetConnectionString("PgNokPortalDB")));
             builder.Services.Configure<ServiceSettings>(builder.Configuration.GetSection("ServiceSettings"));
             builder.Services.Configure<JwtSettingsModel>(builder.Configuration.GetSection("JwtSettings"));
 

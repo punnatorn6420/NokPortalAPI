@@ -11,16 +11,8 @@ namespace NokPortalAPI.Entities
         public int UserId { get; set; }
         public int RoleId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the user. This is a navigation property.
-        /// </summary>
-        [JsonIgnore]
-        public User? User { get; set; } = new User();
-
-        /// <summary>
-        /// Gets or sets role. This is a navigation property.
-        /// </summary>
-        [JsonIgnore]
-        public Role? Role { get; set; } = new Role();
+        // Navigation properties
+        public User? User { get; set; } = null!;
+        public Role? Role { get; set; } = null!;
     }
 }

@@ -1,7 +1,7 @@
 ﻿using NokPortalAPI.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace NokPortalAPI.Entities
+namespace NokPortalAPI.Dtos
 {
     /// <summary>
     /// This class represents the request for registering an app user.
