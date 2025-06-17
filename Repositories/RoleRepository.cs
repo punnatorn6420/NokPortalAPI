@@ -73,15 +73,8 @@ namespace NokPortalAPI.Repositories
         /// <inheritdoc/>
         public async Task<bool> IsUserInRolesAsync(int userId, string[] requiredRoles)
         {
-            var rolesList = string.Join(",", requiredRoles.Select(r => $"'{r}'"));
-            var sqlQuery = $@"
-                SELECT COUNT(*) AS RoleCount
-                FROM User_Role ur
-                INNER JOIN Roles r ON ur.RoleId = r.Id
-                WHERE ur.UserId = @userId AND r.Name IN ({rolesList})";
-
             var count = await context.UserRoles
-                .FromSqlRaw(sqlQuery, new SqlParameter("@userId", userId))
+                .Where(ur => ur.UserId == userId && requiredRoles.Contains(ur.Role!.Name))
                 .CountAsync();
 
             return count > 0;

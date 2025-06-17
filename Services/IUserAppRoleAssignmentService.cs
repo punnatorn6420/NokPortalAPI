@@ -1,6 +1,5 @@
 ﻿using NokAir.Shared.Security.Models.Common;
 using NokPortalAPI.Dtos;
-using NokPortalAPI.Entities;
 
 namespace NokPortalAPI.Services
 {

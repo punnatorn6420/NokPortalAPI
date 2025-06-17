@@ -15,16 +15,8 @@ namespace NokPortalAPI.Entities
         /// </summary>
         public int PermissionId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the role. This is a navigation property.
-        /// </summary>
-        [JsonIgnore]
-        public Role Role { get; set; } = new Role();
-
-        /// <summary>
-        /// Gets or sets the privilege. This is a navigation property.
-        /// </summary>
-        [JsonIgnore]
-        public Permission Permission { get; set; } = new Permission();
+        // Navigation properties
+        public Role Role { get; set; } = null!;
+        public Permission Permission { get; set; } = null!;
     }
 }

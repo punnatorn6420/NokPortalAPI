@@ -30,13 +30,13 @@ namespace NokPortalAPI.Repositories
             var user = await context.Users
                 .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
-                .Include(u => u.AssignedApps)
+                .Include(u => u.UserAppRoleAssignments)
                     .ThenInclude(ua => ua.App)
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null) return null;
 
-            var apps = user.AssignedApps
+            var apps = user.UserAppRoleAssignments
                 .Where(ua => ua.App != null)
                 .Select(ua => ua.App!)
                 .DistinctBy(a => a.Id)
@@ -92,7 +92,7 @@ namespace NokPortalAPI.Repositories
             return await context.Users
                 .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
-                .Include(u => u.AssignedApps)
+                .Include(u => u.UserAppRoleAssignments)
                     .ThenInclude(ua => ua.App)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }

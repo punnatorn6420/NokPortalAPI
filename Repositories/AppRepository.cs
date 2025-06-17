@@ -81,7 +81,7 @@ namespace NokPortalAPI.Repositories
         public async Task<IList<App>> GetAppsByUserIdAsync(int userId)
         {
             return await context.Apps
-                .Where(a => a.AssignedApps.Any(aua => aua.UserId == userId))
+                .Where(a => a.UserAppRoleAssignments.Any(aua => aua.UserId == userId))
                 .ToListAsync();
         }
 

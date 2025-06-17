@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace NokPortalAPI.Entities
+namespace NokPortalAPI.Dtos
 {
     /// <summary>
     /// Represents the Microsoft user information.

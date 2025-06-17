@@ -17,8 +17,8 @@ namespace NokPortalAPI.Extensions
                 JobTitle = userDto.JobTitle,
                 Department = userDto.Department,
                 Active = userDto.Active,
-                CreatedAt = DateTime.UtcNow,
-                ModifiedAt = DateTime.UtcNow
+                CreatedAt = DateTime.Now,
+                ModifiedAt = DateTime.Now
             };
         }
 
