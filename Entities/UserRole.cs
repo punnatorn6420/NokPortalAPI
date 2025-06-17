@@ -12,7 +12,7 @@ namespace NokPortalAPI.Entities
         public int RoleId { get; set; }
 
         // Navigation properties
-        public User? User { get; set; } = null!;
-        public Role? Role { get; set; } = null!;
+        public User? User { get; set; } = new User();
+        public Role? Role { get; set; } = new Role();
     }
 }

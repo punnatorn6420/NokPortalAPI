@@ -177,7 +177,6 @@ namespace NokPortalAPI.Repositories
                 entity.HasKey(ua => new { ua.UserId, ua.AppId, ua.RoleId });
                 entity.Property(ua => ua.UserId).HasColumnName("user_id");
                 entity.Property(ua => ua.AppId).HasColumnName("app_id");
-                entity.Property(ua => ua.RoleId).HasColumnName("role_id");
 
                 entity.HasOne(ua => ua.User)
                     .WithMany(u => u.UserAppRoleAssignments)
@@ -187,11 +186,6 @@ namespace NokPortalAPI.Repositories
                 entity.HasOne(ua => ua.App)
                     .WithMany(a => a.UserAppRoleAssignments)
                     .HasForeignKey(ua => ua.AppId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(ua => ua.Role)
-                    .WithMany(r => r.UserAppRoleAssignments)
-                    .HasForeignKey(ua => ua.RoleId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
         }

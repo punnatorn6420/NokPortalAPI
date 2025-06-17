@@ -275,14 +275,11 @@ namespace NokPortalAPI.Migrations
                         .HasColumnName("app_id");
 
                     b.Property<int>("RoleId")
-                        .HasColumnType("integer")
-                        .HasColumnName("role_id");
+                        .HasColumnType("integer");
 
                     b.HasKey("UserId", "AppId", "RoleId");
 
                     b.HasIndex("AppId");
-
-                    b.HasIndex("RoleId");
 
                     b.ToTable("user_app_role_assignments", (string)null);
                 });
@@ -331,12 +328,6 @@ namespace NokPortalAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NokPortalAPI.Entities.Role", "Role")
-                        .WithMany("UserAppRoleAssignments")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("NokPortalAPI.Entities.User", "User")
                         .WithMany("UserAppRoleAssignments")
                         .HasForeignKey("UserId")
@@ -344,8 +335,6 @@ namespace NokPortalAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("App");
-
-                    b.Navigation("Role");
 
                     b.Navigation("User");
                 });
@@ -382,8 +371,6 @@ namespace NokPortalAPI.Migrations
             modelBuilder.Entity("NokPortalAPI.Entities.Role", b =>
                 {
                     b.Navigation("RolePermissions");
-
-                    b.Navigation("UserAppRoleAssignments");
 
                     b.Navigation("UserRoles");
                 });

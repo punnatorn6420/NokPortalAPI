@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NokPortalAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialPostgreSQLMigration : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -120,22 +120,16 @@ namespace NokPortalAPI.Migrations
                 {
                     user_id = table.Column<int>(type: "integer", nullable: false),
                     app_id = table.Column<int>(type: "integer", nullable: false),
-                    role_id = table.Column<int>(type: "integer", nullable: false)
+                    RoleId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_user_app_role_assignments", x => new { x.user_id, x.app_id, x.role_id });
+                    table.PrimaryKey("PK_user_app_role_assignments", x => new { x.user_id, x.app_id, x.RoleId });
                     table.ForeignKey(
                         name: "FK_user_app_role_assignments_apps_app_id",
                         column: x => x.app_id,
                         principalTable: "apps",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_user_app_role_assignments_roles_role_id",
-                        column: x => x.role_id,
-                        principalTable: "roles",
-                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_user_app_role_assignments_users_user_id",
@@ -196,11 +190,6 @@ namespace NokPortalAPI.Migrations
                 name: "IX_user_app_role_assignments_app_id",
                 table: "user_app_role_assignments",
                 column: "app_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_user_app_role_assignments_role_id",
-                table: "user_app_role_assignments",
-                column: "role_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_user_roles_role_id",

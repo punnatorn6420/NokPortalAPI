@@ -101,8 +101,7 @@ namespace NokPortalAPI.Services
                 existingApp.JwtExpiryHours = appDto.JwtExpiryHours;
                 existingApp.Remark = appDto.Remark;
                 existingApp.Active = appDto.Active;
-                existingApp.ModifiedAt = DateTime.UtcNow;
-
+                existingApp.ModifiedAt = DateTime.Now;
                 await appRepository.UpdateAppAsync(existingApp);
                 await transaction.CommitAsync();
                 return true;

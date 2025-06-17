@@ -56,8 +56,8 @@ namespace NokPortalAPI.Controllers
                     SecretKey = request.SecretKey,
                     JwtExpiryHours = request.JwtExpiryHours,
                     Remark = request.Remark,
-                    CreatedAt = DateTime.UtcNow,
-                    ModifiedAt = DateTime.UtcNow,
+                    CreatedAt = DateTime.Now,
+                    ModifiedAt = DateTime.Now,
                     Active = true
                 };
                 if (appDto != null)

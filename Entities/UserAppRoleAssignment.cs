@@ -14,6 +14,5 @@ namespace NokPortalAPI.Entities
         // Navigation properties
         public User? User { get; set; }
         public App? App { get; set; }
-        public Role? Role { get; set; }
     }
 }

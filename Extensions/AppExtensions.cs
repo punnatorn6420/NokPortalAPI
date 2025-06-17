@@ -20,6 +20,7 @@ namespace NokPortalAPI.Extensions
                 EnvironmentType = appDto.EnvironmentType,
                 ClientUrl = appDto.ClientUrl,
                 BackendUrl = appDto.BackendUrl,
+                ImageUrl = appDto.ImageUrl,
                 SecretKey = appDto.SecretKey,
                 JwtExpiryHours = appDto.JwtExpiryHours,
                 Remark = appDto.Remark,
