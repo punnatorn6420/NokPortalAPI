@@ -171,7 +171,6 @@ namespace NokPortalAPI.Controllers
         /// This endpoint is used to get the JWT token to access the target app for Admin.
         /// </summary>
         [HttpGet("{id}/jwt-token")]
-        [Authorize(Policy = "RootOrAdmin")]
         public async Task<ActionResult> GetJwtTokenInfoAsync(int id)
         {
             try
