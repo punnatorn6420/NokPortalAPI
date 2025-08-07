@@ -54,8 +54,6 @@ namespace NokPortalAPI.Services
             var user = await userRepository.GetUserByIdAsync(userAppAssignmentReq.UserId)
                 ?? throw new DataValidationException("User not found. Please check the user.");
 
-            if (userAppAssignmentReq.Roles == null || !userAppAssignmentReq.Roles.Any())
-                throw new DataValidationException("At least one role must be assigned.");
 
             using var transaction = await context.Database.BeginTransactionAsync();
             try
@@ -113,7 +111,7 @@ namespace NokPortalAPI.Services
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
                 try
                 {
-                    var response = await httpClient.PostAsync($"{backendUrl}/flight-irop/v1/flight-irop/assignUser", content);
+                    var response = await httpClient.PostAsync($"{backendUrl}/assignUser", content);
                     if (!response.IsSuccessStatusCode)
                     {
                         var errorContent = await response.Content.ReadAsStringAsync();
