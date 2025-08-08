@@ -33,7 +33,7 @@ namespace NokPortalAPI
         {
             // Read environment variables
             var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
-            var flightIropDbConnection = Environment.GetEnvironmentVariable("PORTAL_DB_CONNECTION")
+            var ProtalDbConnection = Environment.GetEnvironmentVariable("PORTAL_DB_CONNECTION")
                 ?? throw new InvalidOperationException("PORTAL_DB_CONNECTION environment variable is not set");
 
             // Get the host name
@@ -52,7 +52,7 @@ namespace NokPortalAPI
             // Phase 2: Load configuration from database
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddPostgreSqlConfiguration(flightIropDbConnection);
+                .AddPostgreSqlConfiguration(ProtalDbConnection);
 
             var configuration = configBuilder.Build();
 
@@ -77,7 +77,7 @@ namespace NokPortalAPI
                 .Enrich.WithProperty("Environment", environment)
                 .WriteTo.Console()
                 .WriteTo.PostgreSQL(
-                    connectionString: flightIropDbConnection,
+                    connectionString: ProtalDbConnection,
                     tableName: logTableName,
                     columnOptions: columnOptions,
                     needAutoCreateTable: autoCreateTable,
@@ -118,7 +118,7 @@ namespace NokPortalAPI
             });
 
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("PgNokPortalDB")));
+                options.UseNpgsql(ProtalDbConnection));
             builder.Services.Configure<ServiceSettings>(builder.Configuration.GetSection("ServiceSettings"));
             builder.Services.Configure<JwtSettingsModel>(builder.Configuration.GetSection("JwtSettings"));
 

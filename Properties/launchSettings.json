@@ -27,7 +27,6 @@
       "applicationUrl": "https://localhost:7036;http://localhost:5258",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development",
-        //"NOKPROTAL_DB": "Server=10.94.23.26;Database=Nok_Portal_DEV;User Id=webadmin;Password=DBConnext01;TrustServerCertificate=True;",
         "PORTAL_DB_CONNECTION": "Host=10.94.23.100;Database=nok_portal_dev;Username=nokdevdb;Password=U1op08XK406FSuP;"
       }
     },
