@@ -16,11 +16,14 @@ using NokPortalAPI.Repositories;
 using NokPortalAPI.Resources;
 using NokPortalAPI.Services;
 using NokPortalAPI.Shareds;
+using NpgsqlTypes;
 using Serilog;
 using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Text.Json.Serialization;
+using NokAir.Configuration.Extensions;
+using Serilog.Sinks.PostgreSQL;
 
 namespace NokPortalAPI
 {
@@ -28,37 +31,72 @@ namespace NokPortalAPI
     {
         public static void Main(string[] args)
         {
-            // Build a base configuration to read the environment setting
-            var baseConfig = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .Build();
-
-            // Read the environment setting from base configuration
-            var environment = baseConfig["Environment"] ?? "Production";
-            var dbInitialize = bool.Parse(baseConfig["DbInitialize"] ?? "false");
+            // Read environment variables
+            var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
+            var flightIropDbConnection = Environment.GetEnvironmentVariable("PORTAL_DB_CONNECTION")
+                ?? throw new InvalidOperationException("PORTAL_DB_CONNECTION environment variable is not set");
 
             // Get the host name
             var hostName = Dns.GetHostName();
 
-            // Configure Serilog
+            // PHASE 1: Bootstrap with minimal configuration
             Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(new ConfigurationBuilder()
-                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                    .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
-                    .Build())
+                .MinimumLevel.Information()
                 .Enrich.FromLogContext()
                 .Enrich.WithProperty("HostName", hostName)
-                .CreateLogger();
+                .WriteTo.Console()
+                .CreateBootstrapLogger(); // Special bootstrap logger that can be replaced later
 
+            Log.Information("Starting NokAir Flight IROP Service in {Environment} environment", environment);
+
+            // Phase 2: Load configuration from database
+            var configBuilder = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddPostgreSqlConfiguration(flightIropDbConnection);
+
+            var configuration = configBuilder.Build();
+
+            // Get Serilog connection string from configuration
+            var logTableName = configuration["Serilog:WriteTo:0:Args:tableName"] ?? "app_logs";
+            var schemaName = configuration["Serilog:WriteTo:0:Args:schemaName"] ?? "public";
+            var autoCreateTable = bool.TryParse(configuration["Serilog:WriteTo:0:Args:needAutoCreateTable"], out var needAutoCreateTable) && needAutoCreateTable;
+
+            // Define custom columns using ColumnWriterBase
+            var columnOptions = ColumnOptions.Default;
+            columnOptions.Add("host_name", new SinglePropertyColumnWriter("HostName", PropertyWriteMethod.Raw, NpgsqlDbType.Varchar, null, 128));
+            columnOptions.Add("environment", new SinglePropertyColumnWriter("Environment", PropertyWriteMethod.Raw, NpgsqlDbType.Varchar, null, 64));
+            columnOptions.Add("payload", new SinglePropertyColumnWriter("Payload", PropertyWriteMethod.Raw, NpgsqlDbType.Jsonb, null, null));
+            columnOptions.Remove("message_template"); // Remove message_template to avoid storing full message template
+            columnOptions.Remove("log_event"); // Remove log_event to avoid storing full log event object
+
+            // Reconfigure Serilog with PostgreSQL sink
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(configuration) // Read log levels from config
+                .Enrich.FromLogContext()
+                .Enrich.WithProperty("HostName", hostName)
+                .Enrich.WithProperty("Environment", environment)
+                .WriteTo.Console()
+                .WriteTo.PostgreSQL(
+                    connectionString: flightIropDbConnection,
+                    tableName: logTableName,
+                    columnOptions: columnOptions,
+                    needAutoCreateTable: autoCreateTable,
+                    schemaName: schemaName)
+                .CreateLogger();
+            Serilog.Debugging.SelfLog.Enable(msg => Console.Error.WriteLine(msg));
+
+            Log.Information("Application configuration loaded from database");
+
+            var dbInitialize = bool.Parse(Environment.GetEnvironmentVariable("DB_INTIALIZE") ?? "false");
             var builder = WebApplication.CreateBuilder(args);
 
-            // Set up application configuration based on environment
             builder.Configuration.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
-            builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                                 .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true);
+            builder.Configuration.Sources.Clear();
+            builder.Configuration.AddConfiguration(configuration);
+
+            // Set up application configuration based on environment
             builder.Host.UseSerilog();
+
 
             // Add Localization and set resource path
             builder.Services.AddLocalization();
