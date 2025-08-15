@@ -35,6 +35,8 @@ namespace NokPortalAPI
             var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
             var ProtalDbConnection = Environment.GetEnvironmentVariable("PORTAL_DB_CONNECTION")
                 ?? throw new InvalidOperationException("PORTAL_DB_CONNECTION environment variable is not set");
+            var ProtalDb_Log_Connection = Environment.GetEnvironmentVariable("PORTAL_LOG_DB_CONNECTION")
+                ?? throw new InvalidOperationException("PORTAL_LOG_DB_CONNECTION environment variable is not set");
 
             // Get the host name
             var hostName = Dns.GetHostName();
@@ -52,12 +54,13 @@ namespace NokPortalAPI
             // Phase 2: Load configuration from database
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
                 .AddPostgreSqlConfiguration(ProtalDbConnection);
 
             var configuration = configBuilder.Build();
 
             // Get Serilog connection string from configuration
-            var logTableName = configuration["Serilog:WriteTo:0:Args:tableName"] ?? "app_logs";
+            var logTableName = configuration["Serilog:WriteTo:0:Args:tableName"] ?? "portal_app_logs";
             var schemaName = configuration["Serilog:WriteTo:0:Args:schemaName"] ?? "public";
             var autoCreateTable = bool.TryParse(configuration["Serilog:WriteTo:0:Args:needAutoCreateTable"], out var needAutoCreateTable) && needAutoCreateTable;
 
@@ -65,7 +68,6 @@ namespace NokPortalAPI
             var columnOptions = ColumnOptions.Default;
             columnOptions.Add("host_name", new SinglePropertyColumnWriter("HostName", PropertyWriteMethod.Raw, NpgsqlDbType.Varchar, null, 128));
             columnOptions.Add("environment", new SinglePropertyColumnWriter("Environment", PropertyWriteMethod.Raw, NpgsqlDbType.Varchar, null, 64));
-            columnOptions.Add("payload", new SinglePropertyColumnWriter("Payload", PropertyWriteMethod.Raw, NpgsqlDbType.Jsonb, null, null));
             columnOptions.Remove("message_template"); // Remove message_template to avoid storing full message template
             columnOptions.Remove("log_event"); // Remove log_event to avoid storing full log event object
 
@@ -77,7 +79,7 @@ namespace NokPortalAPI
                 .Enrich.WithProperty("Environment", environment)
                 .WriteTo.Console()
                 .WriteTo.PostgreSQL(
-                    connectionString: ProtalDbConnection,
+                    connectionString: ProtalDb_Log_Connection,
                     tableName: logTableName,
                     columnOptions: columnOptions,
                     needAutoCreateTable: autoCreateTable,
@@ -164,8 +166,6 @@ namespace NokPortalAPI
                         .AllowAnyHeader()
                         .AllowAnyMethod());
             });
-
-
 
             //builder.Services.AddFluentValidationAutoValidation();
             //builder.Services.AddFluentValidationClientsideAdapters();
