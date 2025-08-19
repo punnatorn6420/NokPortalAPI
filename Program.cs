@@ -33,10 +33,10 @@ namespace NokPortalAPI
         {
             // Read environment variables
             var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
-            var ProtalDbConnection = Environment.GetEnvironmentVariable("PORTAL_DB_CONNECTION")
-                ?? throw new InvalidOperationException("PORTAL_DB_CONNECTION environment variable is not set");
-            var ProtalDb_Log_Connection = Environment.GetEnvironmentVariable("PORTAL_LOG_DB_CONNECTION")
-                ?? throw new InvalidOperationException("PORTAL_LOG_DB_CONNECTION environment variable is not set");
+            var encryptionKey = Environment.GetEnvironmentVariable("ENCRYPTION_KEY")
+                ?? throw new InvalidOperationException("ENCRYPTION_KEY environment variable is not set");
+            var ivKey = Environment.GetEnvironmentVariable("IV_KEY")
+                ?? throw new InvalidOperationException("IV_KEY environment variable is not set");
 
             // Get the host name
             var hostName = Dns.GetHostName();
@@ -51,11 +51,27 @@ namespace NokPortalAPI
 
             Log.Information("Starting NokAir Flight IROP Service in {Environment} environment", environment);
 
+
+            // Load configuration from database
+            var initConfig = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonEncryptionFile(
+                    prefixName: "appsettings",
+                    environment: environment,
+                    key: encryptionKey,
+                    iv: ivKey)
+                .Build();
+
+            if (initConfig == null)
+            {
+                Log.Fatal("Failed to load initial configuration. Ensure appsettings.{environment}.json file exists.");
+                throw new InvalidOperationException("Initial configuration not found.");
+            }
+
             // Phase 2: Load configuration from database
             var configBuilder = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
-                .AddPostgreSqlConfiguration(ProtalDbConnection);
+                 .AddConfiguration(initConfig)
+                 .AddPostgreSqlConfiguration(initConfig["ConnectionStrings:PORTAL_DB_CONNECTION"]);
 
             var configuration = configBuilder.Build();
 
@@ -63,6 +79,11 @@ namespace NokPortalAPI
             var logTableName = configuration["Serilog:WriteTo:0:Args:tableName"] ?? "portal_app_logs";
             var schemaName = configuration["Serilog:WriteTo:0:Args:schemaName"] ?? "public";
             var autoCreateTable = bool.TryParse(configuration["Serilog:WriteTo:0:Args:needAutoCreateTable"], out var needAutoCreateTable) && needAutoCreateTable;
+
+            var protalDbConnection = configuration["ConnectionStrings:PORTAL_DB_CONNECTION"]
+               ?? throw new InvalidOperationException("PORTAL_DB_CONNECTION environment variable is not set");
+            var protalDb_Log_Connection = configuration["ConnectionStrings:PORTAL_LOG_DB_CONNECTION"]
+                ?? throw new InvalidOperationException("PORTAL_LOG_DB_CONNECTION environment variable is not set");
 
             // Define custom columns using ColumnWriterBase
             var columnOptions = ColumnOptions.Default;
@@ -79,7 +100,7 @@ namespace NokPortalAPI
                 .Enrich.WithProperty("Environment", environment)
                 .WriteTo.Console()
                 .WriteTo.PostgreSQL(
-                    connectionString: ProtalDb_Log_Connection,
+                    connectionString: protalDb_Log_Connection,
                     tableName: logTableName,
                     columnOptions: columnOptions,
                     needAutoCreateTable: autoCreateTable,
@@ -120,7 +141,7 @@ namespace NokPortalAPI
             });
 
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(ProtalDbConnection));
+                options.UseNpgsql(protalDbConnection));
             builder.Services.Configure<ServiceSettings>(builder.Configuration.GetSection("ServiceSettings"));
             builder.Services.Configure<JwtSettingsModel>(builder.Configuration.GetSection("JwtSettings"));
 
