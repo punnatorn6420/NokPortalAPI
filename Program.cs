@@ -55,6 +55,7 @@ namespace NokPortalAPI
             // Load configuration from database
             var initConfig = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonEncryptionFile(
                     prefixName: "appsettings",
                     environment: environment,
@@ -233,7 +234,7 @@ namespace NokPortalAPI
                         OnTokenValidated = context =>
                         {
                             var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-                            logger.LogInformation("Token validated successfully.");
+                            logger.LogDebug("Token validated successfully.");
                             return Task.CompletedTask;
                         },
                         OnChallenge = context =>

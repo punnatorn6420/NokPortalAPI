@@ -26,13 +26,13 @@
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7036;http://localhost:5258",
       "environmentVariables": {
-        //"DOTNET_ENVIRONMENT": "Development",
-        //"ENCRYPTION_KEY": "SWV3fJ3gmY21P6Z6W22tK3f7",
-        //"IV_KEY": "vdODRsmkWFvM445O"
+        "DOTNET_ENVIRONMENT": "Development",
+        "ENCRYPTION_KEY": "SWV3fJ3gmY21P6Z6W22tK3f7",
+        "IV_KEY": "vdODRsmkWFvM445O"
 
-        "DOTNET_ENVIRONMENT": "Production",
-        "ENCRYPTION_KEY": "KG2bI8O8JfnMkRiU5d0SGRdb",
-        "IV_KEY": "L86W92Ksoy4q2o86",
+        //"DOTNET_ENVIRONMENT": "Production",
+        //"ENCRYPTION_KEY": "KG2bI8O8JfnMkRiU5d0SGRdb",
+        //"IV_KEY": "L86W92Ksoy4q2o86"
       }
     },
     "IIS Express": {
