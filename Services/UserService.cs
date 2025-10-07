@@ -73,11 +73,11 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc />
-        public async Task<ICollection<UserDto>> GetUsersByCriteriaAsync(UserSearchCriteriaDto searchCriteriaDto)
+        public async Task<(IList<UserDto> Items, int TotalRecords)> GetUsersByCriteriaAsync(UserSearchCriteriaDto searchCriteriaDto)
         {
-            var searchCriteria = searchCriteriaDto.ToEntity();
-            var users = await userRepository.GetUsersByCriteriaAsync(searchCriteria);
-            return users.Select(u => u.ToDto()).ToList();
+            var criteria = searchCriteriaDto.ToEntity();
+            var (users, total) = await userRepository.GetUsersByCriteriaAsync(criteria);
+            return (users.Select(u => u.ToDto()).ToList(), total);
         }
 
         /// <inheritdoc />

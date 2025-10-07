@@ -26,7 +26,7 @@ namespace NokPortalAPI.Repositories
                 throw new DataValidationException(ErrorCode.E2001AppNameAlreadyExists, string.Empty);
             }
 
-            var result =await context.Apps.AddAsync(app);
+            var result = await context.Apps.AddAsync(app);
             await context.SaveChangesAsync();
             return result.Entity;
         }
@@ -51,28 +51,19 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<IList<App>> GetAppsByCriteriaAsync(AppSearchDto searchCriteria)
+        public async Task<(IList<App> Items, int TotalRecords)> GetAppsByCriteriaAsync(AppSearchDto criteria)
         {
             IQueryable<App> query = context.Apps;
-
-            var keyword = searchCriteria.Keyword?.Trim();
+            var keyword = criteria.Keyword?.Trim();
             if (!string.IsNullOrEmpty(keyword))
-                if (!string.IsNullOrEmpty(keyword))
-            {
-                query = query.Where(a => a.Name.Contains(keyword) || a.Header.Contains(keyword));
-            }
-
-            var sortField = !string.IsNullOrEmpty(searchCriteria.SortField) ? searchCriteria.SortField.Trim() : "Id";
-            if (!string.IsNullOrEmpty(sortField))
-            {
-                var sortDirection = searchCriteria.Ascending ? "ascending" : "descending";
-                query = query.OrderBy($"{sortField} {sortDirection}");
-            }
-
-            return await query
-                .Skip((searchCriteria.PageNumber - 1) * searchCriteria.PageSize)
-                .Take(searchCriteria.PageSize)
-                .ToListAsync();
+                query = query.Where(a => (a.Name ?? "").Contains(keyword) || (a.Header ?? "").Contains(keyword));
+            var total = await query.CountAsync();
+            var field = string.IsNullOrWhiteSpace(criteria.SortField) ? "Id" : criteria.SortField.Trim();
+            var dir = criteria.Ascending ? "ascending" : "descending";
+            query = query.OrderBy($"{field} {dir}");
+            var skip = (Math.Max(1, criteria.PageNumber) - 1) * Math.Clamp(criteria.PageSize, 1, 200);
+            var items = await query.Skip(skip).Take(Math.Clamp(criteria.PageSize, 1, 200)).ToListAsync();
+            return (items, total);
         }
 
 

@@ -72,10 +72,10 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc />
-        public async Task<IList<AppDto>> GetAppsByCriteriaAsync(AppSearchDto searchCriteria)
+        public async Task<(IList<AppDto> Items, int TotalRecords)> GetAppsByCriteriaAsync(AppSearchDto searchCriteria)
         {
-            var apps = await appRepository.GetAppsByCriteriaAsync(searchCriteria);
-            return apps.Select(app => app.ToDto()).ToList();
+            var (apps, total) = await appRepository.GetAppsByCriteriaAsync(searchCriteria);
+            return (apps.Select(a => a.ToDto()).ToList(), total);
         }
 
         /// <inheritdoc />
