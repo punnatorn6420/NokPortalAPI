@@ -34,7 +34,7 @@ namespace NokPortalAPI.Repositories
         /// </summary>
         /// <param name="searchCriteria">Search criteria.</param>
         /// <returns>List of applications.</returns>
-        Task<IList<App>> GetAppsByCriteriaAsync(AppSearchDto searchCriteria);
+        Task<(IList<App> Items, int TotalRecords)> GetAppsByCriteriaAsync(AppSearchDto searchCriteria);
 
         /// <summary>
         /// Gets list of applications with all the environments by user ID.

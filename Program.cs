@@ -161,6 +161,7 @@ namespace NokPortalAPI
             builder.Services.AddScoped<IUserAppRoleAssignmentService, UserAppRoleAssignmentService>();
             builder.Services.AddScoped<IAppService, AppService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
+            builder.Services.AddScoped<IOtpService, OtpService>();
             builder.Services.AddSingleton<IJwtService, JwtService>();
 
             builder.Services.AddSingleton<ReloadFileConfig>();
@@ -220,7 +221,8 @@ namespace NokPortalAPI
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = jwtSettings?.Issuer ?? "NokAir",
                         ValidAudience = jwtSettings?.Audience ?? "NokAir",
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings?.SecretKey ?? string.Empty))
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings?.SecretKey ?? string.Empty)),
+                        ClockSkew = TimeSpan.Zero
                     };
 
                     options.Events = new JwtBearerEvents

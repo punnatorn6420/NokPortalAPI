@@ -33,7 +33,7 @@ namespace NokPortalAPI.Services
         /// </summary>
         /// <param name="searchCriteria">Search criteria.</param>
         /// <returns>List of applications.</returns>
-        Task<IList<AppDto>> GetAppsByCriteriaAsync(AppSearchDto searchCriteria);
+        Task<(IList<AppDto> Items, int TotalRecords)> GetAppsByCriteriaAsync(AppSearchDto searchCriteria);
 
         /// <summary>
         /// Updates an app asynchronously.

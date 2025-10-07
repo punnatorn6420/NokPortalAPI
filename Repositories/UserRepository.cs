@@ -80,10 +80,10 @@ namespace NokPortalAPI.Repositories
         /// <inheritdoc />
         public async Task<User?> GetUserByEmailAsync(string email)
         {
+            var norm = email.Trim();
             return await context.Users
-               .Include(u => u.UserRoles)
-                   .ThenInclude(ur => ur.Role)
-               .FirstOrDefaultAsync(u => u.Email == email);
+                .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => EF.Functions.ILike(u.Email, norm));
         }
 
         /// <inheritdoc />
@@ -109,32 +109,33 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<ICollection<User>> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria)
+        public async Task<(IList<User> Items, int TotalRecords)> GetUsersByCriteriaAsync(UserSearchCriteria criteria)
         {
             IQueryable<User> query = context.Users
-                    .Include(u => u.UserRoles);
-
-            var keyword = searchCriteria.Keyword?.Trim();
+                .Include(u => u.UserRoles)
+                .AsNoTracking();
+            var keyword = criteria.Keyword?.Trim();
             if (!string.IsNullOrEmpty(keyword))
             {
-                query = query.Where(a => a.FirstName.Contains(keyword) ||
-                    a.LastName.Contains(keyword) ||
-                    a.Email.Equals(keyword));
+                query = query.Where(u =>
+                    (u.FirstName ?? string.Empty).Contains(keyword) ||
+                    (u.LastName ?? string.Empty).Contains(keyword) ||
+                    (u.Email ?? string.Empty).Contains(keyword));
             }
-
-            var sortField = !string.IsNullOrEmpty(searchCriteria.SortField) ? searchCriteria.SortField.Trim() : "Id";
-            if (!string.IsNullOrEmpty(sortField))
-            {
-                var sortDirection = searchCriteria.Ascending ? "ascending" : "descending";
-                query = query.OrderBy($"{sortField} {sortDirection}");
-            }
-
-            return await query
-                .Skip((searchCriteria.PageNumber - 1) * searchCriteria.PageSize)
-                .Take(searchCriteria.PageSize)
+            var total = await query.CountAsync();
+            var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { "Id", "FirstName", "LastName", "Email", "CreatedAt" };
+            var field = string.IsNullOrWhiteSpace(criteria.SortField) ? "Id" : criteria.SortField.Trim();
+            if (!allowed.Contains(field)) field = "Id";
+            var dir = criteria.Ascending ? "ascending" : "descending";
+            query = query.OrderBy($"{field} {dir}");
+            var pageNumber = Math.Max(1, criteria.PageNumber);
+            var pageSize = Math.Clamp(criteria.PageSize, 1, 200);
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
-
-
+            return (items, total);
         }
 
         /// <inheritdoc />

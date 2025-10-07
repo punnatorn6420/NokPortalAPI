@@ -215,18 +215,34 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpGet("search")]
         [Authorize(Policy = "RootOrAdmin")]
-        public async Task<ActionResult> SearchAppAsync([FromQuery] AppSearchDto searchCriteria)
+        public async Task<ActionResult> SearchAppAsync([FromQuery] string? keyword = null,
+                                                        [FromQuery] int? pageNumber = 1,
+                                                        [FromQuery] int? pageSize = 25,
+                                                        [FromQuery] bool? ascending = true,
+                                                        [FromQuery] string? sortField = null)
         {
             try
             {
-                // Validate search criteria
+
+                var criteria = new AppSearchDto
+                {
+                    Keyword = keyword ?? string.Empty,
+                    SortField = sortField ?? string.Empty,
+                    PageNumber = pageNumber ?? 1,
+                    PageSize = pageSize ?? 25,
+                    Ascending = ascending ?? true,
+                };
                 if (!ModelState.IsValid)
                 {
                     return BadRequestResponseFromInvalidRequest();
                 }
 
-                ICollection<AppDto> apps = await appService.GetAppsByCriteriaAsync(searchCriteria);
-                return OkResponseWithResult(apps);
+                var (items, total) = await appService.GetAppsByCriteriaAsync(criteria);
+                return OkResponseWithResult(new
+                {
+                    totalRecords = total,
+                    items
+                });
             }
             catch (Exception ex)
             {

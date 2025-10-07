@@ -24,17 +24,31 @@ namespace NokPortalAPI.Controllers
 
         [HttpGet("search")]
         [Authorize(Policy = "RootOrAdmin")]
-        public async Task<ActionResult> SearchUsersAsync([FromQuery] UserSearchCriteriaDto searchCriteriaDto)
+        public async Task<ActionResult> SearchUsersAsync([FromQuery] string? keyword = null,
+                                                        [FromQuery] int? pageNumber = 1,
+                                                        [FromQuery] int? pageSize = 25,
+                                                        [FromQuery] bool? ascending = true,
+                                                        [FromQuery] string? sortField = null)
         {
-            if (!ModelState.IsValid)
+            var criteria = new UserSearchCriteriaDto
             {
+                Keyword = keyword ?? string.Empty,
+                SortField = sortField ?? string.Empty,
+                PageNumber = pageNumber ?? 1,
+                PageSize = pageSize ?? 25,
+                Ascending = ascending ?? true,
+            };
+            if (!ModelState.IsValid)
                 return BadRequestResponseFromInvalidRequest();
-            }
 
             try
             {
-                IEnumerable<UserDto> user = await userService.GetUsersByCriteriaAsync(searchCriteriaDto);
-                return OkResponseWithResult(user);
+                var (items, total) = await userService.GetUsersByCriteriaAsync(criteria);
+                return OkResponseWithResult(new
+                {
+                    totalRecords = total,
+                    items
+                });
             }
             catch (Exception ex)
             {
