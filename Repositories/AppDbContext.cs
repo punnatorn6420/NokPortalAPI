@@ -4,16 +4,33 @@ using NokPortalAPI.Enums;
 
 namespace NokPortalAPI.Repositories
 {
+    /// <summary>
+    /// Application database context.
+    /// </summary>
     public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
     {
+        /// <inheritdoc/>
         public DbSet<App> Apps { get; set; }
+
+        /// <inheritdoc/>
         public DbSet<User> Users { get; set; }
+
+        /// <inheritdoc/>
         public DbSet<Role> Roles { get; set; }
+
+        /// <inheritdoc/>
         public DbSet<Permission> Permissions { get; set; }
+
+        /// <inheritdoc/>
         public DbSet<RolePermission> RolePermissions { get; set; }
+
+        /// <inheritdoc/>
         public DbSet<UserRole> UserRoles { get; set; }
+
+        /// <inheritdoc/>
         public DbSet<UserAppRoleAssignment> UserAppRoleAssignments { get; set; }
 
+        /// <inheritdoc/>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

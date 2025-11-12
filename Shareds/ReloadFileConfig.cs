@@ -2,8 +2,14 @@
 
 namespace NokPortalAPI.Shareds
 {
+    /// <summary>
+    /// Class for reloading file configuration.
+    /// </summary>
     public class ReloadFileConfig
     {
+        /// <summary>
+        /// Reloads the configuration from the appsettings.json file.
+        /// </summary>
         public IConfiguration ReloadConfiguration()
         {
             var builder = new ConfigurationBuilder()
@@ -12,6 +18,10 @@ namespace NokPortalAPI.Shareds
             return builder.Build();
         }
 
+        /// <summary>
+        /// Gets the configuration as a JSON string.
+        /// </summary>
+        /// <returns>JSON string representation of the configuration.</returns>
         public string GetConfigurationJson()
         {
             var config = ReloadConfiguration();

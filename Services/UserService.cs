@@ -1,12 +1,11 @@
-﻿using NokAir.Core.Interfaces.Rbac.Services;
+﻿using Microsoft.EntityFrameworkCore;
+using NokAir.Core.Exceptions;
+using NokAir.Core.Interfaces.Rbac.Services;
 using NokPortalAPI.Dtos;
 using NokPortalAPI.Entities;
 using NokPortalAPI.Extensions;
 using NokPortalAPI.Repositories;
-using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
-using NokAir.Core.Exceptions;
-
 
 namespace NokPortalAPI.Services
 {
@@ -19,14 +18,13 @@ namespace NokPortalAPI.Services
         private readonly IUserRepository<User> userRepository;
         private readonly IRoleRepository<Role> roleRepository;
 
-        public UserService(AppDbContext context, IUserRepository<User> userRepository,
-            IRoleRepository<Role> roleRepository)
+        /// <inheritdoc/>
+        public UserService(AppDbContext context, IUserRepository<User> userRepository, IRoleRepository<Role> roleRepository)
         {
             this.context = context;
             this.userRepository = userRepository;
             this.roleRepository = roleRepository;
         }
-
 
         /// <inheritdoc />
         public async Task<UserDto> AddUserAsync(UserDto userDto)
@@ -60,6 +58,7 @@ namespace NokPortalAPI.Services
             return user?.ToDto();
         }
 
+        /// <inheritdoc/>
         public async Task<MyProfileDto?> GetMyProfileAsync(int userId)
         {
             return await userRepository.GetMyProfileAsync(userId);
@@ -104,19 +103,22 @@ namespace NokPortalAPI.Services
             return user?.ToDto();
         }
 
-
-
+        /// <inheritdoc/>
         public async Task UpdateUserRoleAsync(int userId, int roleId)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
 
             var user = await userRepository.GetUserByIdAsync(userId);
             if (user == null)
+            {
                 throw new DataValidationException("User not found.");
+            }
 
             var roleExists = await context.Roles.AnyAsync(r => r.Id == roleId);
             if (!roleExists)
+            {
                 throw new DataValidationException("Role does not exist.");
+            }
 
             // Remove all existing roles assigned to this user
             // This is safe only if each user is supposed to have a single role

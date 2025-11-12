@@ -7,10 +7,17 @@ using System.Linq.Dynamic.Core;
 
 namespace NokPortalAPI.Repositories
 {
+    /// <summary>
+    /// Application repository.
+    /// </summary>
     public class AppRepository : IAppRepository
     {
         private readonly AppDbContext context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AppRepository"/> class.
+        /// </summary>
+        /// <param name="context"></param>
         public AppRepository(AppDbContext context)
         {
             this.context = context;
@@ -56,7 +63,9 @@ namespace NokPortalAPI.Repositories
             IQueryable<App> query = context.Apps;
             var keyword = criteria.Keyword?.Trim();
             if (!string.IsNullOrEmpty(keyword))
-                query = query.Where(a => (a.Name ?? "").Contains(keyword) || (a.Header ?? "").Contains(keyword));
+            {
+                query = query.Where(a => (a.Name ?? string.Empty).Contains(keyword) || (a.Header ?? string.Empty).Contains(keyword));
+            }
             var total = await query.CountAsync();
             var field = string.IsNullOrWhiteSpace(criteria.SortField) ? "Id" : criteria.SortField.Trim();
             var dir = criteria.Ascending ? "ascending" : "descending";
@@ -65,8 +74,6 @@ namespace NokPortalAPI.Repositories
             var items = await query.Skip(skip).Take(Math.Clamp(criteria.PageSize, 1, 200)).ToListAsync();
             return (items, total);
         }
-
-
 
         /// <inheritdoc/>
         public async Task<IList<App>> GetAppsByUserIdAsync(int userId)

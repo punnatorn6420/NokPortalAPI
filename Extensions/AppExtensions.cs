@@ -3,6 +3,9 @@ using NokPortalAPI.Entities;
 
 namespace NokPortalAPI.Extensions
 {
+    /// <summary>
+    /// Converts App entity to AppDto.
+    /// </summary>
     public static class AppExtensions
     {
         /// <summary>
@@ -28,6 +31,9 @@ namespace NokPortalAPI.Extensions
             };
         }
 
+        /// <summary>
+        /// Converts App entity to AppDto.
+        /// </summary>
         public static AppDto ToDto(this App app)
         {
             return new AppDto

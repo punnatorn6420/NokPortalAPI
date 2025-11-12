@@ -11,7 +11,6 @@ namespace NokPortalAPI.Services
         /// <summary>
         /// Assigns user to an app.
         /// </summary>
-        /// <param name="userAppRoleAssignment">User app role assignment request.</param>
         /// <returns>True if the user is assigned to the app, otherwise false.</returns>
         Task<bool> AssignUserToAppAsync(UserAppAssignmentRequest userAppAssignmentReq);
 
@@ -29,7 +28,6 @@ namespace NokPortalAPI.Services
         /// <param name="appId">Application ID.</param>
         /// <returns>List of roles.</returns>
         Task<IList<RoleDto>> GetRolesByAppIdAsync(int appId);
-
 
         /// <summary>
         /// Gets user assigned role IDs for a specific app.

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using NokAir.Configuration.Extensions;
 using NokAir.Core.Interfaces.Rbac.Services;
 using NokAir.Shared.Api.Responses.Factories;
 using NokAir.Shared.Api.Responses.Factories.InHouse;
@@ -18,17 +19,22 @@ using NokPortalAPI.Services;
 using NokPortalAPI.Shareds;
 using NpgsqlTypes;
 using Serilog;
+using Serilog.Sinks.PostgreSQL;
 using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Text.Json.Serialization;
-using NokAir.Configuration.Extensions;
-using Serilog.Sinks.PostgreSQL;
 
 namespace NokPortalAPI
 {
+    /// <summary>
+    /// Main program class.
+    /// </summary>
     public class Program
     {
+        /// <summary>
+        /// The main entry point of the application.
+        /// </summary>
         public static void Main(string[] args)
         {
             // Read environment variables
@@ -51,7 +57,6 @@ namespace NokPortalAPI
 
             Log.Information("Starting NokAir Flight IROP Service in {Environment} environment", environment);
 
-
             // Load configuration from database
             var initConfig = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
@@ -70,9 +75,11 @@ namespace NokPortalAPI
             }
 
             // Phase 2: Load configuration from database
+            var portalDbConnection = initConfig["ConnectionStrings:PORTAL_DB_CONNECTION"]
+                ?? throw new InvalidOperationException("ConnectionStrings:PORTAL_DB_CONNECTION is not configured in appsettings");
             var configBuilder = new ConfigurationBuilder()
                  .AddConfiguration(initConfig)
-                 .AddPostgreSqlConfiguration(initConfig["ConnectionStrings:PORTAL_DB_CONNECTION"]);
+                 .AddPostgreSqlConfiguration(portalDbConnection);
 
             var configuration = configBuilder.Build();
 
@@ -120,7 +127,6 @@ namespace NokPortalAPI
 
             // Set up application configuration based on environment
             builder.Host.UseSerilog();
-
 
             // Add Localization and set resource path
             builder.Services.AddLocalization();
@@ -177,10 +183,8 @@ namespace NokPortalAPI
             // Add HttpClient
             builder.Services.AddHttpClient();
 
-
-
             // Add CORS policy
-            var corsOrigins = builder.Configuration.GetSection("CorsAllowedOrigins").Get<string[]>() ?? throw new ArgumentNullException("Cors:AllowedOrigins configuration is missing");
+            var corsOrigins = builder.Configuration.GetSection("CorsAllowedOrigins").Get<string[]>() ?? throw new InvalidOperationException("Cors:AllowedOrigins configuration is missing");
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy(
@@ -189,12 +193,6 @@ namespace NokPortalAPI
                         .AllowAnyHeader()
                         .AllowAnyMethod());
             });
-
-            //builder.Services.AddFluentValidationAutoValidation();
-            //builder.Services.AddFluentValidationClientsideAdapters();
-            //builder.Services.AddValidatorsFromAssemblyContaining<RequestTokenValidation>();
-
-            //builder.Services.AddValidatorsFromAssemblyContaining<App>();
 
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>
@@ -259,9 +257,10 @@ namespace NokPortalAPI
                 {
                     options.AddPolicy(permission, policy => policy.Requirements.Add(new RoleRequirementModel(permission)));
                 }
-                options.AddPolicy("RootOnly", policy => policy.Requirements.Add(new MultiRoleRequirementModel(new[] { "Root", })));
-                options.AddPolicy("RootOrAdmin", policy => policy.Requirements.Add(new MultiRoleRequirementModel(new[] { "Root", "Admin" })));
-                options.AddPolicy("AllRole", policy => policy.Requirements.Add(new MultiRoleRequirementModel(new[] { "Root", "Admin", "EndUser" })));
+
+                options.AddPolicy("RootOnly", policy => policy.Requirements.Add(new MultiRoleRequirementModel(["Root",])));
+                options.AddPolicy("RootOrAdmin", policy => policy.Requirements.Add(new MultiRoleRequirementModel(["Root", "Admin"])));
+                options.AddPolicy("AllRole", policy => policy.Requirements.Add(new MultiRoleRequirementModel(["Root", "Admin", "EndUser"])));
             });
 
             builder.Services.AddEndpointsApiExplorer();
@@ -272,12 +271,10 @@ namespace NokPortalAPI
             if (dbInitialize)
             {
                 // Initialize the database with seed data
-                using (var scope = app.Services.CreateScope())
-                {
-                    var services = scope.ServiceProvider;
-                    var context = services.GetRequiredService<AppDbContext>();
-                    DbInitializer.Initialize(context);
-                }
+                using var scope = app.Services.CreateScope();
+                var services = scope.ServiceProvider;
+                var context = services.GetRequiredService<AppDbContext>();
+                DbInitializer.Initialize(context);
             }
 
             if (app.Environment.IsDevelopment())

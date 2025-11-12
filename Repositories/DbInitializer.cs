@@ -2,8 +2,15 @@
 
 namespace NokPortalAPI.Repositories
 {
+    /// <summary>
+    /// Database initializer to seed default data.
+    /// </summary>
     public static class DbInitializer
     {
+        /// <summary>
+        /// Initializes the database with default data.
+        /// </summary>
+        /// <param name="context">The application database context.</param>
         public static void Initialize(AppDbContext context)
         {
             // Ensure the database is created

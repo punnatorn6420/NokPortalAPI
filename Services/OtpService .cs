@@ -1,16 +1,19 @@
-using System.Security.Cryptography;
-using System.Text;
+using Microsoft.Extensions.Options;
+using NokAir.Shared.Security.Models.Common;
 using NokAir.Shared.Security.Services.InHouse;
 using NokPortalAPI.Dtos;
 using NokPortalAPI.Dtos.Otp;
-using NokAir.Shared.Security.Models.Common;
-using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Net.Mail;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace NokPortalAPI.Services
 {
+    /// <summary>
+    /// OTP service.
+    /// </summary>
     public class OtpService : IOtpService
     {
         private static readonly TimeSpan Ttl = TimeSpan.FromMinutes(3);
@@ -18,26 +21,41 @@ namespace NokPortalAPI.Services
         private readonly IJwtService _jwtService;
         private readonly JwtSettingsModel _baseJwt;
 
-        public OtpService(IUserService<UserDto> userService,
-                          IJwtService jwtService,
-                          IOptions<JwtSettingsModel> jwtOptions)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OtpService"/> class.
+        /// </summary>
+        /// <param name="userService"></param>
+        /// <param name="jwtService"></param>
+        /// <param name="jwtOptions"></param>
+        public OtpService(
+                        IUserService<UserDto> userService,
+                        IJwtService jwtService,
+                        IOptions<JwtSettingsModel> jwtOptions)
         {
             _userService = userService;
             _jwtService = jwtService;
             _baseJwt = jwtOptions.Value ?? throw new InvalidOperationException("JwtSettings is not bound.");
 
             if (string.IsNullOrWhiteSpace(_baseJwt.SecretKey) || _baseJwt.SecretKey.Length < 32)
+            {
                 throw new InvalidOperationException("JwtSettings:SecretKey must be set and >= 32 characters.");
+            }
 
             if (string.IsNullOrWhiteSpace(_baseJwt.Issuer) || string.IsNullOrWhiteSpace(_baseJwt.Audience))
+            {
                 throw new InvalidOperationException("JwtSettings:Issuer/Audience are required.");
+            }
         }
 
+        /// <inheritdoc/>
         public async Task<SendOtpResponseDto> SendAsync(SendOtpRequestDto req)
         {
             var email = req.Email?.Trim();
             if (string.IsNullOrWhiteSpace(email))
+            {
                 throw new InvalidOperationException("Email is required.");
+            }
+
             var emailLower = email.ToLowerInvariant();
 
             var salt = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
@@ -46,14 +64,14 @@ namespace NokPortalAPI.Services
             var expiresAt = DateTime.Now.Add(Ttl);
 
             var claims = new[]
-                        {
+                {
                 new Claim(JwtRegisteredClaimNames.Sub, emailLower),
                 new Claim(ClaimTypes.NameIdentifier, emailLower),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
                 new Claim("typ", "otp"),
                 new Claim("otp_salt",  salt),
                 new Claim("otp_hash",  codeHash),
-            };
+                };
 
             var otpJwtSettings = new JwtSettingsModel
             {
@@ -204,7 +222,7 @@ namespace NokPortalAPI.Services
             return new SendOtpResponseDto(VerifyToken: verifyToken, ExpiresAt: expiresAt);
         }
 
-
+        /// <inheritdoc/>
         public async Task<string> VerifyAsync(VerifyOtpRequestDto req)
         {
             const string FailMessage = "The verification code is invalid or has expired. Please try again.";
@@ -225,7 +243,10 @@ namespace NokPortalAPI.Services
             try
             {
                 principal = _jwtService.DecodeToken(req.VerifyToken!, _baseJwt.SecretKey);
-                if (principal is null) throw new InvalidOperationException();
+                if (principal is null)
+                {
+                    throw new InvalidOperationException();
+                }
             }
             catch
             {
@@ -236,50 +257,64 @@ namespace NokPortalAPI.Services
                 principal.Claims.FirstOrDefault(c => string.Equals(c.Type, type, StringComparison.OrdinalIgnoreCase))?.Value;
 
             if (!string.Equals(Claim("typ"), "otp", StringComparison.Ordinal))
+            {
                 throw new InvalidOperationException(FailMessage);
+            }
 
             var iss = Claim("iss");
             var aud = Claim("aud");
             if (!string.Equals(iss, expectedIssuer, StringComparison.Ordinal) ||
                 !string.Equals(aud, expectedAudience, StringComparison.Ordinal))
+            {
                 throw new InvalidOperationException(FailMessage);
+            }
 
             var emailInToken = Claim(JwtRegisteredClaimNames.Sub)
                             ?? Claim(ClaimTypes.NameIdentifier)
                             ?? Claim("nameid");
             if (string.IsNullOrWhiteSpace(emailInToken) ||
                 !string.Equals(emailInToken.Trim().ToLowerInvariant(), submittedEmail, StringComparison.Ordinal))
+            {
                 throw new InvalidOperationException(FailMessage);
+            }
 
             var salt = Claim("otp_salt");
             var expectedHash = Claim("otp_hash");
             if (string.IsNullOrEmpty(salt) || string.IsNullOrEmpty(expectedHash))
+            {
                 throw new InvalidOperationException(FailMessage);
+            }
 
             var digits = NormalizeDigits(req.Code);
             if (digits.Length != 6)
+            {
                 throw new InvalidOperationException(FailMessage);
+            }
 
             var submittedHash = Sha256($"{digits}:{salt}");
             if (!FixedTimeEqualsHex(submittedHash, expectedHash))
+            {
                 throw new InvalidOperationException(FailMessage);
+            }
 
             var user = await _userService.GetUserByEmailAsync(emailInToken!);
-            if (user is null) throw new InvalidOperationException(FailMessage);
+            if (user is null)
+            {
+                throw new InvalidOperationException(FailMessage);
+            }
 
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Jti,       user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email,     user.Email),
-                new Claim(JwtRegisteredClaimNames.UniqueName,$"{user.FirstName} {user.LastName}"),
+                new Claim(JwtRegisteredClaimNames.UniqueName, $"{user.FirstName} {user.LastName}"),
             };
 
             var token = _jwtService.GenerateJwtTokenInfo(claims);
             return token.Token!;
         }
 
-
-
+        /// <inheritdoc/>
         public Task<SendOtpResponseDto> GenerateDecoyAsync(string email)
         {
             var salt = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
@@ -309,8 +344,6 @@ namespace NokPortalAPI.Services
             return Task.FromResult(dto);
         }
 
-
-
         private static string NormalizeDigits(string s)
             => new string(s.Where(char.IsDigit).ToArray());
 
@@ -325,15 +358,23 @@ namespace NokPortalAPI.Services
         {
             var bytes = RandomNumberGenerator.GetBytes(len);
             var chars = new char[len];
-            for (int i = 0; i < len; i++) chars[i] = (char)('0' + (bytes[i] % 10));
+            for (int i = 0; i < len; i++)
+            {
+                chars[i] = (char)('0' + (bytes[i] % 10));
+            }
+
             return new string(chars);
         }
+
+        /// <summary>
+        /// Computes the SHA-256 hash of the given string.
+        /// </summary>
+        /// <param name="s">The input string.</param>
+        /// <returns>The SHA-256 hash as a hexadecimal string.</returns>
         private static string Sha256(string s)
         {
             using var sha = SHA256.Create();
             return Convert.ToHexString(sha.ComputeHash(Encoding.UTF8.GetBytes(s)));
         }
     }
-
-
 }

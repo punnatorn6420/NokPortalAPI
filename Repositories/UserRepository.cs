@@ -12,6 +12,10 @@ namespace NokPortalAPI.Repositories
     {
         private readonly AppDbContext context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserRepository"/> class.
+        /// </summary>
+        /// <param name="context"></param>
         public UserRepository(AppDbContext context)
         {
             this.context = context;
@@ -25,6 +29,7 @@ namespace NokPortalAPI.Repositories
             return result.Entity;
         }
 
+        /// <inheritdoc/>
         public async Task<MyProfileDto?> GetMyProfileAsync(int userId)
         {
             var user = await context.Users
@@ -34,7 +39,10 @@ namespace NokPortalAPI.Repositories
                     .ThenInclude(ua => ua.App)
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
-            if (user == null) return null;
+            if (user == null)
+            {
+                return null;
+            }
 
             var apps = user.UserAppRoleAssignments
                 .Where(ua => ua.App != null)
@@ -96,6 +104,7 @@ namespace NokPortalAPI.Repositories
                     .ThenInclude(ua => ua.App)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
+
         /// <inheritdoc />
         public async Task<ICollection<User>> GetUsersByAppIdAsync(int appId)
         {
@@ -126,7 +135,11 @@ namespace NokPortalAPI.Repositories
             var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             { "Id", "FirstName", "LastName", "Email", "CreatedAt" };
             var field = string.IsNullOrWhiteSpace(criteria.SortField) ? "Id" : criteria.SortField.Trim();
-            if (!allowed.Contains(field)) field = "Id";
+            if (!allowed.Contains(field))
+            {
+                field = "Id";
+            }
+
             var dir = criteria.Ascending ? "ascending" : "descending";
             query = query.OrderBy($"{field} {dir}");
             var pageNumber = Math.Max(1, criteria.PageNumber);

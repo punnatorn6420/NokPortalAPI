@@ -6,10 +6,17 @@ using System.Linq.Dynamic.Core;
 
 namespace NokPortalAPI.Repositories
 {
+    /// <summary>
+    /// Role repository.
+    /// </summary>
     public class RoleRepository : IRoleRepository<Role>
     {
         private readonly AppDbContext context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RoleRepository"/> class.
+        /// </summary>
+        /// <param name="context"></param>
         public RoleRepository(AppDbContext context)
         {
             this.context = context;
@@ -87,15 +94,19 @@ namespace NokPortalAPI.Repositories
             return await context.SaveChangesAsync();
         }
 
+        /// <inheritdoc/>
         public async Task AssignDefaultRoleAsync(int userId, int defaultRoleId = 3)
         {
-
             if (defaultRoleId <= 0)
+            {
                 throw new ArgumentException("Invalid default role ID");
+            }
 
             var exists = await context.Roles.AnyAsync(r => r.Id == defaultRoleId);
             if (!exists)
+            {
                 throw new Exception($"Role ID {defaultRoleId} does not exist");
+            }
 
             var userRole = new UserRole
             {
@@ -108,6 +119,7 @@ namespace NokPortalAPI.Repositories
             await context.SaveChangesAsync();
         }
 
+        /// <inheritdoc/>
         public async Task<IEnumerable<IRole>> GetAllRolesAsync()
         {
             return await context.Roles
@@ -115,6 +127,5 @@ namespace NokPortalAPI.Repositories
                 .Cast<IRole>()
                 .ToListAsync();
         }
-
     }
 }

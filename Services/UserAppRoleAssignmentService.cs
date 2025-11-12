@@ -10,7 +10,6 @@ using NokPortalAPI.Repositories;
 using System.Security.Claims;
 using System.Text;
 
-
 namespace NokPortalAPI.Services
 {
     /// <summary>
@@ -25,6 +24,15 @@ namespace NokPortalAPI.Services
         private readonly IUserRepository<User> userRepository;
         private readonly HttpClient httpClient;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserAppRoleAssignmentService"/> class.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="httpClient"></param>
+        /// <param name="appRepository"></param>
+        /// <param name="userAppRoleAssignmentRepository"></param>
+        /// <param name="userRepository"></param>
+        /// <param name="jwtService"></param>
         public UserAppRoleAssignmentService(
             AppDbContext context,
             HttpClient httpClient,
@@ -54,15 +62,12 @@ namespace NokPortalAPI.Services
             var user = await userRepository.GetUserByIdAsync(userAppAssignmentReq.UserId)
                 ?? throw new DataValidationException("User not found. Please check the user.");
 
-
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-
                 var deletedCount = await userAppRoleAssignmentRepository.DeleteAllUserAppRoleAssignmentsByUserAndAppAsync(
                     userAppAssignmentReq.UserId,
-                    userAppAssignmentReq.AppId
-                );
+                    userAppAssignmentReq.AppId);
 
                 foreach (var roleId in userAppAssignmentReq.Roles)
                 {
@@ -131,7 +136,6 @@ namespace NokPortalAPI.Services
                 throw;
             }
         }
-
 
         /// <inheritdoc />
         public async Task<JwtInfoModel> GetJwtTokenInfoByUserAppAsync(int userId, int appId)
