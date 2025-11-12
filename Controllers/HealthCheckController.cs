@@ -6,6 +6,9 @@ using NokPortalAPI.Shareds;
 
 namespace NokPortalAPI.Controllers
 {
+    /// <summary>
+    /// Controller for health check operations.
+    /// </summary>
     [ApiController]
     [Route("v1/health-check")]
     public class HealthCheckController : InHouseControllerBase
@@ -13,15 +16,22 @@ namespace NokPortalAPI.Controllers
         private readonly ReloadFileConfig reloadFileConfig;
         private readonly CorsPolicyReloader corsPolicyReloader;
 
+        /// <summary>
+        /// Controller for health check operations.
+        /// </summary>
         public HealthCheckController(
             ReloadFileConfig reloadFileConfig,
             CorsPolicyReloader corsPolicyReloader,
-            IResponseFactory resFactory) : base(resFactory)
+            IResponseFactory resFactory)
+            : base(resFactory)
         {
             this.reloadFileConfig = reloadFileConfig;
             this.corsPolicyReloader = corsPolicyReloader;
         }
 
+        /// <summary>
+        /// Reloads the configuration and CORS policy.
+        /// </summary>
         [AllowAnonymous]
         [HttpGet("reload-config")]
         public ActionResult ReloadConfig()

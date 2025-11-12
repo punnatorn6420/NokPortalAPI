@@ -9,26 +9,37 @@ using NokPortalAPI.Services;
 
 namespace NokPortalAPI.Controllers
 {
+    /// <summary>
+    /// Controller for user management operations.
+    /// </summary>
     [ApiController]
     [Route("v1/users")]
     public class UserController : InHouseControllerBase
     {
         private readonly IUserService<UserDto> userService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserController"/> class.
+        /// </summary>
         public UserController(
             IUserService<UserDto> userService,
-            IResponseFactory resFactory) : base(resFactory)
+            IResponseFactory resFactory)
+            : base(resFactory)
         {
             this.userService = userService;
         }
 
+        /// <summary>
+        /// Searches for users based on the provided criteria.
+        /// </summary>
         [HttpGet("search")]
         [Authorize(Policy = "RootOrAdmin")]
-        public async Task<ActionResult> SearchUsersAsync([FromQuery] string? keyword = null,
-                                                        [FromQuery] int? pageNumber = 1,
-                                                        [FromQuery] int? pageSize = 25,
-                                                        [FromQuery] bool? ascending = true,
-                                                        [FromQuery] string? sortField = null)
+        public async Task<ActionResult> SearchUsersAsync(
+            [FromQuery] string? keyword = null,
+            [FromQuery] int? pageNumber = 1,
+            [FromQuery] int? pageSize = 25,
+            [FromQuery] bool? ascending = true,
+            [FromQuery] string? sortField = null)
         {
             var criteria = new UserSearchCriteriaDto
             {
@@ -39,7 +50,9 @@ namespace NokPortalAPI.Controllers
                 Ascending = ascending ?? true,
             };
             if (!ModelState.IsValid)
+            {
                 return BadRequestResponseFromInvalidRequest();
+            }
 
             try
             {
@@ -56,6 +69,12 @@ namespace NokPortalAPI.Controllers
             }
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="dto"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         [HttpPut("{userId}/role")]
         [Authorize(Policy = "RootOnly")]
         public async Task<IActionResult> UpdateUserRoleAsync(int userId, [FromBody] UpdateUserRoleDto dto)

@@ -5,11 +5,18 @@ using NokPortalAPI.Dtos;
 
 namespace NokPortalAPI.Services
 {
+    /// <summary>
+    /// Service for Microsoft Active Directory integration.
+    /// </summary>
     public class MsActiveDirectoryService
     {
         private readonly ServiceSettings serviceSettings;
         private readonly HttpClient httpClient = new HttpClient();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MsActiveDirectoryService"/> class.
+        /// </summary>
+        /// <param name="options"></param>
         public MsActiveDirectoryService(IOptions<ServiceSettings> options)
         {
             this.serviceSettings = options.Value;
@@ -28,6 +35,7 @@ namespace NokPortalAPI.Services
         /// - scope: Permissions requested (e.g., "User.Read" for basic profile access)
         /// - state: Custom parameter to maintain state between request and callback (set to "signin")
         /// - prompt: Set to "select_account" to force account selection dialog
+        /// </remarks>
         public async Task<string> GenerateAuthorizationUrlSignInAsync()
         {
             var clientId = serviceSettings.OAuth2.ClientId ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
@@ -54,6 +62,7 @@ namespace NokPortalAPI.Services
         /// - scope: Permissions requested (e.g., "User.Read" for basic profile access)
         /// - state: Custom parameter to maintain state between request and callback (set to "signup")
         /// - prompt: Set to "select_account" to force account selection dialog
+        /// </remarks>
         public async Task<string> GenerateAuthorizationUrlSignUpAsync()
         {
             var clientId = serviceSettings.OAuth2.ClientId ?? throw new InvalidConfigurationException("OAuth2 settings are missing");

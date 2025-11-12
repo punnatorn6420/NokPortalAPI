@@ -3,8 +3,14 @@ using NokPortalAPI.Entities;
 
 namespace NokPortalAPI.Extensions
 {
+    /// <summary>
+    /// Extension methods for User-related conversions.
+    /// </summary>
     public static class UserExtensions
     {
+        /// <summary>
+        /// Converts UserDto to User entity.
+        /// </summary>
         public static User ToEntity(this UserDto userDto)
         {
             return new User
@@ -22,6 +28,9 @@ namespace NokPortalAPI.Extensions
             };
         }
 
+        /// <summary>
+        /// Converts UserSearchCriteriaDto to UserSearchCriteria entity.
+        /// </summary>
         public static UserSearchCriteria ToEntity(this UserSearchCriteriaDto userSearchCriteriaDto)
         {
             return new UserSearchCriteria
@@ -34,6 +43,9 @@ namespace NokPortalAPI.Extensions
             };
         }
 
+        /// <summary>
+        /// Converts UserSearchCriteria entity to UserSearchCriteriaDto.
+        /// </summary>
         public static UserSearchCriteriaDto ToDto(this UserSearchCriteria userSearchCriteria)
         {
             return new UserSearchCriteriaDto
@@ -46,6 +58,9 @@ namespace NokPortalAPI.Extensions
             };
         }
 
+        /// <summary>
+        /// Converts User entity to UserDto.
+        /// </summary>
         public static UserDto ToDto(this User user)
         {
             return new UserDto

@@ -4,19 +4,34 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace NokPortalAPI.Dtos
 {
+    /// <summary>
+    /// Data transfer object for application information.
+    /// </summary>
     public class AppDto
     {
+        /// <summary>
+        /// Gets or sets the unique identifier for the application.
+        /// </summary>
         [Required]
         public int Id { get; set; }
 
+        /// <summary>
+        /// Gets or sets the name of the application.
+        /// </summary>
         [Required]
         [MaxLength(255)]
         public string Name { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the header of the application.
+        /// </summary>
         [Required]
         [MaxLength(255)]
         public string Header { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the subheader of the application.
+        /// </summary>
         [AllowNull]
         [MaxLength(255)]
         public string Subheader { get; set; } = string.Empty;
@@ -34,14 +49,19 @@ namespace NokPortalAPI.Dtos
         [MaxLength(255)]
         public string ClientUrl { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the backend URL.
+        /// </summary>
         [Required]
         [MaxLength(255)]
         public string BackendUrl { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the image URL.
+        /// </summary>
         [Required]
         [MaxLength(255)]
-        public string ImageUrl { get; set; } = "";
-
+        public string ImageUrl { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the secret key for JWT.
@@ -56,6 +76,9 @@ namespace NokPortalAPI.Dtos
         [Required]
         public int JwtExpiryHours { get; set; } = 8;
 
+        /// <summary>
+        /// Gets or sets remarks about the application.
+        /// </summary>
         [AllowNull]
         [MaxLength(255)]
         public string Remark { get; set; } = string.Empty;

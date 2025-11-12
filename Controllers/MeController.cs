@@ -9,6 +9,9 @@ using NokPortalAPI.Services;
 
 namespace NokPortalAPI.Controllers
 {
+    /// <summary>
+    /// Controller for user-related operations.
+    /// </summary>
     [ApiController]
     [Route("v1/me")]
     public class MeController : InHouseControllerBase
@@ -17,11 +20,15 @@ namespace NokPortalAPI.Controllers
         private readonly IUserAppRoleAssignmentService userAppRoleAssignmentService;
         private readonly IUserService<UserDto> userService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MeController"/> class.
+        /// </summary>
         public MeController(
             IAppService appService,
             IUserAppRoleAssignmentService userAppRoleAssignmentService,
             IUserService<UserDto> userService,
-            IResponseFactory resFactory) : base(resFactory)
+            IResponseFactory resFactory)
+            : base(resFactory)
         {
             this.appService = appService;
             this.userAppRoleAssignmentService = userAppRoleAssignmentService;

@@ -2,10 +2,20 @@
 
 namespace NokPortalAPI.Enums
 {
+    /// <summary>
+    /// OTP delivery channels.
+    /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum OtpChannel
     {
+        /// <summary>
+        /// Email channel
+        /// </summary>
         Email,
-        Sms
+
+        /// <summary>
+        /// SMS channel
+        /// </summary>
+        Sms,
     }
 }

@@ -7,40 +7,76 @@ namespace NokPortalAPI.Dtos
     /// </summary>
     public class MicrosoftUserInfo
     {
+        /// <summary>
+        /// Gets or sets the OData context.
+        /// </summary>
         [JsonPropertyName("@odata.context")]
-        required public string ODataContext { get; set; }
+        public required string ODataContext { get; set; }
 
+        /// <summary>
+        /// Gets or sets the business phone numbers.
+        /// </summary>
         [JsonPropertyName("businessPhones")]
-        required public List<string> BusinessPhones { get; set; }
+        public required List<string> BusinessPhones { get; set; }
 
+        /// <summary>
+        /// Gets or sets the display name.
+        /// </summary>
         [JsonPropertyName("displayName")]
-        required public string DisplayName { get; set; }
+        public required string DisplayName { get; set; }
 
+        /// <summary>
+        /// Gets or sets the given name.
+        /// </summary>
         [JsonPropertyName("givenName")]
-        required public string GivenName { get; set; }
+        public required string GivenName { get; set; }
 
+        /// <summary>
+        /// Gets or sets the job title.
+        /// </summary>
         [JsonPropertyName("jobTitle")]
-        required public string JobTitle { get; set; }
+        public required string JobTitle { get; set; }
 
+        /// <summary>
+        /// Gets or sets the email address.
+        /// </summary>
         [JsonPropertyName("mail")]
-        required public string Mail { get; set; }
+        public required string Mail { get; set; }
 
+        /// <summary>
+        /// Gets or sets the mobile phone number.
+        /// </summary>
         [JsonPropertyName("mobilePhone")]
-        required public string MobilePhone { get; set; }
+        public required string MobilePhone { get; set; }
 
+        /// <summary>
+        /// Gets or sets the office location.
+        /// </summary>
         [JsonPropertyName("officeLocation")]
-        required public string OfficeLocation { get; set; }
+        public required string OfficeLocation { get; set; }
 
+        /// <summary>
+        /// Gets or sets the preferred language.
+        /// </summary>
         [JsonPropertyName("preferredLanguage")]
-        required public string PreferredLanguage { get; set; }
+        public required string PreferredLanguage { get; set; }
 
+        /// <summary>
+        /// Gets or sets the surname.
+        /// </summary>
         [JsonPropertyName("surname")]
-        required public string Surname { get; set; }
+        public required string Surname { get; set; }
 
+        /// <summary>
+        /// Gets or sets the user principal name.
+        /// </summary>
         [JsonPropertyName("userPrincipalName")]
-        required public string UserPrincipalName { get; set; }
+        public required string UserPrincipalName { get; set; }
 
+        /// <summary>
+        /// ID of the user.
+        /// </summary>
         [JsonPropertyName("id")]
-        required public string Id { get; set; }
+        public required string Id { get; set; }
     }
 }

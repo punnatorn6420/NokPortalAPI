@@ -1,11 +1,18 @@
 ﻿namespace NokPortalAPI.Shareds.DB
 {
-    using System.Data;
     using Microsoft.Data.SqlClient;
     using NokAir.Shared.Infrastructures;
+    using System.Data;
 
+    /// <summary>
+    /// Database connection factory.
+    /// </summary>
     public class DbConnectionFactory : DbConnectionFactoryBase
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DbConnectionFactory"/> class.
+        /// </summary>
+        /// <param name="configuration"></param>
         public DbConnectionFactory(IConfiguration configuration)
             : base(configuration)
         {

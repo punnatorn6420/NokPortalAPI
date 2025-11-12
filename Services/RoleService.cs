@@ -1,5 +1,4 @@
-﻿
-using NokAir.Core.Interfaces.Rbac.Entities;
+﻿using NokAir.Core.Interfaces.Rbac.Entities;
 using NokPortalAPI.Entities;
 using NokPortalAPI.Repositories;
 
@@ -13,6 +12,11 @@ namespace NokPortalAPI.Services
         private readonly AppDbContext context;
         private readonly IRoleRepository<Role> roleRepository;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RoleService"/> class.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="roleRepository"></param>
         public RoleService(AppDbContext context, IRoleRepository<Role> roleRepository)
         {
             this.context = context;
@@ -31,6 +35,7 @@ namespace NokPortalAPI.Services
             return await roleRepository.IsUserInRolesAsync(userId, permissions);
         }
 
+        /// <inheritdoc/>
         public async Task<IEnumerable<IRole>> GetAllRolesAsync()
         {
             return await roleRepository.GetAllRolesAsync();

@@ -1,6 +1,6 @@
 ﻿using NokAir.Core.Exceptions;
-using NokPortalAPI.Extensions;
 using NokPortalAPI.Dtos;
+using NokPortalAPI.Extensions;
 using NokPortalAPI.Repositories;
 
 namespace NokPortalAPI.Services
@@ -13,6 +13,11 @@ namespace NokPortalAPI.Services
         private readonly AppDbContext context;
         private readonly IAppRepository appRepository;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AppService"/> class.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="appRepository"></param>
         public AppService(AppDbContext context, IAppRepository appRepository)
         {
             this.context = context;

@@ -9,6 +9,9 @@ using NokPortalAPI.Services;
 
 namespace NokPortalAPI.Controllers
 {
+    /// <summary>
+    /// Controller for application management.
+    /// </summary>
     [ApiController]
     [Route("v1/apps")]
     public class AppController : InHouseControllerBase
@@ -17,11 +20,15 @@ namespace NokPortalAPI.Controllers
         private readonly IUserAppRoleAssignmentService userAppRoleAssignmentService;
         private readonly IUserService<UserDto> userService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AppController"/> class.
+        /// </summary>
         public AppController(
             IAppService appService,
             IUserAppRoleAssignmentService targetAppService,
             IUserService<UserDto> userService,
-            IResponseFactory apiResponseFactory) : base(apiResponseFactory)
+            IResponseFactory apiResponseFactory)
+            : base(apiResponseFactory)
         {
             this.appService = appService;
             this.userAppRoleAssignmentService = targetAppService;
@@ -85,7 +92,6 @@ namespace NokPortalAPI.Controllers
         [Authorize(Policy = "RootOrAdmin")]
         public async Task<ActionResult> AssignUserToAppAsync(UserAppAssignmentRequest req)
         {
-
             if (!ModelState.IsValid)
             {
                 return BadRequestResponseFromInvalidRequest();
@@ -152,6 +158,9 @@ namespace NokPortalAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// This endpoint is used to get user roles by app.
+        /// </summary>
         [HttpGet("{appId}/user/{userId}/roles")]
         [Authorize(Policy = "RootOrAdmin")]
         public async Task<ActionResult> GetUserRolesByApp(int userId, int appId, [FromQuery] EnvironmentType env)
@@ -215,15 +224,15 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpGet("search")]
         [Authorize(Policy = "RootOrAdmin")]
-        public async Task<ActionResult> SearchAppAsync([FromQuery] string? keyword = null,
-                                                        [FromQuery] int? pageNumber = 1,
-                                                        [FromQuery] int? pageSize = 25,
-                                                        [FromQuery] bool? ascending = true,
-                                                        [FromQuery] string? sortField = null)
+        public async Task<ActionResult> SearchAppAsync(
+            [FromQuery] string? keyword = null,
+            [FromQuery] int? pageNumber = 1,
+            [FromQuery] int? pageSize = 25,
+            [FromQuery] bool? ascending = true,
+            [FromQuery] string? sortField = null)
         {
             try
             {
-
                 var criteria = new AppSearchDto
                 {
                     Keyword = keyword ?? string.Empty,

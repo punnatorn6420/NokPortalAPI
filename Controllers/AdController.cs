@@ -13,6 +13,9 @@ using System.Security.Claims;
 
 namespace NokPortalAPI.Controllers
 {
+    /// <summary>
+    /// Controller for Microsoft Active Directory integration.
+    /// </summary>
     [ApiController]
     [Route("v1/ad")]
     public class AdController : InHouseControllerBase
@@ -21,11 +24,15 @@ namespace NokPortalAPI.Controllers
         private readonly IUserService<UserDto> userService;
         private readonly IJwtService jwtService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdController"/> class.
+        /// </summary>
         public AdController(
             MsActiveDirectoryService msActiveDirectoryService,
             IUserService<UserDto> userService,
             IJwtService jwtService,
-            IResponseFactory resFactory) : base(resFactory)
+            IResponseFactory resFactory)
+            : base(resFactory)
         {
             this.msActiveDirectoryService = msActiveDirectoryService;
             this.userService = userService;
@@ -194,7 +201,6 @@ namespace NokPortalAPI.Controllers
                     new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
                     new Claim(JwtRegisteredClaimNames.UniqueName, string.Format("{0} {1}", user.FirstName, user.LastName)),
-                    // new Claim("roles", string.Join(",", user.Roles.Select(r => r.Name).ToList())),
                 };
                 var token = jwtService.GenerateJwtTokenInfo(cliams!);
                 return OkResponseWithResult(token);

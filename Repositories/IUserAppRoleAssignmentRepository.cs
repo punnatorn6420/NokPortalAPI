@@ -45,7 +45,6 @@ namespace NokPortalAPI.Repositories
         /// <returns>True if the user is assigned to the app; otherwise, false.</returns>
         Task<bool> IsUserAssignedToAppAsync(int userId, int appId);
 
-
         /// <summary>
         ///  Gets user role IDs for a specific app asynchronously.
         /// </summary>

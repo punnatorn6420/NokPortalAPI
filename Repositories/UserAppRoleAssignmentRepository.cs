@@ -3,10 +3,17 @@ using NokPortalAPI.Entities;
 
 namespace NokPortalAPI.Repositories
 {
+    /// <summary>
+    /// User App Role Assignment Repository
+    /// </summary>
     public class UserAppRoleAssignmentRepository : IUserAppRoleAssignmentRepository
     {
         private readonly AppDbContext context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserAppRoleAssignmentRepository"/> class.
+        /// </summary>
+        /// <param name="context"></param>
         public UserAppRoleAssignmentRepository(AppDbContext context)
         {
             this.context = context;
@@ -45,6 +52,7 @@ namespace NokPortalAPI.Repositories
                 .AnyAsync(x => x.UserId == userId && x.AppId == appId && x.RoleId == roleId);
         }
 
+        /// <inheritdoc/>
         public Task<List<int>> GetUserRoleIdsForAppAsync(int userId, int appId)
         {
             return context.UserAppRoleAssignments
@@ -60,6 +68,7 @@ namespace NokPortalAPI.Repositories
                 .AnyAsync(x => x.UserId == userId && x.AppId == appId);
         }
 
+        /// <inheritdoc/>
         public async Task<IList<int>> GetUserRoleIdsByUserAndAppAsync(int userId, int appId)
         {
             return await context.UserAppRoleAssignments

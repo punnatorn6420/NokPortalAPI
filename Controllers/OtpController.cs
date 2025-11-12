@@ -9,29 +9,43 @@ using NokPortalAPI.Services;
 
 namespace NokPortalAPI.Controllers;
 
+/// <summary>
+/// Controller for OTP operations.
+/// </summary>
 [ApiController]
 [Route("v1/otp")]
 public class OtpController : InHouseControllerBase
 {
     private readonly IOtpService otpService;
 
-    public OtpController(IOtpService otpService, IResponseFactory resFactory) : base(resFactory)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OtpController"/> class.
+    /// </summary>
+    public OtpController(IOtpService otpService, IResponseFactory resFactory)
+        : base(resFactory)
     {
         this.otpService = otpService;
-
     }
 
+    /// <summary>
+    /// Sends an OTP to the specified channel.
+    /// </summary>
     [HttpPost("send")]
     [AllowAnonymous]
     public async Task<IActionResult> SendAsync(
     [FromBody] SendOtpRequestDto dto,
     [FromServices] IUserService<UserDto> userService)
     {
-        if (!ModelState.IsValid) return BadRequestResponseFromInvalidRequest();
+        if (!ModelState.IsValid)
+        {
+            return BadRequestResponseFromInvalidRequest();
+        }
 
         var email = dto.Email.Trim().ToLowerInvariant();
         if (dto.Channel != OtpChannel.Email)
+        {
             return BadRequestResponseFromErrorCode("unsupported_channel");
+        }
 
         var user = await userService.GetUserByEmailAsync(email);
 
@@ -46,11 +60,17 @@ public class OtpController : InHouseControllerBase
         });
     }
 
+    /// <summary>
+    /// Verifies the provided OTP.
+    /// </summary>
     [Authorize]
     [HttpPost("verify")]
     public async Task<IActionResult> VerifyAsync([FromBody] VerifyOtpRequestDto dto)
     {
-        if (!ModelState.IsValid) return BadRequestResponseFromInvalidRequest();
+        if (!ModelState.IsValid)
+        {
+            return BadRequestResponseFromInvalidRequest();
+        }
 
         try
         {
