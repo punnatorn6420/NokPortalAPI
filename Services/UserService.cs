@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NokAir.Core.Abstractions.Services.Rbac;
 using NokAir.Core.Exceptions;
-using NokAir.Core.Interfaces.Rbac.Services;
 using NokPortalAPI.Dtos;
 using NokPortalAPI.Entities;
 using NokPortalAPI.Extensions;

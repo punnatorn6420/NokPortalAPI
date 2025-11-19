@@ -1,5 +1,5 @@
-﻿using NokAir.Core.Interfaces.Rbac.Entities;
-using NokAir.Core.Interfaces.Rbac.Services;
+﻿using NokAir.Core.Abstractions.Entities.Rbac;
+using NokAir.Core.Abstractions.Services.Rbac;
 
 namespace NokPortalAPI.Services
 {

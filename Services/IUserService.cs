@@ -1,4 +1,4 @@
-﻿using NokAir.Core.Interfaces.Rbac.Services;
+﻿using NokAir.Core.Abstractions.Services.Rbac;
 using NokPortalAPI.Dtos;
 
 namespace NokPortalAPI.Services
@@ -24,14 +24,14 @@ namespace NokPortalAPI.Services
         Task<(IList<UserDto> Items, int TotalRecords)> GetUsersByCriteriaAsync(UserSearchCriteriaDto searchCriteriaDto);
 
         /// <summary>
-        ///
+        /// Gets the profile of the current user.
         /// </summary>
         /// <param name="userId"></param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         Task<MyProfileDto?> GetMyProfileAsync(int userId);
 
         /// <summary>
-        ///
+        /// Updates the role of a user.
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="roleId"></param>

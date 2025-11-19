@@ -1,12 +1,11 @@
-﻿using Newtonsoft.Json;
-using NokAir.Core.Interfaces.Rbac.Entities;
+﻿using NokAir.Core.Abstractions.Entities.Rbac;
 
 namespace NokPortalAPI.Entities
 {
     /// <summary>
     /// Represents the association between a role and a permission.
     /// </summary>
-    public class RolePermission : IRolePermission
+    public class RolePermission : IRolePrivilege
     {
         /// <summary>
         /// Gets or sets the role ID.

@@ -1,4 +1,4 @@
-﻿using NokAir.Core.Interfaces.Rbac.Repositories;
+﻿using NokAir.Core.Abstractions.Repositories.Rbac;
 using NokPortalAPI.Dtos;
 using NokPortalAPI.Entities;
 
@@ -25,7 +25,7 @@ namespace NokPortalAPI.Repositories
         Task<(IList<User> Items, int TotalRecords)> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria);
 
         /// <summary>
-        ///
+        /// Gets the profile of the current user.
         /// </summary>
         /// <param name="userId"></param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>

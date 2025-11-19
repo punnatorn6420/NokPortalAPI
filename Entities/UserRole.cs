@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using NokAir.Core.Interfaces.Rbac.Entities;
+﻿using NokAir.Core.Abstractions.Entities.Rbac;
 
 namespace NokPortalAPI.Entities
 {

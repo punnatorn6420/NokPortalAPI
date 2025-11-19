@@ -1,4 +1,4 @@
-﻿using NokAir.Core.Interfaces.Rbac.Entities;
+﻿using NokAir.Core.Abstractions.Entities.Rbac;
 using NokPortalAPI.Entities;
 using NokPortalAPI.Repositories;
 
