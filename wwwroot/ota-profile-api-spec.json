@@ -1,0 +1,712 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "version": "1.0.0",
+    "title": "OTA Profile API",
+    "description": "Online Travel Agency Profile API for Nok Portal",
+    "contact": {
+      "name": "Supot Sukvaree",
+      "email": "supot.suk@nokair.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "/v1",
+      "description": "Production server"
+    },
+    {
+      "url": "/v1",
+      "description": "Staging server"
+    }
+  ],
+  "components": {
+    "parameters": {
+      "NokClientId": {
+        "name": "nok-client-id",
+        "in": "header",
+        "description": "Client ID for identifying the client application",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "NokClientType": {
+        "name": "nok-client-type",
+        "in": "header",
+        "description": "Client type for identifying the type of client application",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token for authentication"
+      }
+    },
+    "schemas": {
+      "InvalidRequest": {
+        "$ref": "./components/schemas/responses/InvalidRequestResponse.json"
+      },
+      "InvalidToken": {
+        "$ref": "./components/schemas/responses/InvalidTokenResponse.json"
+      },
+      "InternalServerError": {
+        "$ref": "./components/schemas/responses/InternalServerError.json"
+      },
+      "OtaProfileDto": {
+        "$ref": "./components/schemas/responses/OtaProfileDto.json"
+      },
+      "OtaProfileCreationDto": {
+        "$ref": "./components/schemas/requests/OtaProfileCreationDto.json"
+      },
+      "OtaProfileUpdateDto": {
+        "$ref": "./components/schemas/requests/OtaProfileUpdateDto.json"
+      },
+      "PreferredLanguage": {
+        "type": "string",
+        "enum": ["en", "th"],
+        "description": "Preferred language for airport names"
+      },
+      "PssAccountDto": {
+        "$ref": "./components/schemas/responses/PssAccountDto.json"
+      },
+      "PssAccountCreationDto": {
+        "$ref": "./components/schemas/requests/PssAccountCreationDto.json"
+      },
+      "PssAccountPasswordChangeDto": {
+        "$ref": "./components/schemas/requests/PssAccountPasswordChangeDto.json"
+      },
+      "PssAccountUpdateDto": {
+        "$ref": "./components/schemas/responses/PssAccountUpdateDto.json"
+      },
+      "SuccessResponse": {
+        "$ref": "./components/schemas/responses/SuccessResponse.json"
+      },
+      "UnauthorizedResponse": {
+        "$ref": "./components/schemas/responses/UnauthorizedResponse.json"
+      }
+    }
+  },
+  "paths": {
+    "/ota-profiles": {
+      "post": {
+        "summary": "Create OTA Profile",
+        "description": "Create a new Online Travel Agency (OTA) profile",
+        "operationId": "CreateOtaProfileAsync",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtaProfileCreationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OTA profile created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Search OTA Profiles",
+        "description": "Search for Online Travel Agency (OTA) profiles",
+        "operationId": "SearchOtaProfilesAsync",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 25
+            }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ascending",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OTA profiles retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "correlationId": {
+                      "type": "string",
+                      "example": "ABCD1234-1234-1234-1234-1234567890AB"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "Success"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "totalCount": {
+                          "type": "integer",
+                          "example": 100
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/OtaProfileDto"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ota-profiles/{otaProfileId}": {
+      "get": {
+        "summary": "Get OTA Profile by ID",
+        "description": "Retrieve an Online Travel Agency (OTA) profile by its ID",
+        "operationId": "GetOtaProfileByIdAsync",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "otaProfileId",
+            "in": "path",
+            "required": true,
+            "description": "ID of the OTA profile to retrieve",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OTA profile retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "correlationId": {
+                      "type": "string",
+                      "example": "ABCD1234-1234-1234-1234-1234567890AB"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "Success"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/OtaProfileDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update OTA Profile",
+        "description": "Update an existing Online Travel Agency (OTA) profile by its ID",
+        "operationId": "UpdateOtaProfileAsync",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the OTA profile to update",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtaProfileUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTA profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ota-profiles/{otaProfileId}/pss-accounts": {
+      "get": {
+        "summary": "Get PSS Accounts by OTA Profile ID",
+        "description": "Retrieve PSS accounts associated with a specific OTA profile ID",
+        "operationId": "GetPssAccountsByOtaProfileIdAsync",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "otaProfileId",
+            "in": "path",
+            "required": true,
+            "description": "ID of the OTA profile to retrieve PSS accounts for",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PSS accounts retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "correlationId": {
+                      "type": "string",
+                      "example": "ABCD1234-1234-1234-1234-1234567890AB"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "Success"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "totalCount": {
+                          "type": "integer",
+                          "example": 100
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/PssAccountDto"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create PSS Account for OTA Profile",
+        "description": "Create a new PSS account associated with a specific OTA profile ID",
+        "operationId": "CreatePssAccountForOtaProfileAsync",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "otaProfileId",
+            "in": "path",
+            "required": true,
+            "description": "ID of the OTA profile to create a PSS account for",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PssAccountCreationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "PSS account created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pss-accounts/{pssAccountId}": {
+      "put": {
+        "summary": "Update PSS Account",
+        "description": "Update an existing PSS account by its ID. If default account is set to true, all other accounts for the same OTA profile will be set to false and trying to synchronize to OTA will be done immediately.",
+        "operationId": "UpdatePssAccountAsync",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pssAccountId",
+            "in": "path",
+            "required": true,
+            "description": "ID of the PSS account to update",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PssAccountUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "PSS account updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pss-accounts/{pssAccountId}/change-password": {
+      "put": {
+        "summary": "Change PSS Account Password",
+        "description": "Change the password of an existing PSS account by its ID",
+        "operationId": "ChangePssAccountPasswordAsync",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pssAccountId",
+            "in": "path",
+            "required": true,
+            "description": "ID of the PSS account to change the password for",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PssAccountPasswordChangeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "PSS account password changed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

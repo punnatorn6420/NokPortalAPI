@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "example": 1234567890
+    },
+    "username": {
+      "type": "string",
+      "example": "agent_nok_01"
+    },
+    "password": {
+      "type": "string",
+      "description": "Encrypted password using PSS encryption",
+      "example": "U2FsdGVkX1+abcd1234efgh5678ijkl9012mnop3456qrst7890uvwx="
+    },
+    "environment": {
+      "type": "string",
+      "description": "The environment in which the account is created, e.g., Production or Development",
+      "enum": ["production", "development", "staging"],
+      "example": "production"
+    },
+    "isDefaultAccount": {
+      "type": "boolean",
+      "example": false
+    }
+  }
+}

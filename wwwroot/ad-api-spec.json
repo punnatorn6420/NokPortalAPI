@@ -52,7 +52,7 @@
                       "example": "Success"
                     },
                     "data": {
-                      "$ref": "./components/responses/JwtTokenInfo.json"
+                      "$ref": "./components/schemas/responses/JwtTokenInfo.json"
                     }
                   }
                 }
@@ -141,7 +141,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "./components/requests/MicrosoftTokenRequest.json"
+                "$ref": "./components/schemas/requests/MicrosoftTokenRequest.json"
               }
             }
           }
