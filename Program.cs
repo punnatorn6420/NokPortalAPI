@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NokAir.Configuration.Extensions;
 using NokAir.Core.Abstractions.Services.Rbac;
+using NokAir.Logging.Configurations;
+using NokAir.Logging.Extensions;
+using NokAir.Logging.Services;
 using NokAir.Shared.Api.Responses.Factories;
 using NokAir.Shared.Api.Responses.Factories.InHouse;
 using NokAir.Shared.Middlewares.InHouse.Common;
@@ -38,11 +41,12 @@ namespace NokPortalAPI
         public static void Main(string[] args)
         {
             // Read environment variables
-            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+            var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
             var encryptionKey = Environment.GetEnvironmentVariable("ENCRYPTION_KEY")
                 ?? throw new InvalidOperationException("ENCRYPTION_KEY environment variable is not set");
             var ivKey = Environment.GetEnvironmentVariable("IV_KEY")
                 ?? throw new InvalidOperationException("IV_KEY environment variable is not set");
+            var dbInitialize = bool.TryParse(Environment.GetEnvironmentVariable("DB_INITIALIZE"), out var dbInit) && dbInit;
 
             // Get the host name
             var hostName = Dns.GetHostName();
@@ -79,56 +83,55 @@ namespace NokPortalAPI
                 // Phase 2: Load configuration from database
                 var portalDbConnection = initConfig["ConnectionStrings:PORTAL_DB_CONNECTION"]
                     ?? throw new InvalidOperationException("ConnectionStrings:PORTAL_DB_CONNECTION is not configured in appsettings");
+
                 var configBuilder = new ConfigurationBuilder()
                     .AddConfiguration(initConfig)
                     .AddPostgreSqlConfiguration(portalDbConnection);
 
                 var configuration = configBuilder.Build();
 
-                // Get Serilog connection string from configuration
-                var logTableName = configuration["Serilog:WriteTo:0:Args:tableName"] ?? "portal_app_logs";
-                var schemaName = configuration["Serilog:WriteTo:0:Args:schemaName"] ?? "public";
-                var autoCreateTable = bool.TryParse(configuration["Serilog:WriteTo:0:Args:needAutoCreateTable"], out var needAutoCreateTable) && needAutoCreateTable;
-
                 var protalDbConnection = configuration["ConnectionStrings:PORTAL_DB_CONNECTION"]
                 ?? throw new InvalidOperationException("PORTAL_DB_CONNECTION environment variable is not set");
+
                 var protalDb_Log_Connection = configuration["ConnectionStrings:PORTAL_LOG_DB_CONNECTION"]
                     ?? throw new InvalidOperationException("PORTAL_LOG_DB_CONNECTION environment variable is not set");
 
-                // Define custom columns using ColumnWriterBase
-                var columnOptions = ColumnOptions.Default;
-                columnOptions.Add("host_name", new SinglePropertyColumnWriter("HostName", PropertyWriteMethod.Raw, NpgsqlDbType.Varchar, null, 128));
-                columnOptions.Add("environment", new SinglePropertyColumnWriter("Environment", PropertyWriteMethod.Raw, NpgsqlDbType.Varchar, null, 64));
-                columnOptions.Remove("message_template"); // Remove message_template to avoid storing full message template
-                columnOptions.Remove("log_event"); // Remove log_event to avoid storing full log event object
+                Log.Information("Application configuration loaded from database");
+
+                var builder = WebApplication.CreateBuilder(args);
+
+                // Register AppLoggerConfiguration
+                builder.Services.Configure<AppLoggerConfiguration>(builder.Configuration.GetSection("AppLogger"));
+
+                // Read AppLogger configuration for Serilog setup
+                var appLoggerConfig = builder.Configuration.GetSection("AppLogger").Get<AppLoggerConfiguration>();
+
+                if (appLoggerConfig == null)
+                {
+                    Log.Fatal("AppLogger configuration section is missing or invalid.");
+                    throw new InvalidOperationException("AppLogger configuration is required.");
+                }
+
+                // Set host name and environment in logger config
+                appLoggerConfig.HostName = hostName;
+                appLoggerConfig.Environment = environment;
+
+                // Override the connection string for logging database
+                if (appLoggerConfig.PostgreSqlLogging != null)
+                {
+                    appLoggerConfig.PostgreSqlLogging.ConnectionString = protalDb_Log_Connection;
+                }
 
                 // Reconfigure Serilog with PostgreSQL sink
                 Log.Logger = new LoggerConfiguration()
-                    .ReadFrom.Configuration(configuration) // Read log levels from config
-                    .Enrich.FromLogContext()
-                    .Enrich.WithProperty("HostName", hostName)
-                    .Enrich.WithProperty("Environment", environment)
-                    .WriteTo.Console()
-                    .WriteTo.PostgreSQL(
-                        connectionString: protalDb_Log_Connection,
-                        tableName: logTableName,
-                        columnOptions: columnOptions,
-                        needAutoCreateTable: autoCreateTable,
-                        schemaName: schemaName)
-                    .CreateLogger();
+                       .UseAppLogger(appLoggerConfig)
+                       .CreateLogger();
                 Serilog.Debugging.SelfLog.Enable(msg => Console.Error.WriteLine(msg));
-
-                Log.Information("Application configuration loaded from database");
-
-                var dbInitialize = bool.Parse(Environment.GetEnvironmentVariable("DB_INTIALIZE") ?? "false");
-                var builder = WebApplication.CreateBuilder(args);
+                builder.Host.UseSerilog();
 
                 builder.Configuration.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
                 builder.Configuration.Sources.Clear();
                 builder.Configuration.AddConfiguration(configuration);
-
-                // Set up application configuration based on environment
-                builder.Host.UseSerilog();
 
                 // Add Localization and set resource path
                 builder.Services.AddLocalization();
@@ -156,6 +159,9 @@ namespace NokPortalAPI
 
                 // Register IHttpContextAccessor
                 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+                builder.Services.AddScoped<IAppLogger, AppLoggerService>();
+                builder.Services.AddScoped<AppLoggerService>();
 
                 // Repositories
                 builder.Services.AddScoped<IUserRepository<User>, UserRepository>();
