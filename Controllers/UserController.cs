@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NokAir.Core.Interfaces.Rbac.Entities;
 using NokAir.Shared.Api.Responses.Factories;
 using NokAir.Shared.Controllers;
 using NokPortalAPI.Dtos;
-using NokPortalAPI.Entities;
 using NokPortalAPI.Services;
 
 namespace NokPortalAPI.Controllers

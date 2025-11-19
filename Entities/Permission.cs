@@ -1,12 +1,11 @@
-﻿using NokAir.Core.Interfaces.Rbac.Entities;
-using System.ComponentModel.DataAnnotations;
+﻿using NokAir.Core.Abstractions.Entities.Rbac;
 
 namespace NokPortalAPI.Entities
 {
     /// <summary>
     /// Represents a privilege in Nok Portal system.
     /// </summary>
-    public class Permission : IPermission
+    public class Permission : IPrivilege
     {
         /// <summary>
         /// Permission ID

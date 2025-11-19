@@ -1,6 +1,5 @@
-﻿using NokAir.Core.Interfaces.Rbac.Entities;
-using NokAir.Core.Interfaces.Rbac.Repositories;
-using NokPortalAPI.Entities;
+﻿using NokAir.Core.Abstractions.Entities.Rbac;
+using NokAir.Core.Abstractions.Repositories.Rbac;
 
 namespace NokPortalAPI.Repositories
 {
