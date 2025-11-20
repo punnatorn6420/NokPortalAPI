@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": "string",
+      "description": "Represents an error response for invalid requests",
+      "example": "Invalid request parameters."
+    }
+  }
+}

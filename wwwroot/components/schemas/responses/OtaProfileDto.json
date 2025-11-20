@@ -1,0 +1,44 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "example": 1
+    },
+    "agentCode": {
+      "type": "string",
+      "example": "OTA001"
+    },
+    "companyName": {
+      "type": "string",
+      "example": "Travel World Co., Ltd."
+    },
+    "contactEmail": {
+      "type": "string",
+      "format": "email",
+      "example": "contact@travelworld.com"
+    },
+    "contactPhone": {
+      "type": "string",
+      "example": "+66-2-123-4567"
+    },
+    "address": {
+      "type": "string",
+      "example": "123 Sukhumvit Rd, Bangkok, Thailand"
+    },
+    "defaultCurrency": {
+      "type": "string",
+      "enum": ["THB", "USD", "CNY", "INR"],
+      "example": "THB"
+    },
+    "registrationDate": {
+      "type": "string",
+      "format": "date",
+      "example": "2024-01-15"
+    },
+    "active": {
+      "type": "boolean",
+      "example": true
+    }
+  }
+}

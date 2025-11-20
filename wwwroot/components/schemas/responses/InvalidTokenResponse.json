@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": "string",
+      "description": "Represents an error response for invalid or expired tokens",
+      "example": "The token is invalid or expired"
+    }
+  }
+}

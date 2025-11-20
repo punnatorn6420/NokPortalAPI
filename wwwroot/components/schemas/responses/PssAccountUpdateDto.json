@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "example": 1234567890
+    },
+    "username": {
+      "type": "string",
+      "example": "agent_nok_01"
+    },
+    "environment": {
+      "type": "string",
+      "description": "The environment in which the account is created, e.g., Production or Development",
+      "enum": ["production", "development", "staging"],
+      "example": "production"
+    },
+    "isDefaultAccount": {
+      "type": "boolean",
+      "example": false
+    },
+    "active": {
+      "type": "boolean",
+      "example": true
+    }
+  }
+}
