@@ -32,6 +32,11 @@
       "format": "date",
       "example": "2024-01-15"
     },
+    "currentApiVersion": {
+      "type": "string",
+      "enum": ["v1.0", "v2.0"],
+      "example": "v1.0"
+    },
     "active": {
       "type": "boolean",
       "example": true
