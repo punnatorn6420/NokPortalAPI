@@ -10,7 +10,7 @@ using NokAir.Logging.Extensions;
 using NokAir.Logging.Services;
 using NokAir.Shared.Api.Responses.Factories;
 using NokAir.Shared.Api.Responses.Factories.InHouse;
-using NokAir.Shared.Middlewares.InHouse.Common;
+using NokAir.Shared.Middlewares.Security;
 using NokAir.Shared.Security.AuthorizationHandlers;
 using NokAir.Shared.Security.Models.Common;
 using NokAir.Shared.Security.Services.InHouse;
@@ -162,6 +162,7 @@ namespace NokPortalAPI
 
                 builder.Services.AddScoped<IAppLogger, AppLoggerService>();
                 builder.Services.AddScoped<AppLoggerService>();
+                builder.Services.AddSingleton<Serilog.ILogger>(Log.Logger);
 
                 // Repositories
                 builder.Services.AddScoped<IUserRepository<User>, UserRepository>();
