@@ -124,13 +124,14 @@ namespace NokPortalAPI.Repositories
                 .Include(u => u.UserRoles)
                 .AsNoTracking();
             var keyword = criteria.Keyword?.Trim();
-            if (!string.IsNullOrEmpty(keyword))
+            if (!string.IsNullOrWhiteSpace(keyword))
             {
                 query = query.Where(u =>
-                    (u.FirstName ?? string.Empty).Contains(keyword) ||
-                    (u.LastName ?? string.Empty).Contains(keyword) ||
-                    (u.Email ?? string.Empty).Contains(keyword));
+                    (u.FirstName != null && u.FirstName.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
+                    (u.LastName != null && u.LastName.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
+                    (u.Email != null && u.Email.Contains(keyword, StringComparison.OrdinalIgnoreCase)));
             }
+
             var total = await query.CountAsync();
             var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             { "Id", "FirstName", "LastName", "Email", "CreatedAt" };
