@@ -126,10 +126,11 @@ namespace NokPortalAPI.Repositories
             var keyword = criteria.Keyword?.Trim();
             if (!string.IsNullOrWhiteSpace(keyword))
             {
+                var pattern = $"%{keyword}%";
                 query = query.Where(u =>
-                    (u.FirstName != null && u.FirstName.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
-                    (u.LastName != null && u.LastName.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
-                    (u.Email != null && u.Email.Contains(keyword, StringComparison.OrdinalIgnoreCase)));
+                    (u.FirstName != null && EF.Functions.ILike(u.FirstName, pattern)) ||
+                    (u.LastName != null && EF.Functions.ILike(u.LastName, pattern)) ||
+                    (u.Email != null && EF.Functions.ILike(u.Email, pattern)));
             }
 
             var total = await query.CountAsync();
