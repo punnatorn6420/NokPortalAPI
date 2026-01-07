@@ -79,11 +79,12 @@ namespace NokPortalAPI.Repositories
         /// <inheritdoc/>
         public async Task<bool> IsUserInRolesAsync(int userId, string[] requiredRoles)
         {
-            var count = await context.UserRoles
-                .Where(ur => ur.UserId == userId && requiredRoles.Contains(ur.Role!.Name))
-                .CountAsync();
+            var userRoles = await context.UserRoles
+     .Where(ur => ur.UserId == userId)
+     .Select(ur => ur.Role.Name)
+     .ToListAsync();
 
-            return count > 0;
+            return userRoles.Any(r => requiredRoles.Contains(r));
         }
 
         /// <inheritdoc/>
@@ -111,8 +112,6 @@ namespace NokPortalAPI.Repositories
             {
                 UserId = userId,
                 RoleId = defaultRoleId,
-                Role = null,
-                User = null
             };
             await context.UserRoles.AddAsync(userRole);
             await context.SaveChangesAsync();

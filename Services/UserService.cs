@@ -135,8 +135,6 @@ namespace NokPortalAPI.Services
             {
                 UserId = userId,
                 RoleId = roleId,
-                User = null,
-                Role = null
             };
             await context.UserRoles.AddAsync(newUserRole);
 
