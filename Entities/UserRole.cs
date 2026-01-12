@@ -20,11 +20,15 @@ namespace NokPortalAPI.Entities
         /// <summary>
         /// Navigation properties
         /// </summary>
-        public User? User { get; set; } = new User();
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        public User User { get; set; }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
         /// <summary>
         /// Navigation property for the associated Role.
         /// </summary>
-        public Role? Role { get; set; } = new Role();
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        public Role Role { get; set; }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     }
 }
