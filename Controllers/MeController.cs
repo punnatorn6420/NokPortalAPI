@@ -40,7 +40,7 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpGet("")]
         [Authorize(Policy = "AllRole")]
-        public async Task<ActionResult> GetMeInfo()
+        public async Task<ActionResult> GetMeInfoAsync()
         {
             try
             {

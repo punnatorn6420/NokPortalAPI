@@ -117,7 +117,7 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpGet("{id}")]
         [Authorize(Policy = "RootOrAdmin")]
-        public async Task<ActionResult> GetAppInfo(int id)
+        public async Task<ActionResult> GetAppInfoAsync(int id)
         {
             if (!ModelState.IsValid)
             {
@@ -145,7 +145,7 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpGet("{id}/get-roles")]
         [Authorize(Policy = "RootOrAdmin")]
-        public async Task<ActionResult> GetRoles(int id, [FromQuery] EnvironmentType env)
+        public async Task<ActionResult> GetRolesAsync(int id, [FromQuery] EnvironmentType env)
         {
             try
             {
@@ -163,7 +163,7 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [HttpGet("{appId}/user/{userId}/roles")]
         [Authorize(Policy = "RootOrAdmin")]
-        public async Task<ActionResult> GetUserRolesByApp(int userId, int appId, [FromQuery] EnvironmentType env)
+        public async Task<ActionResult> GetUserRolesByAppAsync(int userId, int appId, [FromQuery] EnvironmentType env)
         {
             try
             {

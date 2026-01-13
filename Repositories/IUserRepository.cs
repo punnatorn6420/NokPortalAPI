@@ -15,20 +15,20 @@ namespace NokPortalAPI.Repositories
         /// </summary>
         /// <param name="appId">Application ID.</param>
         /// <returns>List of users.</returns>
-        Task<ICollection<T>> GetUsersByAppIdAsync(int appId);
+        Task<ICollection<T>> FindUsersByAppIdAsync(int appId);
 
         /// <summary>
         /// Gets list of users by search criteria.
         /// </summary>
         /// <param name="searchCriteria">User search criteria.</param>
         /// <returns>List of users.</returns>
-        Task<(IList<User> Items, int TotalRecords)> GetUsersByCriteriaAsync(UserSearchCriteria searchCriteria);
+        Task<(IList<User> Items, int TotalRecords)> FindUsersByCriteriaAsync(UserSearchCriteria searchCriteria);
 
         /// <summary>
         /// Gets the profile of the current user.
         /// </summary>
         /// <param name="userId"></param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<MyProfileDto?> GetMyProfileAsync(int userId);
+        Task<MyProfileDto?> FindMyProfileAsync(int userId);
     }
 }
