@@ -24,21 +24,21 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc />
-        public async Task<bool> IsUserInRoleAsync(int userId, string permission)
+        public async Task<bool> IsUserInRoleAsync(int userId, string permission, CancellationToken cancellationToken = default)
         {
-            return await roleRepository.IsUserInRoleAsync(userId, permission);
+            return await roleRepository.ExistsUserInRoleAsync(userId, permission);
         }
 
         /// <inheritdoc />
-        public async Task<bool> IsUserInRolesAsync(int userId, string[] permissions)
+        public async Task<bool> IsUserInRolesAsync(int userId, string[] permissions, CancellationToken cancellationToken = default)
         {
-            return await roleRepository.IsUserInRolesAsync(userId, permissions);
+            return await roleRepository.ExistsUserInRolesAsync(userId, permissions);
         }
 
         /// <inheritdoc/>
         public async Task<IEnumerable<IRole>> GetAllRolesAsync()
         {
-            return await roleRepository.GetAllRolesAsync();
+            return await roleRepository.FindAllRolesAsync();
         }
     }
 }

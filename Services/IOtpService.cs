@@ -12,7 +12,7 @@ namespace NokPortalAPI.Services
         /// </summary>
         /// <param name="req"></param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<SendOtpResponseDto> SendAsync(SendOtpRequestDto req);
+        Task<SendOtpResponseDto> NotifyOtpAsync(SendOtpRequestDto req);
 
         /// <summary>
         ///
@@ -26,6 +26,6 @@ namespace NokPortalAPI.Services
         /// </summary>
         /// <param name="req"></param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<string> VerifyAsync(VerifyOtpRequestDto req);
+        Task<string> IsVerificationCodeValidAsync(VerifyOtpRequestDto req);
     }
 }

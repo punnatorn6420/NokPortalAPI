@@ -34,7 +34,7 @@ namespace NokPortalAPI.Controllers
         /// </summary>
         [AllowAnonymous]
         [HttpGet("reload-config")]
-        public ActionResult ReloadConfig()
+        public ActionResult ReloadConfigAsync()
         {
             reloadFileConfig.ReloadConfiguration();
             corsPolicyReloader.ReloadCorsPolicy();

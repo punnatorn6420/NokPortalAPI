@@ -39,7 +39,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<int> DeleteAppByIdAsync(int id)
+        public async Task<int> RemoveAppByIdAsync(int id)
         {
             var app = await context.Apps.FindAsync(id);
             if (app == null)
@@ -52,13 +52,13 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<App?> GetAppByIdAsync(int id)
+        public async Task<App?> FindAppByIdAsync(int id)
         {
             return await context.Apps.FindAsync(id);
         }
 
         /// <inheritdoc/>
-        public async Task<(IList<App> Items, int TotalRecords)> GetAppsByCriteriaAsync(AppSearchDto criteria)
+        public async Task<(IList<App> Items, int TotalRecords)> FindAppsByCriteriaAsync(AppSearchDto criteria)
         {
             IQueryable<App> query = context.Apps;
             var keyword = criteria.Keyword?.Trim();
@@ -76,7 +76,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<IList<App>> GetAppsByUserIdAsync(int userId)
+        public async Task<IList<App>> FindAppsByUserIdAsync(int userId)
         {
             return await context.Apps
                 .Where(a => a.UserAppRoleAssignments.Any(aua => aua.UserId == userId))

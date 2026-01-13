@@ -2,6 +2,7 @@
 using NokAir.Core.Abstractions.Entities.Rbac;
 using NokPortalAPI.Entities;
 using System.Linq.Dynamic.Core;
+using System.Threading;
 
 namespace NokPortalAPI.Repositories
 {
@@ -22,7 +23,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<Role> AddRoleAsync(Role role)
+        public async Task<Role> AddRoleAsync(Role role, CancellationToken cancellationToken = default)
         {
             var result = await context.Roles.AddAsync(role);
             await context.SaveChangesAsync();
@@ -30,7 +31,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<int> DeleteRoleByIdAsync(int roleId)
+        public async Task<int> RemoveRoleByIdAsync(int roleId, CancellationToken cancellationToken = default)
         {
             var role = await context.Roles.FindAsync(roleId);
             if (role == null)
@@ -43,13 +44,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<Role?> GetRoleByIdAsync(int roleId)
-        {
-            return await context.Roles.FindAsync(roleId);
-        }
-
-        /// <inheritdoc/>
-        public async Task<ICollection<Role>> GetRolesByCriteriaAsync(IRoleSearchCriteria searchCriteria)
+        public async Task<ICollection<Role>> FindRolesByCriteriaAsync(IRoleSearchCriteria searchCriteria, CancellationToken cancellationToken = default)
         {
             IQueryable<Role> query = context.Roles;
             if (!string.IsNullOrEmpty(searchCriteria.Keyword))
@@ -70,32 +65,32 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<bool> IsUserInRoleAsync(int userId, string requiredRole)
+        public async Task<bool> ExistsUserInRoleAsync(int userId, string requiredRole, CancellationToken cancellationToken = default)
         {
             return await context.UserRoles
                 .AnyAsync(ur => ur.UserId == userId && ur.Role!.Name == requiredRole);
         }
 
         /// <inheritdoc/>
-        public async Task<bool> IsUserInRolesAsync(int userId, string[] requiredRoles)
+        public async Task<bool> ExistsUserInRolesAsync(int userId, string[] requiredRoles, CancellationToken cancellationToken = default)
         {
             var userRoles = await context.UserRoles
-     .Where(ur => ur.UserId == userId)
-     .Select(ur => ur.Role.Name)
-     .ToListAsync();
+                 .Where(ur => ur.UserId == userId)
+                 .Select(ur => ur.Role.Name)
+                 .ToListAsync();
 
             return userRoles.Any(r => requiredRoles.Contains(r));
         }
 
         /// <inheritdoc/>
-        public async Task<int> UpdateRoleAsync(Role role)
+        public async Task<int> UpdateRoleAsync(Role role, CancellationToken cancellationToken = default)
         {
             context.Roles.Update(role);
             return await context.SaveChangesAsync();
         }
 
         /// <inheritdoc/>
-        public async Task AssignDefaultRoleAsync(int userId, int defaultRoleId = 3)
+        public async Task AddUserRoleAsync(int userId, int defaultRoleId = 3)
         {
             if (defaultRoleId <= 0)
             {
@@ -118,12 +113,18 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<IRole>> GetAllRolesAsync()
+        public async Task<IEnumerable<IRole>> FindAllRolesAsync()
         {
             return await context.Roles
                 .AsNoTracking()
                 .Cast<IRole>()
                 .ToListAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<Role?> FindByIdAsync(int roleId, CancellationToken cancellationToken = default)
+        {
+            return await context.Roles.FindAsync(roleId);
         }
     }
 }

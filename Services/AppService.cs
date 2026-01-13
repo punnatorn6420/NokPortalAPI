@@ -53,12 +53,12 @@ namespace NokPortalAPI.Services
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                var app = await appRepository.GetAppByIdAsync(id);
+                var app = await appRepository.FindAppByIdAsync(id);
                 if (app == null)
                 {
                     return false;
                 }
-                await appRepository.DeleteAppByIdAsync(id);
+                await appRepository.RemoveAppByIdAsync(id);
                 await transaction.CommitAsync();
                 return true;
             }
@@ -72,14 +72,14 @@ namespace NokPortalAPI.Services
         /// <inheritdoc />
         public async Task<AppDto?> GetAppByIdAsync(int id)
         {
-            var app = await appRepository.GetAppByIdAsync(id);
+            var app = await appRepository.FindAppByIdAsync(id);
             return app?.ToDto();
         }
 
         /// <inheritdoc />
         public async Task<(IList<AppDto> Items, int TotalRecords)> GetAppsByCriteriaAsync(AppSearchDto searchCriteria)
         {
-            var (apps, total) = await appRepository.GetAppsByCriteriaAsync(searchCriteria);
+            var (apps, total) = await appRepository.FindAppsByCriteriaAsync(searchCriteria);
             return (apps.Select(a => a.ToDto()).ToList(), total);
         }
 
@@ -89,7 +89,7 @@ namespace NokPortalAPI.Services
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                var existingApp = await appRepository.GetAppByIdAsync(appDto.Id);
+                var existingApp = await appRepository.FindAppByIdAsync(appDto.Id);
                 if (existingApp == null)
                 {
                     return false;

@@ -56,16 +56,16 @@ namespace NokPortalAPI.Services
         /// <inheritdoc />
         public async Task<bool> AssignUserToAppAsync(UserAppAssignmentRequest userAppAssignmentReq)
         {
-            var app = await appRepository.GetAppByIdAsync(userAppAssignmentReq.AppId)
+            var app = await appRepository.FindAppByIdAsync(userAppAssignmentReq.AppId)
                 ?? throw new DataValidationException("Application not found. Please check the app.");
 
-            var user = await userRepository.GetUserByIdAsync(userAppAssignmentReq.UserId)
+            var user = await userRepository.FindUserByIdAsync(userAppAssignmentReq.UserId)
                 ?? throw new DataValidationException("User not found. Please check the user.");
 
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                var deletedCount = await userAppRoleAssignmentRepository.DeleteAllUserAppRoleAssignmentsByUserAndAppAsync(
+                var deletedCount = await userAppRoleAssignmentRepository.RemoveUserAppRoleAssignmentsAsync(
                     userAppAssignmentReq.UserId,
                     userAppAssignmentReq.AppId);
 
@@ -141,17 +141,17 @@ namespace NokPortalAPI.Services
         public async Task<JwtInfoModel> GetJwtTokenInfoByUserAppAsync(int userId, int appId)
         {
             // Verify if the user has been assigned to the app
-            var isUserAssignedToApp = await userAppRoleAssignmentRepository.IsUserAssignedToAppAsync(userId, appId);
+            var isUserAssignedToApp = await userAppRoleAssignmentRepository.ExistsAssignmentAsync(userId, appId);
             if (!isUserAssignedToApp)
             {
                 throw new DataValidationException("User is not assigned to the app. Please check the assignment.");
             }
 
-            var user = await userRepository.GetUserByIdAsync(userId);
+            var user = await userRepository.FindUserByIdAsync(userId);
 
-            var roleIds = await userAppRoleAssignmentRepository.GetUserRoleIdsForAppAsync(userId, appId);
+            var roleIds = await userAppRoleAssignmentRepository.FindRoleIdsAsync(userId, appId);
 
-            var app = await appRepository.GetAppByIdAsync(appId);
+            var app = await appRepository.FindAppByIdAsync(appId);
 
             if (app == null)
             {
@@ -191,7 +191,7 @@ namespace NokPortalAPI.Services
         {
             try
             {
-                var app = await appRepository.GetAppByIdAsync(appId);
+                var app = await appRepository.FindAppByIdAsync(appId);
                 if (app == null)
                 {
                     throw new DataValidationException("Application not found");
@@ -223,19 +223,19 @@ namespace NokPortalAPI.Services
         {
             try
             {
-                var user = await userRepository.GetUserByIdAsync(userId);
+                var user = await userRepository.FindUserByIdAsync(userId);
                 if (user == null)
                 {
                     throw new DataValidationException("User not found. Please check the user ID.");
                 }
 
-                var app = await appRepository.GetAppByIdAsync(appId);
+                var app = await appRepository.FindAppByIdAsync(appId);
                 if (app == null)
                 {
                     throw new DataValidationException("Application not found. Please check the app ID.");
                 }
 
-                var roleIds = await userAppRoleAssignmentRepository.GetUserRoleIdsByUserAndAppAsync(userId, appId);
+                var roleIds = await userAppRoleAssignmentRepository.FindRoleIdsByAppAsync(userId, appId);
 
                 return new UserAppRoleDto
                 {

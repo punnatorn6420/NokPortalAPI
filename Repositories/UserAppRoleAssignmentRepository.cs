@@ -27,7 +27,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<int> DeleteUserAppRoleAssignmentByIdAsync(int id)
+        public async Task<int> RemoveUserAppRoleAssignmentAsync(int id)
         {
             var assignedUserAppRole = await context.UserAppRoleAssignments.FindAsync(id);
             if (assignedUserAppRole == null)
@@ -40,20 +40,20 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<UserAppRoleAssignment?> GetUserAppRoleAssignmentByIdAsync(int id)
+        public async Task<UserAppRoleAssignment?> FindUserAppRoleAssignmentAsync(int id)
         {
             return await context.UserAppRoleAssignments.FindAsync(id);
         }
 
         /// <inheritdoc/>
-        public Task<bool> IsUserAppRoleExistAsync(int userId, int appId, int roleId)
+        public Task<bool> ExistsAsync(int userId, int appId, int roleId)
         {
             return context.UserAppRoleAssignments
                 .AnyAsync(x => x.UserId == userId && x.AppId == appId && x.RoleId == roleId);
         }
 
         /// <inheritdoc/>
-        public Task<List<int>> GetUserRoleIdsForAppAsync(int userId, int appId)
+        public Task<List<int>> FindRoleIdsAsync(int userId, int appId)
         {
             return context.UserAppRoleAssignments
                 .Where(x => x.UserId == userId && x.AppId == appId)
@@ -62,14 +62,14 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<bool> IsUserAssignedToAppAsync(int userId, int appId)
+        public async Task<bool> ExistsAssignmentAsync(int userId, int appId)
         {
             return await context.UserAppRoleAssignments
                 .AnyAsync(x => x.UserId == userId && x.AppId == appId);
         }
 
         /// <inheritdoc/>
-        public async Task<IList<int>> GetUserRoleIdsByUserAndAppAsync(int userId, int appId)
+        public async Task<IList<int>> FindRoleIdsByAppAsync(int userId, int appId)
         {
             return await context.UserAppRoleAssignments
                 .Where(x => x.UserId == userId && x.AppId == appId)
@@ -79,7 +79,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<int> DeleteAllUserAppRoleAssignmentsByUserAndAppAsync(int userId, int appId)
+        public async Task<int> RemoveUserAppRoleAssignmentsAsync(int userId, int appId)
         {
             var existingAssignments = await context.UserAppRoleAssignments
                 .Where(x => x.UserId == userId && x.AppId == appId)

@@ -22,7 +22,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<User> AddUserAsync(User user)
+        public async Task<User> AddUserAsync(User user, CancellationToken cancellationToken = default)
         {
             var result = await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
@@ -30,7 +30,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<MyProfileDto?> GetMyProfileAsync(int userId)
+        public async Task<MyProfileDto?> FindMyProfileAsync(int userId)
         {
             var user = await context.Users
                 .Include(u => u.UserRoles)
@@ -86,7 +86,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<User?> GetUserByEmailAsync(string email)
+        public async Task<User?> FindUserByEmailAsync(string email, CancellationToken cancellationToken = default)
         {
             var norm = email.Trim();
             return await context.Users
@@ -95,7 +95,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<User?> GetUserByIdAsync(int id)
+        public async Task<User?> FindUserByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             return await context.Users
                 .Include(u => u.UserRoles)
@@ -106,7 +106,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<ICollection<User>> GetUsersByAppIdAsync(int appId)
+        public async Task<ICollection<User>> FindUsersByAppIdAsync(int appId)
         {
             // Get users by application ID from AssignedUserApps table.
             var query = from aua in context.UserAppRoleAssignments
@@ -118,7 +118,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<(IList<User> Items, int TotalRecords)> GetUsersByCriteriaAsync(UserSearchCriteria criteria)
+        public async Task<(IList<User> Items, int TotalRecords)> FindUsersByCriteriaAsync(UserSearchCriteria criteria)
         {
             IQueryable<User> query = context.Users
                 .Include(u => u.UserRoles)
@@ -154,7 +154,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<int> UpdateUserAsync(User user)
+        public async Task<int> UpdateUserAsync(User user, CancellationToken cancellationToken = default)
         {
             context.Users.Update(user);
             return await context.SaveChangesAsync();

@@ -50,7 +50,7 @@ public class OtpController : InHouseControllerBase
         var user = await userService.GetUserByEmailAsync(email);
 
         var res = user is not null
-            ? await otpService.SendAsync(dto with { Email = email, Channel = OtpChannel.Email })
+            ? await otpService.NotifyOtpAsync(dto with { Email = email, Channel = OtpChannel.Email })
             : await otpService.GenerateDecoyAsync(email);
 
         return OkResponseWithResult(new
@@ -65,7 +65,7 @@ public class OtpController : InHouseControllerBase
     /// </summary>
     [Authorize]
     [HttpPost("verify")]
-    public async Task<IActionResult> VerifyAsync([FromBody] VerifyOtpRequestDto dto)
+    public async Task<IActionResult> SubmitVerificationAsync([FromBody] VerifyOtpRequestDto dto)
     {
         if (!ModelState.IsValid)
         {
@@ -74,7 +74,7 @@ public class OtpController : InHouseControllerBase
 
         try
         {
-            var accessToken = await otpService.VerifyAsync(dto);
+            var accessToken = await otpService.IsVerificationCodeValidAsync(dto);
             return OkResponseWithResult(new VerifyOtpResponseDto(accessToken));
         }
         catch (InvalidOperationException)

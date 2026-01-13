@@ -27,14 +27,14 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc />
-        public async Task<UserDto> AddUserAsync(UserDto userDto)
+        public async Task<UserDto> AddUserAsync(UserDto userDto, CancellationToken cancellationToken = default)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
                 var user = userDto.ToEntity();
                 var createdUser = await userRepository.AddUserAsync(user);
-                await roleRepository.AssignDefaultRoleAsync(createdUser.Id, 3);
+                await roleRepository.AddUserRoleAsync(createdUser.Id, 3);
                 await transaction.CommitAsync();
                 return user.ToDto();
             }
@@ -46,28 +46,28 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc />
-        public async Task<User?> GetUserByEmailAsync(string email)
+        public async Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
         {
-            return await userRepository.GetUserByEmailAsync(email);
+            return await userRepository.FindUserByEmailAsync(email);
         }
 
         /// <inheritdoc />
-        public async Task<UserDto?> GetUserByIdAsync(int id)
+        public async Task<UserDto?> GetUserByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            var user = await userRepository.GetUserByIdAsync(id);
+            var user = await userRepository.FindUserByIdAsync(id);
             return user?.ToDto();
         }
 
         /// <inheritdoc/>
         public async Task<MyProfileDto?> GetMyProfileAsync(int userId)
         {
-            return await userRepository.GetMyProfileAsync(userId);
+            return await userRepository.FindMyProfileAsync(userId);
         }
 
         /// <inheritdoc />
         public async Task<ICollection<UserDto>> GetUsersByAppIdAsync(int appId)
         {
-            var users = await userRepository.GetUsersByAppIdAsync(appId);
+            var users = await userRepository.FindUsersByAppIdAsync(appId);
             return users.Select(u => u.ToDto()).ToList();
         }
 
@@ -75,12 +75,12 @@ namespace NokPortalAPI.Services
         public async Task<(IList<UserDto> Items, int TotalRecords)> GetUsersByCriteriaAsync(UserSearchCriteriaDto searchCriteriaDto)
         {
             var criteria = searchCriteriaDto.ToEntity();
-            var (users, total) = await userRepository.GetUsersByCriteriaAsync(criteria);
+            var (users, total) = await userRepository.FindUsersByCriteriaAsync(criteria);
             return (users.Select(u => u.ToDto()).ToList(), total);
         }
 
         /// <inheritdoc />
-        public async Task<bool> UpdateUserAsync(UserDto userDto)
+        public async Task<bool> UpdateUserAsync(UserDto userDto, CancellationToken cancellationToken = default)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
             try
@@ -97,9 +97,9 @@ namespace NokPortalAPI.Services
             }
         }
 
-        async Task<UserDto?> IUserServiceBase<UserDto>.GetUserByEmailAsync(string email)
+        async Task<UserDto?> IUserServiceBase<UserDto>.GetUserByEmailAsync(string email, CancellationToken cancellationToken)
         {
-            var user = await userRepository.GetUserByEmailAsync(email);
+            var user = await userRepository.FindUserByEmailAsync(email);
             return user?.ToDto();
         }
 
@@ -108,7 +108,7 @@ namespace NokPortalAPI.Services
         {
             using var transaction = await context.Database.BeginTransactionAsync();
 
-            var user = await userRepository.GetUserByIdAsync(userId);
+            var user = await userRepository.FindUserByIdAsync(userId);
             if (user == null)
             {
                 throw new DataValidationException("User not found.");

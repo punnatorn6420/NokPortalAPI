@@ -20,28 +20,28 @@ namespace NokPortalAPI.Repositories
         /// </summary>
         /// <param name="id">Application ID.</param>
         /// <returns>Returns the number of rows affected.</returns>
-        Task<int> DeleteAppByIdAsync(int id);
+        Task<int> RemoveAppByIdAsync(int id);
 
         /// <summary>
         /// Gets an application by ID.
         /// </summary>
         /// <param name="id">Application ID.</param>
         /// <returns>An application.</returns>
-        Task<App?> GetAppByIdAsync(int id);
+        Task<App?> FindAppByIdAsync(int id);
 
         /// <summary>
         /// Gets list of applications without environments by search criteria.
         /// </summary>
         /// <param name="searchCriteria">Search criteria.</param>
         /// <returns>List of applications.</returns>
-        Task<(IList<App> Items, int TotalRecords)> GetAppsByCriteriaAsync(AppSearchDto searchCriteria);
+        Task<(IList<App> Items, int TotalRecords)> FindAppsByCriteriaAsync(AppSearchDto searchCriteria);
 
         /// <summary>
         /// Gets list of applications with all the environments by user ID.
         /// </summary>
         /// <param name="userId">User ID.</param>
         /// <returns>List of applications.</returns>
-        Task<IList<App>> GetAppsByUserIdAsync(int userId);
+        Task<IList<App>> FindAppsByUserIdAsync(int userId);
 
         /// <summary>
         /// Updates an application.

@@ -48,7 +48,7 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc/>
-        public async Task<SendOtpResponseDto> SendAsync(SendOtpRequestDto req)
+        public async Task<SendOtpResponseDto> NotifyOtpAsync(SendOtpRequestDto req)
         {
             var email = req.Email?.Trim();
             if (string.IsNullOrWhiteSpace(email))
@@ -223,7 +223,7 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc/>
-        public async Task<string> VerifyAsync(VerifyOtpRequestDto req)
+        public async Task<string> IsVerificationCodeValidAsync(VerifyOtpRequestDto req)
         {
             const string FailMessage = "The verification code is invalid or has expired. Please try again.";
 
