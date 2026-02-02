@@ -90,7 +90,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task AddUserRoleAsync(int userId, int defaultRoleId = 3)
+        public async Task AddUserRoleAsync(int userId, int defaultRoleId = 3, CancellationToken cancellationToken = default)
         {
             if (defaultRoleId <= 0)
             {
@@ -113,7 +113,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<IRole>> FindAllRolesAsync()
+        public async Task<IEnumerable<IRole>> FindAllRolesAsync(CancellationToken cancellationToken)
         {
             return await context.Roles
                 .AsNoTracking()

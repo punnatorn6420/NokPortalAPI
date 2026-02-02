@@ -25,7 +25,7 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc />
-        public async Task<AppDto> AddAppAsync(AppDto appDto)
+        public async Task<AppDto> AddAppAsync(AppDto appDto, CancellationToken cancellationToken)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
             try
@@ -48,7 +48,7 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc />
-        public async Task<bool> DeleteAppByIdAsync(int id)
+        public async Task<bool> DeleteAppByIdAsync(int id, CancellationToken cancellationToken)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
             try
@@ -70,21 +70,21 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc />
-        public async Task<AppDto?> GetAppByIdAsync(int id)
+        public async Task<AppDto?> GetAppByIdAsync(int id, CancellationToken cancellationToken)
         {
             var app = await appRepository.FindAppByIdAsync(id);
             return app?.ToDto();
         }
 
         /// <inheritdoc />
-        public async Task<(IList<AppDto> Items, int TotalRecords)> GetAppsByCriteriaAsync(AppSearchDto searchCriteria)
+        public async Task<(IList<AppDto> Items, int TotalRecords)> GetAppsByCriteriaAsync(AppSearchDto searchCriteria, CancellationToken cancellationToken)
         {
             var (apps, total) = await appRepository.FindAppsByCriteriaAsync(searchCriteria);
             return (apps.Select(a => a.ToDto()).ToList(), total);
         }
 
         /// <inheritdoc />
-        public async Task<bool> UpdateAppAsync(AppDto appDto)
+        public async Task<bool> UpdateAppAsync(AppDto appDto, CancellationToken cancellationToken)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
             try

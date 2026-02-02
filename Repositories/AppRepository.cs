@@ -24,7 +24,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<App> AddAppAsync(App app)
+        public async Task<App> AddAppAsync(App app, CancellationToken cancellationToken)
         {
             // Ensure that the app name is unique.
             var existingApp = await context.Apps.FirstOrDefaultAsync(a => a.Name == app.Name.Trim());
@@ -39,7 +39,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<int> RemoveAppByIdAsync(int id)
+        public async Task<int> RemoveAppByIdAsync(int id, CancellationToken cancellationToken)
         {
             var app = await context.Apps.FindAsync(id);
             if (app == null)
@@ -52,13 +52,13 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<App?> FindAppByIdAsync(int id)
+        public async Task<App?> FindAppByIdAsync(int id, CancellationToken cancellationToken)
         {
             return await context.Apps.FindAsync(id);
         }
 
         /// <inheritdoc/>
-        public async Task<(IList<App> Items, int TotalRecords)> FindAppsByCriteriaAsync(AppSearchDto criteria)
+        public async Task<(IList<App> Items, int TotalRecords)> FindAppsByCriteriaAsync(AppSearchDto criteria, CancellationToken cancellationToken)
         {
             IQueryable<App> query = context.Apps;
             var keyword = criteria.Keyword?.Trim();
@@ -76,7 +76,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<IList<App>> FindAppsByUserIdAsync(int userId)
+        public async Task<IList<App>> FindAppsByUserIdAsync(int userId, CancellationToken cancellationToken)
         {
             return await context.Apps
                 .Where(a => a.UserAppRoleAssignments.Any(aua => aua.UserId == userId))
@@ -84,7 +84,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<int> UpdateAppAsync(App app)
+        public async Task<int> UpdateAppAsync(App app, CancellationToken cancellationToken)
         {
             context.Apps.Update(app);
             return await context.SaveChangesAsync();

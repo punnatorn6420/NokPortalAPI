@@ -36,7 +36,7 @@ namespace NokPortalAPI.Services
         /// - state: Custom parameter to maintain state between request and callback (set to "signin")
         /// - prompt: Set to "select_account" to force account selection dialog
         /// </remarks>
-        public async Task<string> GenerateAuthorizationUrlSignInAsync()
+        public async Task<string> GenerateAuthorizationUrlSignInAsync(CancellationToken cancellationToken)
         {
             var clientId = serviceSettings.OAuth2.ClientId ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
             var responseType = serviceSettings.OAuth2.ResponseType ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
@@ -63,7 +63,7 @@ namespace NokPortalAPI.Services
         /// - state: Custom parameter to maintain state between request and callback (set to "signup")
         /// - prompt: Set to "select_account" to force account selection dialog
         /// </remarks>
-        public async Task<string> GenerateAuthorizationUrlSignUpAsync()
+        public async Task<string> GenerateAuthorizationUrlSignUpAsync(CancellationToken cancellationToken)
         {
             var clientId = serviceSettings.OAuth2.ClientId ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
             var responseType = serviceSettings.OAuth2.ResponseType ?? throw new InvalidConfigurationException("OAuth2 settings are missing");
@@ -80,9 +80,10 @@ namespace NokPortalAPI.Services
         /// Gets the Microsoft user info using the token.
         /// </summary>
         /// <param name="token">The token.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>Microsoft user info if successful, otherwise null.</returns>
         /// <exception cref="Exception"></exception>
-        public async Task<MicrosoftUserInfo?> GetMicrosoftUserInfoByTokenAsync(string token)
+        public async Task<MicrosoftUserInfo?> GetMicrosoftUserInfoByTokenAsync(string token, CancellationToken cancellationToken)
         {
             // Request to microsoft get AD info
             var request = new HttpRequestMessage(HttpMethod.Get, "https://graph.microsoft.com/v1.0/me");
