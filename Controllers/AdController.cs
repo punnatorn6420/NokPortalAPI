@@ -24,6 +24,8 @@ namespace NokPortalAPI.Controllers
         private readonly IUserService<UserDto> userService;
         private readonly IJwtService jwtService;
 
+        private readonly CancellationToken cancellationToken = default;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AdController"/> class.
         /// </summary>
@@ -48,7 +50,7 @@ namespace NokPortalAPI.Controllers
         {
             try
             {
-                var authorizationUrl = await msActiveDirectoryService.GenerateAuthorizationUrlSignUpAsync();
+                var authorizationUrl = await msActiveDirectoryService.GenerateAuthorizationUrlSignUpAsync(cancellationToken);
                 return await Task.FromResult(OkResponseWithResult(new { link = authorizationUrl }));
             }
             catch (Exception ex)
@@ -70,7 +72,7 @@ namespace NokPortalAPI.Controllers
                 {
                     return BadRequestResponseFromInvalidRequest();
                 }
-                var msUserInfo = await msActiveDirectoryService.GetMicrosoftUserInfoByTokenAsync(req.Token);
+                var msUserInfo = await msActiveDirectoryService.GetMicrosoftUserInfoByTokenAsync(req.Token, cancellationToken);
 
                 if (msUserInfo == null)
                 {
@@ -126,7 +128,7 @@ namespace NokPortalAPI.Controllers
         {
             try
             {
-                var authorizationUrl = await msActiveDirectoryService.GenerateAuthorizationUrlSignInAsync();
+                var authorizationUrl = await msActiveDirectoryService.GenerateAuthorizationUrlSignInAsync(cancellationToken);
                 return await Task.FromResult(OkResponseWithResult(new { link = authorizationUrl }));
             }
             catch (Exception ex)
@@ -184,7 +186,7 @@ namespace NokPortalAPI.Controllers
 
             try
             {
-                var msUserInfo = await msActiveDirectoryService.GetMicrosoftUserInfoByTokenAsync(req.Token);
+                var msUserInfo = await msActiveDirectoryService.GetMicrosoftUserInfoByTokenAsync(req.Token, cancellationToken);
                 if (msUserInfo == null)
                 {
                     return BadRequestResponseFromMessage("Failed to get user info");

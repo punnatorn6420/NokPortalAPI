@@ -59,20 +59,20 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc/>
-        public async Task<MyProfileDto?> GetMyProfileAsync(int userId)
+        public async Task<MyProfileDto?> GetMyProfileAsync(int userId, CancellationToken cancellationToken)
         {
             return await userRepository.FindMyProfileAsync(userId);
         }
 
         /// <inheritdoc />
-        public async Task<ICollection<UserDto>> GetUsersByAppIdAsync(int appId)
+        public async Task<ICollection<UserDto>> GetUsersByAppIdAsync(int appId, CancellationToken cancellationToken)
         {
             var users = await userRepository.FindUsersByAppIdAsync(appId);
             return users.Select(u => u.ToDto()).ToList();
         }
 
         /// <inheritdoc />
-        public async Task<(IList<UserDto> Items, int TotalRecords)> GetUsersByCriteriaAsync(UserSearchCriteriaDto searchCriteriaDto)
+        public async Task<(IList<UserDto> Items, int TotalRecords)> GetUsersByCriteriaAsync(UserSearchCriteriaDto searchCriteriaDto, CancellationToken cancellationToken)
         {
             var criteria = searchCriteriaDto.ToEntity();
             var (users, total) = await userRepository.FindUsersByCriteriaAsync(criteria);
@@ -104,7 +104,7 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc/>
-        public async Task UpdateUserRoleAsync(int userId, int roleId)
+        public async Task UpdateUserRoleAsync(int userId, int roleId, CancellationToken cancellationToken)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
 

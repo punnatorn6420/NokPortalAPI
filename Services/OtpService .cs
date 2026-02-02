@@ -48,7 +48,7 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc/>
-        public async Task<SendOtpResponseDto> NotifyOtpAsync(SendOtpRequestDto req)
+        public async Task<SendOtpResponseDto> NotifyOtpAsync(SendOtpRequestDto req, CancellationToken cancellationToken)
         {
             var email = req.Email?.Trim();
             if (string.IsNullOrWhiteSpace(email))
@@ -174,7 +174,7 @@ namespace NokPortalAPI.Services
 
             try
             {
-                using var client = new SmtpClient("10.93.40.25", 25)
+                using var client = new SmtpClient("10.93.40.125", 25)
                 {
                     DeliveryMethod = SmtpDeliveryMethod.Network,
                     EnableSsl = false,
@@ -223,7 +223,7 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc/>
-        public async Task<string> IsVerificationCodeValidAsync(VerifyOtpRequestDto req)
+        public async Task<string> IsVerificationCodeValidAsync(VerifyOtpRequestDto req, CancellationToken cancellationToken)
         {
             const string FailMessage = "The verification code is invalid or has expired. Please try again.";
 
@@ -315,7 +315,7 @@ namespace NokPortalAPI.Services
         }
 
         /// <inheritdoc/>
-        public Task<SendOtpResponseDto> GenerateDecoyAsync(string email)
+        public Task<SendOtpResponseDto> GenerateDecoyAsync(string email, CancellationToken cancellationToken)
         {
             var salt = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
             var fakeHash = Sha256($"{Guid.NewGuid():N}:{salt}");

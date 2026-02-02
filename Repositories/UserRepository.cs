@@ -30,7 +30,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<MyProfileDto?> FindMyProfileAsync(int userId)
+        public async Task<MyProfileDto?> FindMyProfileAsync(int userId, CancellationToken cancellationToken)
         {
             var user = await context.Users
                 .Include(u => u.UserRoles)
@@ -106,7 +106,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<ICollection<User>> FindUsersByAppIdAsync(int appId)
+        public async Task<ICollection<User>> FindUsersByAppIdAsync(int appId, CancellationToken cancellationToken)
         {
             // Get users by application ID from AssignedUserApps table.
             var query = from aua in context.UserAppRoleAssignments
@@ -118,7 +118,7 @@ namespace NokPortalAPI.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<(IList<User> Items, int TotalRecords)> FindUsersByCriteriaAsync(UserSearchCriteria criteria)
+        public async Task<(IList<User> Items, int TotalRecords)> FindUsersByCriteriaAsync(UserSearchCriteria criteria, CancellationToken cancellationToken)
         {
             IQueryable<User> query = context.Users
                 .Include(u => u.UserRoles)
