@@ -229,7 +229,8 @@ namespace NokPortalAPI.Controllers
             [FromQuery] int? pageNumber = 1,
             [FromQuery] int? pageSize = 25,
             [FromQuery] bool? ascending = true,
-            [FromQuery] string? sortField = null)
+            [FromQuery] string? sortField = null,
+            [FromQuery] bool? lightweight = false)
         {
             try
             {
@@ -247,10 +248,18 @@ namespace NokPortalAPI.Controllers
                 }
 
                 var (items, total) = await appService.GetAppsByCriteriaAsync(criteria);
+                var appItems = lightweight == true
+                    ? items.Select(a => new
+                    {
+                        a.Id,
+                        a.Name,
+                    })
+                    : items;
+
                 return OkResponseWithResult(new
                 {
                     totalRecords = total,
-                    items
+                    items = appItems
                 });
             }
             catch (Exception ex)
