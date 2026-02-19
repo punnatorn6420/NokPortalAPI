@@ -69,5 +69,11 @@ namespace NokPortalAPI.Dtos
         /// Date and time when the user was last modified.
         /// </summary>
         public DateTime ModifiedAt { get; set; } = DateTime.Now;
+
+
+        /// <summary>
+        /// Applications that this user can access.
+        /// </summary>
+        public IList<UserAppAccessDto> Apps { get; set; } = new List<UserAppAccessDto>();
     }
 }
