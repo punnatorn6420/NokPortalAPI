@@ -37,7 +37,8 @@ namespace NokPortalAPI.Controllers
             [FromQuery] int? pageNumber = 1,
             [FromQuery] int? pageSize = 25,
             [FromQuery] bool? ascending = true,
-            [FromQuery] string? sortField = null)
+            [FromQuery] string? sortField = null,
+            [FromQuery] int? appId = null)
         {
             var criteria = new UserSearchCriteriaDto
             {
@@ -46,6 +47,7 @@ namespace NokPortalAPI.Controllers
                 PageNumber = pageNumber ?? 1,
                 PageSize = pageSize ?? 25,
                 Ascending = ascending ?? true,
+                AppId = appId,
             };
             if (!ModelState.IsValid)
             {

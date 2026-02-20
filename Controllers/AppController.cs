@@ -229,7 +229,8 @@ namespace NokPortalAPI.Controllers
             [FromQuery] int? pageNumber = 1,
             [FromQuery] int? pageSize = 25,
             [FromQuery] bool? ascending = true,
-            [FromQuery] string? sortField = null)
+            [FromQuery] string? sortField = null,
+            [FromQuery] bool? lightweight = false)
         {
             try
             {
@@ -247,11 +248,55 @@ namespace NokPortalAPI.Controllers
                 }
 
                 var (items, total) = await appService.GetAppsByCriteriaAsync(criteria);
+
+                object appItems;
+                if (lightweight == true)
+                {
+                    appItems = items.Select(a => new
+                    {
+                        a.Id,
+                        a.Name,
+                    }).ToList();
+                }
+                else
+                {
+                    appItems = items;
+                }
+
                 return OkResponseWithResult(new
                 {
                     totalRecords = total,
-                    items
+                    items = appItems
                 });
+            }
+            catch (Exception ex)
+            {
+                return InternalServerErrorResponseFromException(ex);
+            }
+        }
+
+
+        /// <summary>
+        /// This endpoint is used to delete an app by id.
+        /// </summary>
+        [HttpDelete("{id}")]
+        [Authorize(Policy = "RootOrAdmin")]
+        public async Task<ActionResult> DeleteAppAsync(int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequestResponseFromInvalidRequest();
+            }
+
+            try
+            {
+                var isDeleted = await appService.DeleteAppByIdAsync(id);
+                if (!isDeleted)
+                {
+                    return BadRequestResponseFromMessage("Application not found.");
+                }
+
+                return OkSuccessResponse();
             }
             catch (Exception ex)
             {

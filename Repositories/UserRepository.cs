@@ -122,6 +122,8 @@ namespace NokPortalAPI.Repositories
         {
             IQueryable<User> query = context.Users
                 .Include(u => u.UserRoles)
+                .Include(u => u.UserAppRoleAssignments)
+                    .ThenInclude(ua => ua.App)
                 .AsNoTracking();
             var keyword = criteria.Keyword?.Trim();
             if (!string.IsNullOrWhiteSpace(keyword))
@@ -133,6 +135,10 @@ namespace NokPortalAPI.Repositories
                     (u.Email != null && EF.Functions.ILike(u.Email, pattern)));
             }
 
+            if (criteria.AppId.HasValue)
+            {
+                query = query.Where(u => u.UserAppRoleAssignments.Any(ua => ua.AppId == criteria.AppId.Value));
+            }
             var total = await query.CountAsync();
             var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             { "Id", "FirstName", "LastName", "Email", "CreatedAt" };

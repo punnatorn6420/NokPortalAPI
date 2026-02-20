@@ -39,7 +39,8 @@ namespace NokPortalAPI.Extensions
                 PageNumber = userSearchCriteriaDto.PageNumber,
                 PageSize = userSearchCriteriaDto.PageSize,
                 SortField = userSearchCriteriaDto.SortField,
-                Ascending = userSearchCriteriaDto.Ascending
+                Ascending = userSearchCriteriaDto.Ascending,
+                AppId = userSearchCriteriaDto.AppId
             };
         }
 
@@ -54,7 +55,8 @@ namespace NokPortalAPI.Extensions
                 PageNumber = userSearchCriteria.PageNumber,
                 PageSize = userSearchCriteria.PageSize,
                 SortField = userSearchCriteria.SortField,
-                Ascending = userSearchCriteria.Ascending
+                Ascending = userSearchCriteria.Ascending,
+                AppId = userSearchCriteria.AppId
             };
         }
 
@@ -76,6 +78,16 @@ namespace NokPortalAPI.Extensions
                 CreatedAt = user.CreatedAt,
                 ModifiedAt = user.ModifiedAt,
                 Role = user.UserRoles.FirstOrDefault()?.RoleId.ToString() ?? string.Empty,
+                Apps = user.UserAppRoleAssignments
+                    .Where(a => a.App != null)
+                    .Select(a => a.App!)
+                    .DistinctBy(a => a.Id)
+                    .Select(a => new UserAppAccessDto
+                    {
+                        Id = a.Id,
+                        Name = a.Name,
+                    })
+                    .ToList(),
             };
         }
     }
