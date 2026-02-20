@@ -275,7 +275,6 @@ namespace NokPortalAPI.Controllers
             }
         }
 
-
         /// <summary>
         /// This endpoint is used to delete an app by id.
         /// </summary>

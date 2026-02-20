@@ -70,7 +70,6 @@ namespace NokPortalAPI.Dtos
         /// </summary>
         public DateTime ModifiedAt { get; set; } = DateTime.Now;
 
-
         /// <summary>
         /// Applications that this user can access.
         /// </summary>

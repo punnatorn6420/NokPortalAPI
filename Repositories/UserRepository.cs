@@ -151,7 +151,7 @@ namespace NokPortalAPI.Repositories
             var dir = criteria.Ascending ? "ascending" : "descending";
             query = query.OrderBy($"{field} {dir}");
             var pageNumber = Math.Max(1, criteria.PageNumber);
-            var pageSize = Math.Clamp(criteria.PageSize, 1, 200);
+            var pageSize = Math.Clamp(criteria.PageSize, 1, 1000);
             var items = await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)

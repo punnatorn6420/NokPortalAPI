@@ -31,6 +31,7 @@ namespace NokPortalAPI.Dtos
         /// Indicates whether the sorting is in ascending order.
         /// </summary>
         public bool Ascending { get; set; } = true;
+
         /// <summary>
         /// Optional application ID used for filtering users by app access.
         /// </summary>
