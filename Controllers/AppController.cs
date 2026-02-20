@@ -248,19 +248,55 @@ namespace NokPortalAPI.Controllers
                 }
 
                 var (items, total) = await appService.GetAppsByCriteriaAsync(criteria);
-                var appItems = lightweight == true
-                    ? items.Select(a => new
+
+                object appItems;
+                if (lightweight == true)
+                {
+                    appItems = items.Select(a => new
                     {
                         a.Id,
                         a.Name,
-                    })
-                    : items;
+                    }).ToList();
+                }
+                else
+                {
+                    appItems = items;
+                }
 
                 return OkResponseWithResult(new
                 {
                     totalRecords = total,
                     items = appItems
                 });
+            }
+            catch (Exception ex)
+            {
+                return InternalServerErrorResponseFromException(ex);
+            }
+        }
+
+
+        /// <summary>
+        /// This endpoint is used to delete an app by id.
+        /// </summary>
+        [HttpDelete("{id}")]
+        [Authorize(Policy = "RootOrAdmin")]
+        public async Task<ActionResult> DeleteAppAsync(int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequestResponseFromInvalidRequest();
+            }
+
+            try
+            {
+                var isDeleted = await appService.DeleteAppByIdAsync(id);
+                if (!isDeleted)
+                {
+                    return BadRequestResponseFromMessage("Application not found.");
+                }
+
+                return OkSuccessResponse();
             }
             catch (Exception ex)
             {
